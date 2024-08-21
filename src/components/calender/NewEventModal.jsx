@@ -23,6 +23,7 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
   const [selectedPlatformIds, setSelectedPlatformIds] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState({});
   const [showCustomModal, setShowCustomModal] = useState(false);
+  const [recurrenceData, setRecurrenceData] = useState(null);
 
   useEffect(() => {
     if (event) {
@@ -100,31 +101,35 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
 
   const handleSave = async () => {
     const startDatetime = new Date(`${eventData.date}T${eventData.time}`);
+    const endDatetime = recurrenceData?.endDate
+      ? new Date(recurrenceData.endDate)
+      : null;
 
-    // Determine the event_type based on the repeat value
     const eventType =
-      eventData.repeat === "Does not repeat"
-        ? "all_day"
-        : eventData.repeat.toLowerCase();
+      eventData.repeat === "Does not repeat" ? "all_day" : "recurring"; // Always use "recurring" for custom recurrence
 
     const requestBody = {
       brand_id: brandId,
       start_date: startDatetime.toISOString(),
+      end_date: endDatetime ? endDatetime.toISOString() : null, // Include end_date if available
       title: eventData.title,
       description: eventData.description,
-      color: eventData.color, // Use the selected color here
+      color: eventData.color,
       event_type: eventType,
       platforms: selectedPlatformIds.map((platformId) => ({
         platfrom_id: platformId,
-        type_id: selectedTypes[platformId], // This now contains the 'type' value instead of '_id'
+        type_id: selectedTypes[platformId],
       })),
+      ...(eventData.repeat === "Custom" && {
+        recurrence: recurrenceData, // Ensure recurrenceData does not include endDate
+      }),
     };
 
     try {
       const response = await axios.post(`/v1/task/add`, requestBody);
       if (response.data.success) {
-        onSave(response.data.event); // Pass the saved event back to the parent component.
-        onClose(); // Close the modal.
+        onSave(response.data.event);
+        onClose();
       } else {
         console.error("Failed to save the event:", response.data.message);
       }
@@ -209,7 +214,7 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
                                 type="radio"
                                 id={`type-${type._id}`}
                                 name={`type-${post.social_id}`}
-                                value={type.type} // Use 'type.type' instead of 'type._id'
+                                value={type.type}
                                 checked={
                                   selectedTypes[post.social_id] === type.type
                                 }
@@ -262,10 +267,6 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
                     className="mt-1 block w-full text-xs rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 py-1 px-3 border-none"
                   >
                     <option>Does not repeat</option>
-                    <option>Daily</option>
-                    <option>Weekly</option>
-                    <option>Monthly</option>
-                    <option>Yearly</option>
                     <option>Custom</option>
                   </select>
                 </label>
@@ -277,29 +278,26 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
                   value={eventData.description}
                   onChange={handleInputChange}
                   placeholder="Description"
-                  className="mt-1 min-h-16 block w-full rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 text-xs py-1 px-3 border-none"
-                />
+                  rows={3}
+                  className="mt-1 block w-full text-xs rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 py-1 px-3 border-none"
+                ></textarea>
               </label>
             </div>
-            <div className="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-200">
-              <span className="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
-                <button
-                  onClick={handleSave}
-                  type="button"
-                  className="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-1 bg-indigo-600 text-xs text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo transition ease-in-out duration-150"
-                >
-                  Save
-                </button>
-              </span>
-              <span className="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
-                <button
-                  onClick={onClose}
-                  type="button"
-                  className="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-1 bg-white text-xs text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150"
-                >
-                  Cancel
-                </button>
-              </span>
+            <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+              <button
+                type="button"
+                onClick={handleSave}
+                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -308,6 +306,10 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
       <CustomModal
         show={showCustomModal}
         onClose={() => setShowCustomModal(false)}
+        onSave={(recurrence) => {
+          setRecurrenceData(recurrence);
+          setShowCustomModal(false);
+        }}
       />
     </div>
   );

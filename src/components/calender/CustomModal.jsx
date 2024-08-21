@@ -13,12 +13,17 @@ const CustomModal = ({ show, onClose, onSave }) => {
 
   const handleSave = () => {
     const recurrence = {
-      frequency: repeatUnit,
-      daysOfWeek: selectedDays,
+      frequency: repeatUnit === "day" ? "daily" : "weekly",
+      daysOfWeek: selectedDays.map((day) =>
+        ["S1", "M", "T1", "W", "T2", "F", "S2"].indexOf(day)
+      ),
       interval: repeatEvery,
-      endDate: ends === "on" ? endDate : undefined,
-      occurrences: ends === "after" ? occurrences : undefined,
     };
+
+    if (ends === "on" && endDate) {
+      recurrence.endDate = endDate; // Ensure endDate is part of recurrence
+    }
+
     if (onSave) onSave(recurrence);
     onClose();
   };
@@ -27,7 +32,7 @@ const CustomModal = ({ show, onClose, onSave }) => {
     setSelectedDays((prevSelectedDays) =>
       prevSelectedDays.includes(day)
         ? prevSelectedDays.filter((d) => d !== day)
-        : [...prevSelectedDays]
+        : [...prevSelectedDays, day]
     );
   };
 
@@ -37,7 +42,7 @@ const CustomModal = ({ show, onClose, onSave }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative"
+        className="bg-white rounded-lg shadow-lg w-1/4 p-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -68,31 +73,32 @@ const CustomModal = ({ show, onClose, onSave }) => {
                 <option value="day">day</option>
                 <option value="week">week</option>
                 <option value="month">month</option>
-                <option value="year">year</option>
               </select>
             </div>
           </div>
-          <div className="mb-4">
-            <label className="block mb-2 font-medium text-gray-700">
-              Repeat on:
-            </label>
-            <div className="flex text-xs space-x-2">
-              {["S1", "M", "T1", "W", "T2", "F", "S2"].map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => toggleDaySelection(day)}
-                  className={`w-5 h-5 text-xs rounded-full ${
-                    selectedDays.includes(day)
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700"
-                  }`}
-                >
-                  {day[0]}
-                </button>
-              ))}
+          {repeatUnit !== "day" && repeatUnit !== "month" && (
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-700">
+                Repeat on:
+              </label>
+              <div className="flex text-xs space-x-2">
+                {["S1", "M", "T1", "W", "T2", "F", "S2"].map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleDaySelection(day)}
+                    className={`w-5 h-5 text-xs rounded-full ${
+                      selectedDays.includes(day)
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {day[0]}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           <div className="mb-4">
             <label className="block mb-2 text-xs font-medium text-gray-700">
               Ends:
