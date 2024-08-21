@@ -52,7 +52,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
   
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10 bg-blend-saturation">
       <div className="max-w-xs w-full  bg-white shadow-lg rounded-lg">
         <div className="flex justify-between border-b p-4">
             <p className='text-sm font-semibold'>Login Access</p>

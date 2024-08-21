@@ -4,39 +4,58 @@ import setupAxiosInterceptors from "../../AxiosInterceptor";
 import toast from "react-hot-toast";
 
 const AddMemberModal = ({ onClose, team }) => {
-  setupAxiosInterceptors()
-  const {_id} = team
+  setupAxiosInterceptors();
+  const { _id } = team; // Assuming team object contains the team ID
   const [people, setPeople] = useState([]);
   const [persons, setPersons] = useState([{ member_id: "", reporting_id: "" }]);
   const [manager, setManager] = useState("");
 
+  useEffect(() => {
+    const fetchPeople = async () => {
+      try {
+        const response = await axios.get(`/v1/people/get`, {
+          params: {
+            page: 1,
+            limit: 10,
+            order: "desc",
+            sort: "createdAt",
+          },
+        });
+
+        setPeople(response.data.data);
+      } catch (error) {
+        console.error("Error fetching people:", error);
+      }
+    };
+
+    const fetchExistingMembers = async () => {
+      try {
+        const response = await axios.get(`/v1/team/members/get/${_id}`);
+        const existingTeam = response.data;
+        console.log("Existing Team>>??",existingTeam.members)
+        if (existingTeam.manager) {
+          setManager(existingTeam.manager._id); // Assuming manager has an _id field
+        }
+
+        const existingMembers = existingTeam.members.map((member) => ({
+          
+          member_id: member.member._id, // Assuming each member has an _id
+          reporting_id: member.reporting._id, // Assuming each member has a reporting_id
+        }));
+
+        setPersons(existingMembers);
+      } catch (error) {
+        console.error("Error fetching existing team members:", error);
+      }
+    };
+
+    fetchPeople();
+    fetchExistingMembers();
+  }, [_id]);
+
   const handleAddPerson = () => {
     setPersons([...persons, { member_id: "", reporting_id: "" }]);
   };
-
-  const fetchPeople = async () => {
-    try {
-      const response = await axios.get(`/v1/people/get`, {
-        params: {
-          page: 1,
-          limit: 10,
-          order: "desc",
-          sort: "createdAt",
-        },
-      });
-
-      const people = response.data.data;
-      setPeople(people);
-    } catch (error) {
-      console.error("Error fetching people:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPeople();
-  }, []);
-
-  console.log("Manager>>??",manager)
 
   const handlePersonChange = (index, field, value) => {
     const updatedPersons = [...persons];
@@ -44,34 +63,30 @@ const AddMemberModal = ({ onClose, team }) => {
     setPersons(updatedPersons);
   };
 
-  console.log("Persons>>>???",persons)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Convert name and reporting to their respective IDs
     const teamMembers = persons.map((person) => {
-      const member = people.find((p) => p._id === person.member_id);
-      const reporting = people.find((p) => p._id === person.reporting_id);
       return {
-        member_id: member ? member._id : "",
-        reporting_id: reporting ? reporting._id : "",
+        member_id: person.member_id,
+        reporting_id: person.reporting_id,
       };
     });
 
     const requestBody = {
-      team_id: _id, // Assuming team object contains the team ID
-      manager_id: manager || "",
+      team_id: _id,
+      manager_id: manager,
       team_members: teamMembers,
     };
-    
+
     try {
       const response = await axios.post(`/v1/team/members/add`, requestBody);
       console.log("Response:", response.data);
-      // Handle success or redirection here if needed
-      toast.success(response.data.message)
-      onClose();
+      toast.success(response.data.message);
+      onClose(); // Close the modal on success
     } catch (error) {
       console.error("Error submitting data:", error);
+      toast.error("Failed to add members");
     }
   };
 

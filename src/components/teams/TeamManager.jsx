@@ -10,6 +10,7 @@ const TeamManager = () => {
   const {id} = useParams()
   setupAxiosInterceptors()
   const [teamMembers, setTeamMembers] = useState([])
+  const [teams, setTeams] = useState([])
   const [manager,setManager] = useState([])
   const [members,setMembers] = useState([])
   const [showModal, setShowModal] = useState(false);
@@ -42,6 +43,18 @@ const TeamManager = () => {
     fetchTeamMembers();
   }, [id]); // Include 'id' in the dependency array if 'id' is a dynamic value
 
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const response = await axios.get(`/v1/team/get/${id}`);
+        setTeams(response.data.data);
+      } catch (error) {
+        console.error("Error fetching teams:", error);
+      }
+    };
+    fetchTeams();
+  }, []);
+
   console.log("Team Members>>???",teamMembers)
   
   return (
@@ -54,11 +67,14 @@ const TeamManager = () => {
             <div className="">
                 <button className="text-xs text-white bg-blue-800 px-4 py-1 rounded-sm" onClick={handleAddMembers}>+Add Member</button>
             </div>
-            {showModal && (
+          {
+            showModal && (
               <AddMemberModal
+              team={teams}
               onClose={handleClose}
               />
-            )}
+            )
+          }
         </div>
         <div className="flex mx-4 gap-x-4 my-4">
             <div className="flex items-center">
