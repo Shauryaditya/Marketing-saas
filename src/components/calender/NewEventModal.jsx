@@ -267,6 +267,7 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
                     className="mt-1 block w-full text-xs rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 py-1 px-3 border-none"
                   >
                     <option>Does not repeat</option>
+                    <option>Daily</option>
                     <option>Custom</option>
                   </select>
                 </label>
