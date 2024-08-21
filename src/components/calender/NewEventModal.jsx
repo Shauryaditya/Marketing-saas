@@ -27,6 +27,7 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
 
   useEffect(() => {
     if (event) {
+      // If there is an event, populate the state with the event data
       setEventData({
         title: event.title || "",
         date: event.start
@@ -39,6 +40,28 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
         repeat: event.repeat || "Does not repeat",
         color: event.color || colorOptions[0], // Set color from event if available
       });
+      // Populate selected platforms and types if editing an existing event
+      setSelectedPlatformIds(event.platforms?.map((p) => p.platfrom_id) || []);
+      setSelectedTypes(
+        event.platforms?.reduce((acc, p) => {
+          acc[p.platfrom_id] = p.type_id;
+          return acc;
+        }, {}) || {}
+      );
+      setRecurrenceData(event.recurrence || null);
+    } else {
+      // If no event is provided, reset the state to initial values
+      setEventData({
+        title: "",
+        date: new Date().toISOString().split("T")[0],
+        time: "",
+        description: "",
+        repeat: "Does not repeat",
+        color: colorOptions[0], // Default color
+      });
+      setSelectedPlatformIds([]);
+      setSelectedTypes({});
+      setRecurrenceData(null);
     }
   }, [event]);
 
@@ -105,8 +128,13 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
       ? new Date(recurrenceData.endDate)
       : null;
 
-    const eventType =
-      eventData.repeat === "Does not repeat" ? "all_day" : "recurring"; // Always use "recurring" for custom recurrence
+    let eventType = "all_day"; // Default to "all_day" for non-recurring events
+
+    if (eventData.repeat === "Daily") {
+      eventType = "daily";
+    } else if (eventData.repeat === "Custom") {
+      eventType = "recurring";
+    }
 
     const requestBody = {
       brand_id: brandId,
@@ -115,7 +143,7 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
       title: eventData.title,
       description: eventData.description,
       color: eventData.color,
-      event_type: eventType,
+      event_type: eventType, // Use the dynamically determined event_type
       platforms: selectedPlatformIds.map((platformId) => ({
         platfrom_id: platformId,
         type_id: selectedTypes[platformId],
