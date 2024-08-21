@@ -145,7 +145,7 @@ function App() {
           }
         />
         <Route
-          path="/keyword-tags"
+          path="/keyword-tags/:brandid"
           element={
             <Layout>
               <KeywordTags />

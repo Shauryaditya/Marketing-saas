@@ -4,6 +4,7 @@ import axios from "axios";
 import { FaFileAlt, FaFilePdf, FaImage } from "react-icons/fa"; // Import icons from react-icons
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
+import { BreadcrumbDemo } from "../BreadCrumbDemo";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const FolderView = () => {
@@ -11,6 +12,7 @@ const FolderView = () => {
   const [currentFolder, setCurrentFolder] = useState(null);
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
+  const [path, setPath] = useState([])
 
   const fetchFolders = async (parentId) => {
     try {
@@ -20,13 +22,14 @@ const FolderView = () => {
           params: { brand_id: brandId },
         }
       );
+      setPath(response.data[0].path)
       return response.data;
     } catch (error) {
       console.error("Error fetching folders:", error);
       return [];
     }
   };
-
+console.log("Path>>??",path)
   const fetchFiles = async (parentId) => {
     try {
       const response = await axios.get(
@@ -120,6 +123,9 @@ const FolderView = () => {
             />
           </div>
         </header>
+        <BreadcrumbDemo 
+        currentFolder={currentFolder}
+        />
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
             {folders.map((folder) => (
