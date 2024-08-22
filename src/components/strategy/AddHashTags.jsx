@@ -5,6 +5,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddHashTags = () => {
   const { brandid } = useParams();
+  console.log("Brand Id >>???",brandid)
   const [contentTypes, setContentTypes] = useState([]);
   const navigate = useNavigate();
   const accessToken = localStorage.getItem("access_token");
@@ -20,7 +21,7 @@ const AddHashTags = () => {
         }
       );
       setContentTypes(response.data.data);
-      setPagination(response.data.pagination);
+     
     } catch (error) {
       console.error("Error fetching content types:", error);
     }
@@ -31,7 +32,7 @@ const AddHashTags = () => {
   }, [accessToken]);
 
   const handleEditClick = () => {
-    navigate(`/keyword-tags`);
+    navigate(`/keyword-tags/${brandid}`);
   };
 
   return (
