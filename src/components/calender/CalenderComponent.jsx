@@ -24,8 +24,8 @@ import CustomToolbar from "./CustomToolbar";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
+import EventModal from "./EventModal";
 
-// Initialize the Axios interceptors
 setupAxiosInterceptors();
 
 const locales = {
@@ -44,16 +44,16 @@ const CalendarComponent = () => {
   const [events, setEvents] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(startOfToday());
   const [view, setView] = useState("month");
   const { id: brandId } = useParams();
 
-  // Fetch events from API
   const fetchEvents = async () => {
     try {
       const year = currentDate.getFullYear();
-      const month = String(currentDate.getMonth() + 1).padStart(2, "0"); // Format month as two digits
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
       const response = await axios.get(
         `/v1/task/currect/month?brand_id=${brandId}&year=${year}&month=${month}`
       );
@@ -62,7 +62,7 @@ const CalendarComponent = () => {
         title: event.title,
         start: new Date(event.start_date),
         end: new Date(event.end_date),
-        color: event.color, // Include color in event data
+        color: event.color,
         description: event.description,
         eventType: event.event_type,
       }));
@@ -78,7 +78,6 @@ const CalendarComponent = () => {
 
   const handleSaveEvent = async () => {
     if (selectedEvent.id) {
-      // Update existing event
       try {
         await axios.put(`/v1/task/add/${selectedEvent.id}`, selectedEvent);
         setEvents(
@@ -90,7 +89,6 @@ const CalendarComponent = () => {
         console.error("Error updating event:", error);
       }
     } else {
-      // Create new event
       try {
         const response = await axios.post(`/v1/task/add`, selectedEvent);
         setEvents([...events, { ...selectedEvent, id: response.data.id }]);
@@ -111,25 +109,10 @@ const CalendarComponent = () => {
     handleModalClose();
   };
 
-  // const handleEventClick = (event) => {
-  //   setSelectedEvent(event);
-  //   setShowEditModal(true);
-  // };
   const handleEventClick = async (event) => {
-    console.log("Clicked Event ID:", event.id); // Log event ID
-
     try {
       const response = await axios.get(`/v1/task/get/${event.id}`);
-      console.log("API Response:", response.data); // Log the entire API response
-
-      // Directly access the event data
       const eventData = response.data;
-
-      console.log("Event Data:", eventData); // Log the extracted event data
-
-      if (!eventData || !eventData._id) {
-        throw new Error("No event data found");
-      }
 
       setSelectedEvent({
         id: eventData._id,
@@ -139,14 +122,13 @@ const CalendarComponent = () => {
         color: eventData.color,
         description: eventData.description,
         eventType: eventData.event_type,
-        // Add additional fields if needed
       });
 
-      setShowEditModal(true);
+      setShowEventModal(true);
+      setShowEditModal(false);
       setShowNewEventModal(false);
     } catch (error) {
       console.error("Error fetching event details:", error.message);
-      console.error("Error Stack:", error.stack);
     }
   };
 
@@ -296,8 +278,13 @@ const CalendarComponent = () => {
         onClose={handleModalClose}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
-        event={selectedEvent} // Passing event details as props
+        event={selectedEvent}
         onChange={handleEventChange}
+      />
+      <EventModal
+        show={showEventModal}
+        onClose={() => setShowEventModal(false)}
+        event={selectedEvent}
       />
     </DndProvider>
   );
