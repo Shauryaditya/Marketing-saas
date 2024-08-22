@@ -1,17 +1,13 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
-// import { useAuth } from "../contexts/AuthContext";
+import { Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-const ProtectedRoute = ({ element, roles }) => {
-  // const { user, loading } = useAuth();
+const ProtectedRoute = ({ element }) => {
+  const { token } = useSelector((state) => state.auth);
 
-  // if (loading) {
-  //   return <div>Loading...</div>; // or a loading spinner
-  // }
-
-  // if (!user || (roles && !roles.includes(user.roles[0]))) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  // Check if user is authenticated
+  if (!token) {
+    return <Navigate to="/sign-in" />;
+  }
 
   return element;
 };

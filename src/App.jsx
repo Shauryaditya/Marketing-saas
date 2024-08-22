@@ -36,7 +36,7 @@ function App() {
     <Router>
       <Toaster />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/sign-in" element={<LoginPage />} />
         <Route
           path="/admin"
           element={
@@ -46,7 +46,6 @@ function App() {
                   <AdminPage />
                 </Layout>
               }
-              roles={["admin"]}
             />
           }
         />
@@ -59,123 +58,178 @@ function App() {
                   <UserPage />
                 </Layout>
               }
-              roles={["user", "admin"]}
             />
           }
         />
         <Route
           path="/"
           element={
-            <Layout>
-              <HomePage />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <HomePage />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/team/people"
           element={
-            <Layout>
-              <People />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <People />
+                </Layout>
+              }
+            />
           }
         />
 
         <Route
           path="/team/teams"
           element={
-            <Layout>
-              <Teams />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <Teams />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/team/role-access"
           element={
-            <Layout>
-              <RoleAccess />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <RoleAccess />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/team/teams/team-profile/:id"
           element={
-            <Layout>
-              <TeamManager />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <TeamManager />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/brand/:id"
           element={
-            <Layout>
-              <BrandDetail />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <BrandDetail />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/brand/edit/:id"
           element={
-            <Layout>
-              <EditProfile />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <EditProfile />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/settings"
           element={
-            <Layout>
-              <Settings />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <Settings />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/profile"
           element={
-            <Layout>
+            <ProtectedRoute
+            element={
+              <Layout>
               <Profile />
             </Layout>
+            }
+/>
           }
         />
         <Route
           path="/add-strategy/:brandid"
           element={
-            <Layout>
-              <StrategyDashboard />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <StrategyDashboard />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/keyword-tags/:brandid"
           element={
-            <Layout>
-              <KeywordTags />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <KeywordTags />
+                </Layout>
+              }
+            />
           }
         />
 
         <Route
           path="/strategy/:id"
           element={
-            <Layout>
-              <BrandStrategy />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <BrandStrategy />
+                </Layout>
+              }
+            />
           }
         />
 
         <Route
           path="/originalcollateral/:brandId"
           element={
-            <Layout>
-              <OriginalCollateral />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <OriginalCollateral />
+                </Layout>
+              }
+            />
           }
         />
         <Route
           path="/item/:brandId/:parentId"
           element={
-            <Layout>
-              <FolderView />
-            </Layout>
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <FolderView />
+                </Layout>
+              }
+            />
           }
         />
         <Route

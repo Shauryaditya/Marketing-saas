@@ -1,52 +1,48 @@
+import React from "react";
 import {
-    Breadcrumb,
-    BreadcrumbEllipsis,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-  } from "../../src/components/ui/breadcrumb"
-//   import {
-//     DropdownMenu,
-//     DropdownMenuContent,
-//     DropdownMenuItem,
-//     DropdownMenuTrigger,
-//   } from "@/components/ui/dropdown-menu"
-  
-  export function BreadcrumbDemo({currentFolder}) {
-    const Path = currentFolder
-    console.log("Current Path>>??",Path)
-    return (
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1">
-                <BreadcrumbEllipsis className="h-4 w-4" />
-                <span className="sr-only">Toggle menu</span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem>Documentation</DropdownMenuItem>
-                <DropdownMenuItem>Themes</DropdownMenuItem>
-                <DropdownMenuItem>GitHub</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/docs/components">Components</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-    )
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../src/components/ui/breadcrumb";
+
+export function BreadcrumbDemo({ currentFolder }) {
+  if (!Array.isArray(currentFolder) || currentFolder.length === 0) {
+    return null; // Return null or a fallback if the array is empty
   }
+
+  // Assuming the last item in the array is the current folder
+  const { path } = currentFolder[currentFolder.length - 1] || {};
+
+  // Ensure path is a string, or fallback to an empty string
+  const pathString = typeof path === "string" ? path : "";
   
+  // Split path into parts and remove empty strings
+  const pathParts = pathString.split("/").filter(Boolean);
+  
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/admin">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        {pathParts.map((part, index) => (
+          <React.Fragment key={index}>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              {index < pathParts.length - 1 ? (
+                <BreadcrumbLink href={`/${pathParts.slice(0, index + 1).join("/")}`}>
+                  {part}
+                </BreadcrumbLink>
+              ) : (
+                <BreadcrumbPage>{part}</BreadcrumbPage>
+              )}
+            </BreadcrumbItem>
+          </React.Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}

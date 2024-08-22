@@ -12,7 +12,7 @@ const FolderView = () => {
   const [currentFolder, setCurrentFolder] = useState(null);
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
-  const [path, setPath] = useState([])
+  const [path, setPath] = useState([]);
 
   const fetchFolders = async (parentId) => {
     try {
@@ -22,14 +22,14 @@ const FolderView = () => {
           params: { brand_id: brandId },
         }
       );
-      setPath(response.data[0].path)
+      setPath(response.data); // Set the path from the response
       return response.data;
     } catch (error) {
       console.error("Error fetching folders:", error);
       return [];
     }
   };
-console.log("Path>>??",path)
+console.log("Path>>>????",path)
   const fetchFiles = async (parentId) => {
     try {
       const response = await axios.get(
@@ -68,6 +68,7 @@ console.log("Path>>??",path)
       );
     }
   }, [folders, parentId]);
+  console.log("Response data path",)
 
   const handleFolderAdded = (newFolder) => {
     const updatedFolders = [...folders, newFolder];
@@ -109,11 +110,12 @@ console.log("Path>>??",path)
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-xs text-left text-blue-400 font-semibold mb-6">
+          {/* <h1 className="text-xs text-left text-blue-400 font-semibold mb-6">
             {currentFolder
               ? ` ${renderPath(currentFolder.path)}`
               : "Loading Folder..."}
-          </h1>
+          </h1> */}
+          <BreadcrumbDemo currentFolder={path}  />
           <div className="flex items-center space-x-4">
             <AddCollateralButton onCollateralAdded={handleCollateralAdded} />
             <AddFolderButton
@@ -123,9 +125,8 @@ console.log("Path>>??",path)
             />
           </div>
         </header>
-        <BreadcrumbDemo 
-        currentFolder={currentFolder}
-        />
+        {/* Pass the path as a prop to BreadcrumbDemo */}
+        
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
             {folders.map((folder) => (
