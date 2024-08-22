@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [subdepartments, setSubDepartments] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
@@ -42,10 +42,12 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
   }, [accessToken]);
 
   useEffect(() => {
-    const fetchSubDepartments = async () => {
+    const fetchSubDepartments = async (department_id) => {
+      if (!department_id) return;
+
       try {
         const response = await axios.get(
-          `${apiUrl}/v1/platform/get/sub/department?page=1&limit=10`,
+          `${apiUrl}/v1/platform/get/sub/departements/${department_id}?page=1&limit=10`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -58,8 +60,10 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
       }
     };
 
-    fetchSubDepartments();
-  }, [accessToken]);
+    if (formData.department_id) {
+      fetchSubDepartments(formData.department_id);
+    }
+  }, [formData.department_id, accessToken]);
 
   useEffect(() => {
     const fetchDesignations = async () => {
@@ -106,6 +110,10 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
       ...prevState,
       [name]: value,
     }));
+
+    if (name === "department_id") {
+      setSubDepartments([]); // Clear sub-departments when department changes
+    }
   };
 
   const handleFileChange = (e) => {
@@ -130,10 +138,10 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
           ? `${apiUrl}/v1/people/edit/${emp_id}`
           : `${apiUrl}/v1/people/add`;
 
-          const { _id,designation_name,sub_department_name, department_name, ...dataToSubmit } = formData;
+      const { _id, designation_name, sub_department_name, department_name, ...dataToSubmit } = formData;
 
-          const body = JSON.stringify(dataToSubmit);
-      
+      const body = JSON.stringify(dataToSubmit);
+
       await axios[method](url, body, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -143,7 +151,7 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
 
       toast.success(`Person ${modal_name === "edit" ? "updated" : "added"} successfully!`);
       onClose();
-      navigate(0)
+      navigate(0);
     } catch (error) {
       console.error(`Error ${modal_name === "edit" ? "updating" : "adding"} person:`, error);
     }
@@ -194,8 +202,7 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
               <input
                 type="text"
                 name="name"
-                className="mt-1 p-2 block bg-gray-50 w-full border-none rounded-md shadow-sm focus:ring-0"
-                placeholder="Name"
+                className="mt-1 p-2 block bg-gray-50 w-full shadow-sm sm:text-xs border border-gray-300 rounded-md"
                 value={formData.name}
                 onChange={handleChange}
               />
@@ -207,8 +214,7 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
               <input
                 type="text"
                 name="emp_id"
-                className="mt-1 p-2 bg-gray-50 block w-full border-none rounded-md shadow-sm focus:ring-0"
-                placeholder="Employee ID"
+                className="mt-1 p-2 block bg-gray-50 w-full shadow-sm sm:text-xs border border-gray-300 rounded-md"
                 value={formData.emp_id}
                 onChange={handleChange}
               />
@@ -218,10 +224,9 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
                 Mobile Number
               </label>
               <input
-                type="text"
+                type="tel"
                 name="mobile"
-                className="mt-1 p-2 block bg-gray-50 w-full border-none rounded-md shadow-sm focus:ring-0"
-                placeholder="Mobile No"
+                className="mt-1 p-2 block bg-gray-50 w-full shadow-sm sm:text-xs border border-gray-300 rounded-md"
                 value={formData.mobile}
                 onChange={handleChange}
               />
@@ -233,8 +238,7 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
               <input
                 type="email"
                 name="email"
-                className="-mt-1 p-2 block bg-gray-50 w-full border-none rounded-md shadow-sm focus:ring-0"
-                placeholder="Email"
+                className="mt-1 p-2 block bg-gray-50 w-full shadow-sm sm:text-xs border border-gray-300 rounded-md"
                 value={formData.email}
                 onChange={handleChange}
               />
@@ -245,20 +249,16 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
               </label>
               <select
                 name="department_id"
-                className="w-full border bg-gray-50 rounded text-xs p-1"
+                className="mt-1 block p-2 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm sm:text-xs"
                 value={formData.department_id}
                 onChange={handleChange}
               >
-                <option value="">Select a department</option>
-                {departments.length > 0 ? (
-                  departments.map((dept) => (
-                    <option key={dept._id} value={dept._id}>
-                      {dept.department_name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">No departments available</option>
-                )}
+                <option value="">Select Department</option>
+                {departments.map((department) => (
+                  <option key={department._id} value={department._id}>
+                    {department.department_name}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -267,20 +267,16 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
               </label>
               <select
                 name="sub_department_id"
-                className="w-full border bg-gray-50 rounded text-xs p-1"
+                className="mt-1 block p-2 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm sm:text-xs"
                 value={formData.sub_department_id}
                 onChange={handleChange}
               >
-                <option value="">Select a subdepartment</option>
-                {subdepartments.length > 0 ? (
-                  subdepartments.map((dept) => (
-                    <option key={dept._id} value={dept._id}>
-                      {dept.sub_department_name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">No subdepartments available</option>
-                )}
+                <option value="">Select Sub Department</option>
+                {subdepartments.map((subdepartment) => (
+                  <option key={subdepartment._id} value={subdepartment._id}>
+                    {subdepartment.sub_department_name}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -289,37 +285,32 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
               </label>
               <select
                 name="designation_id"
-                className="w-full border bg-gray-50 rounded text-xs p-1"
+                className="mt-1 block p-2 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm sm:text-xs"
                 value={formData.designation_id}
                 onChange={handleChange}
               >
-                <option value="">Select a designation</option>
-                {designations.length > 0 ? (
-                  designations.map((dept) => (
-                    <option key={dept._id} value={dept._id}>
-                      {dept.designation_name}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">No designations available</option>
-                )}
+                <option value="">Select Designation</option>
+                {designations.map((designation) => (
+                  <option key={designation._id} value={designation._id}>
+                    {designation.designation_name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
-
-          <div className="flex justify-center gap-x-3 p-4">
+          <div className="flex justify-end p-4 border-t">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 bg-white rounded-lg shadow-md hover:bg-gray-200 focus:outline-none"
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md shadow-sm mr-2"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-sm"
             >
-              Save
+              {modal_name === "edit" ? "Update Person" : "Add Person"}
             </button>
           </div>
         </form>

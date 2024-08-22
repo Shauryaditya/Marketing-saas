@@ -4,6 +4,7 @@ import BrandModal from "./AddBrandModal";
 import Card from "./BrandCard";
 
 function BrandPage() {
+  
   const apiUrl = import.meta.env.VITE_API_URL;
   const [brands, setBrands] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);

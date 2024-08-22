@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const OriginalCollateral = () => {
+  const navigate = useNavigate()
   const { brandId } = useParams(); // Retrieve brandId from URL parameters
   const [items, setItems] = useState([]);
 
@@ -37,6 +38,9 @@ const OriginalCollateral = () => {
   return (
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
+      <button onClick={() => navigate(-1)} className="text-blue-500 text-xs mb-4">
+        ← Back
+      </button>
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-xl text-left text-blue-400 font-semibold mb-6">
             Original Collateral
