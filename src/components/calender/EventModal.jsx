@@ -1,4 +1,3 @@
-// src/components/EventModal.js
 import React from "react";
 import PropTypes from "prop-types";
 import {
@@ -15,10 +14,16 @@ const EventModal = ({ show, onClose, event }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    if (isNaN(date)) return "Invalid date";
-    return date.toLocaleDateString("en-US", {
-      dateStyle: "full",
-      timeStyle: "short",
+    if (isNaN(date.getTime())) return "Invalid date";
+    return date.toLocaleString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZoneName: "short",
     });
   };
 
@@ -34,14 +39,14 @@ const EventModal = ({ show, onClose, event }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="fixed text-xs inset-0 flex items-center justify-center z-50">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-gray-800 opacity-75"
         onClick={onClose}
       />
       {/* Modal Content */}
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 relative z-10 overflow-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 relative z-10 overflow-auto max-h-[90vh]">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -52,7 +57,7 @@ const EventModal = ({ show, onClose, event }) => {
           <FaCalendarAlt className="mr-2 text-blue-600" />
           Event Details
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
             <h3 className="text-gray-600 font-medium flex items-center">
               <FaTag className="mr-2 text-blue-500" />
@@ -60,19 +65,21 @@ const EventModal = ({ show, onClose, event }) => {
             </h3>
             <p className="text-gray-800 text-lg">{event.title}</p>
           </div>
-          <div>
-            <h3 className="text-gray-600 font-medium flex items-center">
-              <FaCalendarAlt className="mr-2 text-blue-500" />
-              Start Date
-            </h3>
-            <p className="text-gray-800">{formatDate(event.start_date)}</p>
-          </div>
-          <div>
-            <h3 className="text-gray-600 font-medium flex items-center">
-              <FaCalendarAlt className="mr-2 text-blue-500" />
-              End Date
-            </h3>
-            <p className="text-gray-800">{formatDate(event.end_date)}</p>
+          <div className="flex justify-between">
+            <div className="w-1/2 pr-2">
+              <h3 className="text-gray-600 font-medium flex items-center">
+                <FaCalendarAlt className="mr-2 text-blue-500" />
+                Start Date
+              </h3>
+              <p className="text-gray-800">{formatDate(event.start_date)}</p>
+            </div>
+            <div className="w-1/2 pl-2">
+              <h3 className="text-gray-600 font-medium flex items-center">
+                <FaCalendarAlt className="mr-2 text-blue-500" />
+                End Date
+              </h3>
+              <p className="text-gray-800">{formatDate(event.end_date)}</p>
+            </div>
           </div>
           <div>
             <h3 className="text-gray-600 font-medium flex items-center">
@@ -131,14 +138,14 @@ const EventModal = ({ show, onClose, event }) => {
                 <FaInfoCircle className="mr-2 text-blue-500" />
                 Platforms
               </h3>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-3">
                 {event.platforms_data.map((platform, index) => (
-                  <div key={index} className="flex items-center space-x-4">
+                  <div key={index} className="flex items-center space-x-3">
                     {platform.platform_logo && (
                       <img
                         src={platform.platform_logo}
                         alt={platform.platform_name}
-                        className="w-10 h-10 object-cover rounded-full"
+                        className="w-8 h-8 object-cover rounded-full"
                       />
                     )}
                     <div>
@@ -147,7 +154,7 @@ const EventModal = ({ show, onClose, event }) => {
                       </p>
                       {platform.content_types &&
                         platform.content_types.length > 0 && (
-                          <ul className="list-disc list-inside text-gray-700 mt-2">
+                          <ul className="list-disc list-inside text-gray-700 mt-1">
                             {platform.content_types.map((content, idx) => (
                               <li key={idx}>
                                 {content.content_type} - {content.size}

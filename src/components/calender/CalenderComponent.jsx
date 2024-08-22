@@ -117,16 +117,17 @@ const CalendarComponent = () => {
       setSelectedEvent({
         id: eventData._id,
         title: eventData.title,
-        start: new Date(eventData.start_date),
-        end: new Date(eventData.end_date),
+        start_date: eventData.start_date, // Use the raw date string
+        end_date: eventData.end_date, // Use the raw date string
         color: eventData.color,
         description: eventData.description,
-        eventType: eventData.event_type,
+        event_type: eventData.event_type,
+        status: eventData.status,
+        recurrence: eventData.recurrence,
+        platforms_data: eventData.platforms_data,
       });
 
       setShowEventModal(true);
-      setShowEditModal(false);
-      setShowNewEventModal(false);
     } catch (error) {
       console.error("Error fetching event details:", error.message);
     }
