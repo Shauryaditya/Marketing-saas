@@ -27,6 +27,46 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
 
   useEffect(() => {
     if (event) {
+      setEventData({
+        title: event.title || "",
+        date: event.start
+          ? new Date(event.start).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        time: event.start
+          ? new Date(event.start).toTimeString().slice(0, 5)
+          : "",
+        description: event.description || "",
+        repeat: event.repeat || "Does not repeat",
+        color: event.color || colorOptions[0],
+      });
+      // Handle platforms, types, and recurrence if necessary
+    } else {
+      // Reset form for a new event
+    }
+  }, [event]);
+
+  useEffect(() => {
+    if (event) {
+      setEventData({
+        title: event.title || "",
+        date: event.start
+          ? new Date(event.start).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        time: event.start
+          ? new Date(event.start).toTimeString().slice(0, 5)
+          : "",
+        description: event.description || "",
+        repeat: event.repeat || "Does not repeat",
+        color: event.color || colorOptions[0],
+      });
+      // Handle platforms, types, and recurrence if necessary
+    } else {
+      // Reset form for a new event
+    }
+  }, [event]); // Update when the `event` prop changes
+
+  useEffect(() => {
+    if (event) {
       // If there is an event, populate the state with the event data
       setEventData({
         title: event.title || "",

@@ -111,19 +111,43 @@ const CalendarComponent = () => {
     handleModalClose();
   };
 
-  const handleEventClick = (event) => {
-    setSelectedEvent(event);
-    setShowEditModal(true);
-  };
+  // const handleEventClick = (event) => {
+  //   setSelectedEvent(event);
+  //   setShowEditModal(true);
+  // };
+  const handleEventClick = async (event) => {
+    console.log("Clicked Event ID:", event.id); // Log event ID
 
-  const handleModalClose = () => {
-    setShowEditModal(false);
-    setShowNewEventModal(false);
-    setSelectedEvent(null);
-  };
+    try {
+      const response = await axios.get(`/v1/task/get/${event.id}`);
+      console.log("API Response:", response.data); // Log the entire API response
 
-  const handleEventChange = (e) => {
-    setSelectedEvent({ ...selectedEvent, [e.target.name]: e.target.value });
+      // Directly access the event data
+      const eventData = response.data;
+
+      console.log("Event Data:", eventData); // Log the extracted event data
+
+      if (!eventData || !eventData._id) {
+        throw new Error("No event data found");
+      }
+
+      setSelectedEvent({
+        id: eventData._id,
+        title: eventData.title,
+        start: new Date(eventData.start_date),
+        end: new Date(eventData.end_date),
+        color: eventData.color,
+        description: eventData.description,
+        eventType: eventData.event_type,
+        // Add additional fields if needed
+      });
+
+      setShowEditModal(true);
+      setShowNewEventModal(false);
+    } catch (error) {
+      console.error("Error fetching event details:", error.message);
+      console.error("Error Stack:", error.stack);
+    }
   };
 
   const handleSelectSlot = ({ start, end }) => {
@@ -135,6 +159,16 @@ const CalendarComponent = () => {
       color: "#FFEBCC",
     });
     setShowNewEventModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowEditModal(false);
+    setShowNewEventModal(false);
+    setSelectedEvent(null);
+  };
+
+  const handleEventChange = (e) => {
+    setSelectedEvent({ ...selectedEvent, [e.target.name]: e.target.value });
   };
 
   const moveEvent = ({ event, start, end }) => {
@@ -178,6 +212,11 @@ const CalendarComponent = () => {
   const handleNextClick = () => {
     handleNavigationClick(view, "next");
   };
+
+  useEffect(() => {
+    console.log("showEditModal:", showEditModal);
+    console.log("showNewEventModal:", showNewEventModal);
+  }, [showEditModal, showNewEventModal]);
 
   const handleViewChange = (newView) => {
     setView(newView);
@@ -252,20 +291,12 @@ const CalendarComponent = () => {
           </div>
         </div>
       </div>
-
       <NewEventModal
-        show={showNewEventModal}
-        onClose={handleModalClose}
-        onSave={handleSaveEvent}
-        onChange={handleEventChange}
-        event={selectedEvent}
-      />
-      <NewEventModal
-        show={showEditModal}
+        show={showNewEventModal || showEditModal}
         onClose={handleModalClose}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
-        event={selectedEvent}
+        event={selectedEvent} // Passing event details as props
         onChange={handleEventChange}
       />
     </DndProvider>

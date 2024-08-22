@@ -21,7 +21,9 @@ const CustomModal = ({ show, onClose, onSave }) => {
     };
 
     if (ends === "on" && endDate) {
-      recurrence.endDate = endDate; // Ensure endDate is part of recurrence
+      recurrence.endDate = endDate;
+    } else if (ends === "after") {
+      recurrence.occurrences = occurrences;
     }
 
     if (onSave) onSave(recurrence);
