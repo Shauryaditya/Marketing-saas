@@ -6,19 +6,18 @@ import { useParams } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const { brandId, parentId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
-      setFile(null);
+      setFiles([]);
     }
   }, [isOpen]);
 
   const onDrop = (acceptedFiles) => {
-    const file = acceptedFiles[0];
-    setFile(file);
+    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   };
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
@@ -27,7 +26,9 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append("files", file);
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
       formData.append("brand_id", brandId);
       formData.append("folderId", parentId || undefined);
 
@@ -62,7 +63,7 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
             {...getRootProps()}
             className="border-2 border-dashed border-gray-300 p-8 text-center rounded-lg flex flex-col items-center justify-center h-48"
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} multiple />
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -78,11 +79,15 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
               />
             </svg>
 
-            {file ? (
-              <p>{file.name}</p>
+            {files.length > 0 ? (
+              <ul>
+                {files.map((file, index) => (
+                  <li key={index}>{file.name}</li>
+                ))}
+              </ul>
             ) : (
               <p className="text-gray-500">
-                Drag 'n' drop a file here, or click to select a file
+                Drag 'n' drop files here, or click to select files
               </p>
             )}
           </div>
