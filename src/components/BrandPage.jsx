@@ -19,11 +19,14 @@ function BrandPage() {
       try {
         const accessToken = localStorage.getItem("access_token");
         console.log("Access Token>>??", accessToken);
-        const response = await axios.get(`${apiUrl}/v1/brand/profile/get`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await axios.get(
+          `${apiUrl}/v1/brand/profile/get?page=1&limit=100`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         setBrands(response.data.data);
       } catch (error) {
         console.error("Error fetching brand data:", error);
