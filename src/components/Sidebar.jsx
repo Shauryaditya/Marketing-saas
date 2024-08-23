@@ -66,7 +66,7 @@ const Sidebar = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen h-full w-48 text-xs bg-white shadow-md sticky top-0">
+    <div className="min-h-screen h-full w-48 text-xs bg-white shadow-md sticky top-0 overflow-y-scroll no-scrollbar">
       <div className="p-4 flex items-center justify-center gap-2 ">
         <img src={logo} alt="Logo" className="h-6 w-6" />
         <p className="font-semibold text-base">21Genx</p>

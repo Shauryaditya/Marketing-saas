@@ -12,7 +12,7 @@ const BrandTable = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get(`/v1/brand/profile/get`);
+        const response = await axios.get(`/v1/brand/profile/get?limit=100`);
         setBrands(response.data.data); // Assuming response.data is an array of brands
       } catch (error) {
         console.error("Error fetching brands:", error);
