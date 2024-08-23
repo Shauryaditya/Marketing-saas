@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaFileAlt, FaFilePdf, FaImage } from "react-icons/fa"; // Import icons from react-icons
 import AddFolderButton from "./AddFolderButton";
@@ -8,6 +8,7 @@ import { BreadcrumbDemo } from "../BreadCrumbDemo";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const FolderView = () => {
+  const navigate = useNavigate()
   const { brandId, parentId } = useParams();
   const [currentFolder, setCurrentFolder] = useState(null);
   const [folders, setFolders] = useState([]);
@@ -69,6 +70,7 @@ const FolderView = () => {
     }
   }, [folders, parentId]);
 
+
   const handleFolderAdded = (newFolder) => {
     setFolders((prevFolders) => [...prevFolders, newFolder]);
   };
@@ -107,6 +109,20 @@ const FolderView = () => {
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
         <header className="flex justify-between items-center mb-8">
+
+          {/* <h1 className="text-xs text-left text-blue-400 font-semibold mb-6">
+            {currentFolder
+              ? ` ${renderPath(currentFolder.path)}`
+              : "Loading Folder..."}
+          </h1> */}
+          <button
+            onClick={() => navigate(-1)}
+            className="text-blue-500 text-xs mb-4"
+          >
+            ← Back
+          </button>
+
+
           <BreadcrumbDemo currentFolder={path} />
           <div className="flex items-center space-x-4">
             <AddCollateralButton onCollateralAdded={handleCollateralAdded} />
@@ -117,6 +133,7 @@ const FolderView = () => {
             />
           </div>
         </header>
+
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
             {folders.map((folder) => (

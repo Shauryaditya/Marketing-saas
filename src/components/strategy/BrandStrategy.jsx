@@ -4,10 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import BackButton from "../BackButton";
+import setupAxiosInterceptors from "../../AxiosInterceptor";
 const url = import.meta.env.VITE_API_URL;
 
 const BrandStrategy = () => {
-  const { id } = useParams(); // Fetch brand_id from URL
+  setupAxiosInterceptors()
+  const { id,strategyId } = useParams(); // Fetch brand_id from URL
   const [platforms, setPlatforms] = useState([]);
   const [focus, setFocus] = useState([]);
   const token = localStorage.getItem("access_token");
@@ -34,8 +37,6 @@ const BrandStrategy = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [tags, setTags] = useState("");
   const [fileUri, setFileUri] = useState("");
-  console.log("Url>>", url);
-  console.log("Url>>", url);
 
   useEffect(() => {
     if (selectedMonth && selectedYear) {
@@ -65,6 +66,32 @@ const BrandStrategy = () => {
   const timeIntervals = ["Daily", "Weekly", "Monthly"];
 
   useEffect(() => {
+    const fetchStrategy = async () => {
+      try {
+        const response = await axios.get(`/v1/strategy/sigle/get/${strategyId}`);
+        
+        if(response.data.data.length > 0){
+          const data = response.data.data[0]
+          setFormData((prevState) => ({
+            ...prevState,
+            ...data,
+          }));
+        }
+      } catch (error) {
+        setError('Failed to fetch strategy data');
+        console.error('Error fetching strategy data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (strategyId) {
+      fetchStrategy();
+    }
+  }, [strategyId]);
+ 
+
+  useEffect(() => {
     const fetchData = async () => {
       const formattedMonth =
         selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
@@ -74,8 +101,6 @@ const BrandStrategy = () => {
       try {
         // Construct the URL with the parameters
         const apiurl = `${url}/v1/Strategy/get/${id}/${formattedDate}`;
-        console.log("ApiUrl >>>", apiurl);
-
         // Make the GET request
         const response = await axios.get(apiurl, {
           headers: {
@@ -95,7 +120,6 @@ const BrandStrategy = () => {
             ...data,
           }));
         }
-        console.log("Formdata>>??", formData);
       } catch (error) {
         console.error(
           "Error fetching data:",
@@ -211,7 +235,6 @@ const BrandStrategy = () => {
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   const handleDateChange = (index, field, value) => {
-    console.log("Value>>??", index, value, field);
     const updatedDates = formData.important_date.map((date, i) =>
       i === index ? { ...date, [field]: value } : date
     );
@@ -221,7 +244,6 @@ const BrandStrategy = () => {
     }));
   };
 
-  console.log("Ïmportant Dates", importantDates);
   const handleAddDate = () => {
     setFormData((prevData) => ({
       ...prevData,
@@ -325,16 +347,17 @@ const BrandStrategy = () => {
       });
       console.log(response.data);
       const data = response.data;
-
+      toast.success(data.message)
       // Handle successful submission
     } catch (error) {
+      toast.error(error.response.data.message)
       console.error("Error submitting form:", error);
-      // Handle error
     }
   };
-  // console.log("Formdata???>>>", formData);
+
   return (
     <div className="text-xs">
+      <BackButton />
       <form onSubmit={handleSubmit}>
         <div className="p-4 bg-gray-50">
           <div className="mb-6">

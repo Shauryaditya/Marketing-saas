@@ -45,8 +45,11 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
         },
       });
 
-      onCollateralAdded(files); // Pass the files to the parent component
-      onClose(); // Close the modal
+      console.log("Collateral added:", response.data);
+      onCollateralAdded(response.data);
+      onClose();
+      navigate(0)
+
     } catch (error) {
       console.error("Error adding collateral:", error);
     } finally {

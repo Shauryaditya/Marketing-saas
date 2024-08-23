@@ -5,6 +5,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddStrategy = () => {
   const { brandid } = useParams();
+
   const [contentTypes, setContentTypes] = useState([]);
   const navigate = useNavigate();
   const accessToken = localStorage.getItem("access_token");
@@ -20,7 +21,6 @@ const AddStrategy = () => {
         }
       );
       setContentTypes(response.data.data);
-      setPagination(response.data.pagination);
     } catch (error) {
       console.error("Error fetching content types:", error);
     }
@@ -30,8 +30,8 @@ const AddStrategy = () => {
     fetchContentTypes();
   }, [accessToken]);
 
-  const handleEditClick = () => {
-    navigate(`/strategy/${brandid}`);
+  const handleEditClick = (type) => {
+    navigate(`/strategy/edit/${brandid}/${type._id}`);
   };
 
   return (
@@ -99,7 +99,7 @@ const AddStrategy = () => {
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500">No Focus available.</div>
+            <div className="text-center text-gray-500">No Strategy available.</div>
           )}
         </div>
       </div>
