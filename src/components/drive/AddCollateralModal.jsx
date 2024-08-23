@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useDropzone } from "react-dropzone";
+import axios from "axios";
 import { useParams } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
   const [files, setFiles] = useState([]);
   const { brandId, parentId } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -17,10 +15,13 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
   }, [isOpen]);
 
   const onDrop = (acceptedFiles) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+    setFiles(acceptedFiles);
   };
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    multiple: true,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,20 +34,15 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
       formData.append("folderId", parentId || undefined);
 
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.post(
-        `${apiUrl}/v1/collateral/file/upload`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.post(`${apiUrl}/v1/collateral/file/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      console.log("Collateral added:", response.data);
-      onCollateralAdded(response.data);
-      onClose();
+      onCollateralAdded(files); // Pass the files to the parent component
+      onClose(); // Close the modal
     } catch (error) {
       console.error("Error adding collateral:", error);
     }
@@ -63,7 +59,7 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
             {...getRootProps()}
             className="border-2 border-dashed border-gray-300 p-8 text-center rounded-lg flex flex-col items-center justify-center h-48"
           >
-            <input {...getInputProps()} multiple />
+            <input {...getInputProps()} />
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
