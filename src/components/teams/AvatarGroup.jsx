@@ -1,13 +1,11 @@
-import React from 'react';
+import React from "react";
 
 const AvatarGroup = () => {
   const avatars = [
-    'https://randomuser.me/api/portraits/men/1.jpg',
-    'https://randomuser.me/api/portraits/women/1.jpg',
-    'https://randomuser.me/api/portraits/men/2.jpg',
-    'https://randomuser.me/api/portraits/women/2.jpg',
-    'https://randomuser.me/api/portraits/men/3.jpg',
-    'https://randomuser.me/api/portraits/women/3.jpg',
+    "https://randomuser.me/api/portraits/men/1.jpg",
+    "https://randomuser.me/api/portraits/women/1.jpg",
+    "https://randomuser.me/api/portraits/men/2.jpg",
+    "https://randomuser.me/api/portraits/women/2.jpg",
   ];
 
   return (
@@ -20,7 +18,6 @@ const AvatarGroup = () => {
           className="w-6 h-6 rounded-full border-2 border-white -ml-3 first:ml-0"
         />
       ))}
-
     </div>
   );
 };

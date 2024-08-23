@@ -1,27 +1,48 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AvatarGroup from "./AvatarGroup";
 import AddMemberModal from "./AddMemberModal";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const TeamCard = ({team}) => {
-  const {team_name, team_desc, _id} = team
+const TeamCard = ({ team }) => {
+  const { team_name, team_desc, _id } = team;
   const router = useNavigate();
   const [showModal, setShowModal] = useState(false);
-    
+  const [count, setCount] = useState();
   const handleAddTeams = () => {
-      setShowModal(true);
-  }
-  const handleClose =()=>{
-      setShowModal(false);
-  }
+    setShowModal(true);
+  };
+  const handleClose = () => {
+    setShowModal(false);
+  };
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await axios.get(`/v1/team/members/get/${_id}`);
+        // Handle the response data as needed
+        const data = response.data
+        setCount(data.totalUniquePeople);
+        console.log("Fetched team members:", teamMembers);
+      } catch (error) {
+        console.error("Error fetching team members:", error);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [_id]); // Include 'id' in the dependency array if 'id' is a dynamic value
+
   return (
     <div>
       <div className="max-w-xs rounded-lg shadow-lg p-4 bg-white flex flex-col justify-start ">
         {/* Image Section */}
-        <div className="flex justify-between" >
-          <div className="flex flex-col" onClick={() => router(`/team/teams/team-profile/${_id}`)}>
+        <div className="flex justify-between">
+          <div
+            className="flex flex-col"
+            onClick={() => router(`/team/teams/team-profile/${_id}`)}
+          >
             <h1 className="text-sm font-semibold">{team_name}</h1>
-            <p className="text-xs font-medium text-gray-400">23 Employees</p>
+            <p className="text-xs font-medium text-gray-400">{count} Employees</p>
           </div>
           <div className="flex space-x-2 items-center">
             <AvatarGroup />
@@ -48,12 +69,7 @@ const TeamCard = ({team}) => {
           </div>
         </div>
       </div>
-      {showModal && (
-        <AddMemberModal 
-          team={team}
-          onClose={handleClose}
-        />
-      )}
+      {showModal && <AddMemberModal team={team} onClose={handleClose} />}
 
       {/* Divider */}
     </div>
