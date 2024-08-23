@@ -1,54 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useDropzone } from "react-dropzone";
+import axios from "axios";
 import { useParams } from "react-router-dom";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false); // New loading state
   const { brandId, parentId } = useParams();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
-      setFile(null);
+      setFiles([]);
     }
   }, [isOpen]);
 
   const onDrop = (acceptedFiles) => {
-    const file = acceptedFiles[0];
-    setFile(file);
+    setFiles(acceptedFiles);
   };
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    multiple: true,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when the upload starts
+
     try {
       const formData = new FormData();
-      formData.append("files", file);
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
       formData.append("brand_id", brandId);
       formData.append("folderId", parentId || undefined);
 
       const accessToken = localStorage.getItem("access_token");
-      const response = await axios.post(
-        `${apiUrl}/v1/collateral/file/upload`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.post(`${apiUrl}/v1/collateral/file/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       console.log("Collateral added:", response.data);
       onCollateralAdded(response.data);
       onClose();
       navigate(0)
+
     } catch (error) {
       console.error("Error adding collateral:", error);
+    } finally {
+      setLoading(false); // Set loading to false after the upload completes
     }
   };
 
@@ -79,11 +84,15 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
               />
             </svg>
 
-            {file ? (
-              <p>{file.name}</p>
+            {files.length > 0 ? (
+              <ul>
+                {files.map((file, index) => (
+                  <li key={index}>{file.name}</li>
+                ))}
+              </ul>
             ) : (
               <p className="text-gray-500">
-                Drag 'n' drop a file here, or click to select a file
+                Drag 'n' drop files here, or click to select files
               </p>
             )}
           </div>
@@ -97,9 +106,33 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
+              className="px-4 py-2 bg-blue-500 text-white rounded flex items-center"
+              disabled={loading} // Disable the button while loading
             >
-              Add Collateral
+              {loading ? (
+                <svg
+                  className="animate-spin h-5 w-5 mr-3"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 1 1 16 0A8 8 0 0 1 4 12z"
+                  ></path>
+                </svg>
+              ) : (
+                "Add Collateral"
+              )}
             </button>
           </div>
         </form>

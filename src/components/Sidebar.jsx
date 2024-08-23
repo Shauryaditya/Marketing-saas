@@ -116,7 +116,7 @@ const Sidebar = () => {
               <Link
                 key={brand._id}
                 to={`/brand/${brand._id}`} // Assuming dynamic links
-                className="block p-1 hover:bg-gray-200 rounded"
+                className="block p-1 capitalize hover:bg-gray-200 rounded"
               >
                 {brand.brand_name}
               </Link>

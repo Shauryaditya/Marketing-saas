@@ -30,7 +30,7 @@ const FolderView = () => {
       return [];
     }
   };
-  console.log("Path>>>????", path);
+
   const fetchFiles = async (parentId) => {
     try {
       const response = await axios.get(
@@ -69,16 +69,14 @@ const FolderView = () => {
       );
     }
   }, [folders, parentId]);
-  console.log("Response data path");
+
 
   const handleFolderAdded = (newFolder) => {
-    const updatedFolders = [...folders, newFolder];
-    setFolders(updatedFolders);
+    setFolders((prevFolders) => [...prevFolders, newFolder]);
   };
 
-  const handleCollateralAdded = (newCollateral) => {
-    const updatedFiles = [...files, newCollateral];
-    setFiles(updatedFiles);
+  const handleCollateralAdded = (newFiles) => {
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
   const renderPath = (path) => {
@@ -111,6 +109,7 @@ const FolderView = () => {
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
         <header className="flex justify-between items-center mb-8">
+
           {/* <h1 className="text-xs text-left text-blue-400 font-semibold mb-6">
             {currentFolder
               ? ` ${renderPath(currentFolder.path)}`
@@ -123,6 +122,7 @@ const FolderView = () => {
             ← Back
           </button>
 
+
           <BreadcrumbDemo currentFolder={path} />
           <div className="flex items-center space-x-4">
             <AddCollateralButton onCollateralAdded={handleCollateralAdded} />
@@ -133,7 +133,6 @@ const FolderView = () => {
             />
           </div>
         </header>
-        {/* Pass the path as a prop to BreadcrumbDemo */}
 
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
