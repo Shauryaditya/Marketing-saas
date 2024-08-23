@@ -162,12 +162,12 @@ function App() {
           path="/profile"
           element={
             <ProtectedRoute
-            element={
-              <Layout>
-              <Profile />
-            </Layout>
-            }
-/>
+              element={
+                <Layout>
+                  <Profile />
+                </Layout>
+              }
+            />
           }
         />
         <Route
@@ -197,6 +197,19 @@ function App() {
 
         <Route
           path="/strategy/:id"
+          element={
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <BrandStrategy />
+                </Layout>
+              }
+            />
+          }
+        />
+
+        <Route
+          path="/strategy/edit/:id/:strategyId"
           element={
             <ProtectedRoute
               element={

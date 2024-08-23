@@ -4,6 +4,7 @@ import { PlusCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import BackButton from "../BackButton";
 
 const KeywordTags = () => {
   setupAxiosInterceptors();
@@ -78,10 +79,12 @@ const KeywordTags = () => {
   };
 
   return (
-    <div className="bg-gray-50 h-screen">
+    <div className="">
+      <BackButton/>
+    <div className="bg-gray-50 h-screen p-2">
       {/* Google Search Section */}
       <div className="">
-        <div className="bg-white p-2 mx-2">
+        <div className="bg-white  m-2">
           <div className="flex justify-center items-center bg-white p-2 mt-2">
             <label className="text-xs w-1/6 uppercase font-semibold">
               Google Search
@@ -201,6 +204,7 @@ const KeywordTags = () => {
           Submit
         </button>
       </div>
+    </div>
     </div>
   );
 };

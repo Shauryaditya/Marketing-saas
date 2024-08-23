@@ -24,7 +24,7 @@ const RoleAccessTable = () => {
       const response = await axios.get(`/v1/people/get`, {
         params: {
           page: 1,
-          limit: 10,
+          limit: 100,
           order: "desc",
           sort: "createdAt",
         },
@@ -42,7 +42,7 @@ const RoleAccessTable = () => {
   useEffect(() => {
     fetchPeople();
   }, []);
-
+  console.log("People>>??", people);
   return (
     <div>
       <div className="relative px-4 pt-2">
@@ -60,6 +60,9 @@ const RoleAccessTable = () => {
                 Employee's Name
               </th>
               <th scope="col" className="px-2 py-3 whitespace-nowrap">
+                Employee ID
+              </th>
+              <th scope="col" className="px-2 py-3 whitespace-nowrap">
                 Department
               </th>
               <th scope="col" className="px-2 py-3 whitespace-nowrap">
@@ -71,16 +74,10 @@ const RoleAccessTable = () => {
               <th scope="col" className="px-2 py-3 whitespace-nowrap">
                 Email
               </th>
-              <th
-                scope="col"
-                className="px-2 py-3 whitespace-nowrap "
-              >
+              <th scope="col" className="px-2 py-3 whitespace-nowrap ">
                 Mobile Number
               </th>
-              <th
-                scope="col"
-                className="px-2 py-3 whitespace-nowrap "
-              >
+              <th scope="col" className="px-2 py-3 whitespace-nowrap ">
                 Login Access
               </th>
               <th
@@ -100,6 +97,9 @@ const RoleAccessTable = () => {
                   </td>
                   <td className="px-2 py-3 whitespace-nowrap bg-white">
                     {person.name}
+                  </td>
+                  <td className="px-2 py-3 whitespace-nowrap bg-white">
+                    {person.emp_id}
                   </td>
                   <td className="px-2 py-3 whitespace-nowrap bg-white">
                     {person.department_name}
@@ -161,9 +161,15 @@ const RoleAccessTable = () => {
                     </div>
                   </td>
                   <td className="px-2 py-3 whitespace-nowrap bg-white">
-                    <p className="px-2 text-green-600 bg-green-50 text-center rounded-sm">
-                      Active
-                    </p>
+                    {person.loginStatus ? (
+                      <p className="px-2 text-green-600 bg-green-50 text-center rounded-sm">
+                        Active
+                      </p>
+                    ) : (
+                      <p className="px-2 text-red-600 bg-red-50 text-center rounded-sm">
+                        Deactive
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))

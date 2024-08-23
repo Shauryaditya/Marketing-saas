@@ -4,6 +4,7 @@ import TeamCard from "./TeamCard";
 import { useNavigate } from "react-router-dom";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import axios from "axios";
+import BackButton from "../BackButton";
 
 const Teams = () => {
   setupAxiosInterceptors();
@@ -32,6 +33,8 @@ const Teams = () => {
   console.log("Teams>>???", teams);
 
   return (
+    <div className="">
+      <BackButton />
     <div className="w-full bg-gray-100 h-screen p-2">
       <div className="flex justify-between">
         <div className="flex flex-col">
@@ -52,6 +55,7 @@ const Teams = () => {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 };

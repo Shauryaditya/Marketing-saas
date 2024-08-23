@@ -46,6 +46,7 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
       console.log("Collateral added:", response.data);
       onCollateralAdded(response.data);
       onClose();
+      navigate(0)
     } catch (error) {
       console.error("Error adding collateral:", error);
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaFileAlt, FaFilePdf, FaImage } from "react-icons/fa"; // Import icons from react-icons
 import AddFolderButton from "./AddFolderButton";
@@ -8,6 +8,7 @@ import { BreadcrumbDemo } from "../BreadCrumbDemo";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const FolderView = () => {
+  const navigate = useNavigate()
   const { brandId, parentId } = useParams();
   const [currentFolder, setCurrentFolder] = useState(null);
   const [folders, setFolders] = useState([]);
@@ -29,7 +30,7 @@ const FolderView = () => {
       return [];
     }
   };
-console.log("Path>>>????",path)
+  console.log("Path>>>????", path);
   const fetchFiles = async (parentId) => {
     try {
       const response = await axios.get(
@@ -68,7 +69,7 @@ console.log("Path>>>????",path)
       );
     }
   }, [folders, parentId]);
-  console.log("Response data path",)
+  console.log("Response data path");
 
   const handleFolderAdded = (newFolder) => {
     const updatedFolders = [...folders, newFolder];
@@ -115,7 +116,14 @@ console.log("Path>>>????",path)
               ? ` ${renderPath(currentFolder.path)}`
               : "Loading Folder..."}
           </h1> */}
-          <BreadcrumbDemo currentFolder={path}  />
+          <button
+            onClick={() => navigate(-1)}
+            className="text-blue-500 text-xs mb-4"
+          >
+            ← Back
+          </button>
+
+          <BreadcrumbDemo currentFolder={path} />
           <div className="flex items-center space-x-4">
             <AddCollateralButton onCollateralAdded={handleCollateralAdded} />
             <AddFolderButton
@@ -126,7 +134,7 @@ console.log("Path>>>????",path)
           </div>
         </header>
         {/* Pass the path as a prop to BreadcrumbDemo */}
-        
+
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
             {folders.map((folder) => (
