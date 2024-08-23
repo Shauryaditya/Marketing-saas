@@ -1,38 +1,40 @@
+// BrandPage.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import BrandModal from "./AddBrandModal";
+import BrandModal from "./BrandModal"; // Ensure the correct import path
 import Card from "./BrandCard";
 
 function BrandPage() {
-  
   const apiUrl = import.meta.env.VITE_API_URL;
   const [brands, setBrands] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const accessToken = localStorage.getItem("access_token");
-        console.log("Access Token>>??",accessToken)
-        const response = await axios.get(`${apiUrl}/v1/brand/profile/get`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        setBrands(response.data.data);
-      } catch (error) {
-        console.error("Error fetching brand data:", error);
-      }
-    };
+  const fetchBrands = async () => {
+    try {
+      const accessToken = localStorage.getItem("access_token");
+      const response = await axios.get(`${apiUrl}/v1/brand/profile/get`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setBrands(response.data.data);
+    } catch (error) {
+      console.error("Error fetching brand data:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchBrands();
   }, []);
+
+  const refreshBrands = () => {
+    fetchBrands(); // Refresh the brands after adding a new one
+  };
 
   const filteredBrands = brands.filter((brand) =>
     brand.brand_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -65,7 +67,13 @@ function BrandPage() {
           </div>
         </main>
       </div>
-      <BrandModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <BrandModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          refreshBrands();
+        }}
+      />
     </div>
   );
 }
