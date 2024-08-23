@@ -41,7 +41,7 @@ const TeamCard = ({ team }) => {
             className="flex flex-col"
             onClick={() => router(`/team/teams/team-profile/${_id}`)}
           >
-            <h1 className="text-sm font-semibold">{team_name}</h1>
+            <h1 className="text-xs font-semibold">{team_name}</h1>
             <p className="text-xs font-medium text-gray-400">{count} Employees</p>
           </div>
           <div className="flex space-x-2 items-center">
@@ -53,7 +53,7 @@ const TeamCard = ({ team }) => {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
