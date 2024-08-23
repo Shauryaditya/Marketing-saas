@@ -44,10 +44,10 @@ function BrandPage() {
     <div className="min-h-screen bg-gray-200 min-w-screen text-xs">
       <div className="bg-white min-h-screen pl-2 pt-2">
         <header className="flex justify-between items-center pb-8">
-          <h1 className="text-xl text-blue-500 font-semibold pb-6">Account</h1>
+          <h1 className="text-xl text-black font-semibold pb-6">Account</h1>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md hover:bg-blue-600 transition-colors duration-300"
+            className="bg-gray-800 text-white px-3 py-1 rounded-md shadow-md hover:bg-black transition-colors duration-300"
           >
             Add Brand Profile
           </button>
