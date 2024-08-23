@@ -75,12 +75,9 @@ const BrandModal = ({ isOpen, onClose }) => {
     if (!formData.brandName) newErrors.brandName = "Brand Name is required";
     if (!formData.brandCompanyName)
       newErrors.brandCompanyName = "Brand Company Name is required";
-    if (!formData.websiteLink)
-      newErrors.websiteLink = "Website Link is required";
+
     if (!formData.brand_logo_dataURI)
       newErrors.brand_logo_dataURI = "Logo is required";
-    if (!formData.brand_guidelines_dataURI)
-      newErrors.brand_guidelines_dataURI = "Brand Guidelines PDF is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
