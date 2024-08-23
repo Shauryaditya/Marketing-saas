@@ -1,7 +1,6 @@
 // BrandPage.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import BrandModal from "./BrandModal"; // Ensure the correct import path
+import BrandModal from "./AddBrandModal";
 import Card from "./BrandCard";
 
 function BrandPage() {
