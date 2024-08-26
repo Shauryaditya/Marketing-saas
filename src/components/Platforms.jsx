@@ -104,7 +104,7 @@ const Platforms = () => {
     setPlatformContentTypes(
       platform.content_type.map((contentType) => {
         const [length, width] = contentType.size.split(" x ");
-        return { type: contentType.type, length, width };
+        return { type: contentType._id, length, width };
       })
     );
     setShowModal(true);
