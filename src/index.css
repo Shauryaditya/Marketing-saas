@@ -20,6 +20,11 @@
   }
 }
 
+@layer utilities {
+  .bg-custom-gradient {
+    background: linear-gradient(180deg, #FFEFD5 0%, #FFDAB9 100%);
+  }
+}
 /* In your global CSS file or Tailwind configuration */
 .react-calendar {
   border: none;
