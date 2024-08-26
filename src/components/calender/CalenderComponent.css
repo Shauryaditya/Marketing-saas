@@ -145,3 +145,16 @@
     background-color: #2d3748;
     /* Tailwind's gray-800 */
 }
+/* Custom styles for the calendar */
+.my-calender-style {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden; /* Ensures no overflow */
+    flex-shrink: 0;
+  }
+  
+  .my-calender-style .react-calendar {
+    width: 100%;
+    height: 80%;
+  }
+  
