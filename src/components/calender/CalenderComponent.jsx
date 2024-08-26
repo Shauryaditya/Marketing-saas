@@ -168,7 +168,22 @@ const CalendarComponent = () => {
     () => ({
       components: {
         toolbar: CustomToolbar,
+        event: (props) => (
+          <div
+            style={{
+              padding: "2px",
+              borderRadius: "2px",
+              color: "#fff",
+              border: "none",
+              outline: "none",
+            }}
+            onClick={() => handleEventClick(props.event)}
+          >
+            {props.event.title}
+          </div>
+        ),
       },
+
       defaultDate: new Date(2015, 3, 13),
     }),
     []
