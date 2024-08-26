@@ -69,11 +69,13 @@ const Sidebar = () => {
 
     <div className="min-h-screen h-full w-48 text-xs bg-white shadow-md sticky top-0 overflow-y-scroll no-scrollbar">
 
-      <div className="p-4 flex items-center justify-center gap-2 ">
-        <img src={logo} alt="Logo" className="h-6 w-6" />
-        <p className="font-semibold text-base">21Genx</p>
-      </div>
-      <div className="p-4 ">
+      <a href="/admin">
+        <div className="p-4 flex items-center justify-center gap-2 ">
+          <img src={logo} alt="Logo" className="h-6 w-6" />
+          <p className="font-semibold text-base">21Genx</p>
+        </div>
+      </a>
+      <div className="p-4">
         <button
           className="flex items-center justify-between w-full text-left p-2 rounded hover:bg-gray-200"
           onClick={toggleAccount}
