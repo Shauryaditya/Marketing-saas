@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
 import {
   format,
@@ -25,7 +25,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import EventModal from "./EventModal";
-
+import { useCalenderContext } from "../../contexts/CalenderContext";
 setupAxiosInterceptors();
 
 const locales = {
@@ -41,13 +41,12 @@ const localizer = dateFnsLocalizer({
 });
 
 const CalendarComponent = () => {
+  const { currentDate, view, setView } = useCalenderContext()
   const [events, setEvents] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [currentDate, setCurrentDate] = useState(startOfToday());
-  const [view, setView] = useState("month");
   const { id: brandId } = useParams();
 
   const fetchEvents = async () => {
@@ -159,71 +158,31 @@ const CalendarComponent = () => {
     setEvents(events.map((e) => (e.id === event.id ? updatedEvent : e)));
   };
 
-  const handleDateClick = (date) => {
-    setCurrentDate(date);
-  };
-
-  const handleTodayClick = () => {
-    setCurrentDate(startOfToday());
-  };
-
-  const handleNavigationClick = (type, direction) => {
-    let newDate;
-    if (type === "day") {
-      newDate =
-        direction === "next"
-          ? addDays(currentDate, 1)
-          : subDays(currentDate, 1);
-    } else if (type === "week") {
-      newDate =
-        direction === "next"
-          ? addWeeks(currentDate, 1)
-          : subWeeks(currentDate, 1);
-    } else if (type === "month") {
-      newDate =
-        direction === "next"
-          ? addMonths(currentDate, 1)
-          : subMonths(currentDate, 1);
-    }
-    setCurrentDate(newDate);
-  };
-
-  const handleBackClick = () => {
-    handleNavigationClick(view, "back");
-  };
-
-  const handleNextClick = () => {
-    handleNavigationClick(view, "next");
-  };
-
   useEffect(() => {
     console.log("showEditModal:", showEditModal);
     console.log("showNewEventModal:", showNewEventModal);
   }, [showEditModal, showNewEventModal]);
 
-  const handleViewChange = (newView) => {
-    setView(newView);
-  };
+
+
+  const { components, defaultDate } = useMemo(
+    () => ({
+      components: {
+        toolbar: CustomToolbar,
+      },
+      defaultDate: new Date(2015, 3, 13),
+    }),
+    []
+  );
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex h-screen">
-        <Sidebar onDateClick={handleDateClick} />
+        <Sidebar
+        />
         <div className="flex-1 p-4">
-          <div className="flex justify-between">
-            <button onClick={handleTodayClick} className="button">
-              Today
-            </button>
-            <div className="flex">
-              <button onClick={handleBackClick} className="button mr-2">
-                Back
-              </button>
-              <button onClick={handleNextClick} className="button">
-                Next
-              </button>
-            </div>
-          </div>
-          <div style={{ height: "calc(100vh - 4rem)" }}>
+
+          <div style={{ height: "calc(100vh - 2rem)" }}>
             <BigCalendar
               localizer={localizer}
               events={events}
@@ -231,36 +190,8 @@ const CalendarComponent = () => {
               endAccessor="end"
               style={{ height: "98%" }}
               className="custom-calendar"
-              components={{
-                toolbar: (props) => (
-                  <CustomToolbar
-                    label={props.label}
-                    onNavigate={(direction) => {
-                      props.onNavigate(direction);
-                      if (direction === "NEXT") handleNextClick();
-                      if (direction === "PREV") handleBackClick();
-                    }}
-                    onView={(newView) => {
-                      props.onView(newView);
-                      handleViewChange(newView);
-                    }}
-                  />
-                ),
-                event: (props) => (
-                  <div
-                    style={{
-                      padding: "2px",
-                      borderRadius: "2px",
-                      color: "#fff",
-                      border: "none",
-                      outline: "none",
-                    }}
-                    onClick={() => handleEventClick(props.event)}
-                  >
-                    {props.event.title}
-                  </div>
-                ),
-              }}
+              defaultDate={defaultDate}
+              components={components}
               onEventDrop={({ event, start, end }) =>
                 moveEvent({ event, start, end })
               }
