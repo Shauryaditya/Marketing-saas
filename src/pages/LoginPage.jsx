@@ -85,12 +85,12 @@ const LoginPage = () => {
             >
               <FormField
                 control={form.control}
-                name="email"
+                name="emp_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Employee ID</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your email" {...field} />
+                      <Input placeholder="Enter your Employee ID" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
