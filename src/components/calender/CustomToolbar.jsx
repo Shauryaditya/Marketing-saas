@@ -1,13 +1,30 @@
 import { format } from 'date-fns';
 import { useCalenderContext } from '../../contexts/CalenderContext';
 function CustomToolbar() {
-  const { handleTodayClick, handleNavigationClick, currentDate, view, setView } = useCalenderContext()
+  const { handleTodayClick, handleNavigationClick, currentDate, view, setView, setShowNewEventModal } = useCalenderContext()
   return (
     <div className="flex justify-between items-center mb-3 ">
-      <div className='text-2xl '>
-        {format(currentDate, 'MMMM dd, yyyy')}
+      <div className='text-2xl flex items-center'>
+        <span
+          className='font-bold'
+        >
+          {currentDate.toLocaleString('default', { month: 'long' })}
+
+        </span>
+        <span className='ml-2'>
+          {currentDate.getFullYear()}
+        </span>
+
+        <span
+          onClick={() => setShowNewEventModal(true)}
+          className='ml-5 cursor-pointer'>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+
+        </span>
       </div>
-      <div className='flex justify-center space-x-1'>
+      <div className='flex justify-center '>
         <button className={`${view === 'month' ? 'bg-gray-100' : 'bg-white'} py-1 px-4  border rounded text-xs`} onClick={() => setView('month')}>
           Month
         </button>

@@ -41,10 +41,9 @@ const localizer = dateFnsLocalizer({
 });
 
 const CalendarComponent = () => {
-  const { currentDate, view, setView } = useCalenderContext()
+  const { currentDate, view, setView, setShowNewEventModal, showNewEventModal } = useCalenderContext()
   const [events, setEvents] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showNewEventModal, setShowNewEventModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { id: brandId } = useParams();
