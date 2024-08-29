@@ -7,9 +7,11 @@ import {
   FaInfoCircle,
   FaCheckCircle,
   FaExclamationCircle,
+  FaEdit,
+  FaTrashAlt,
 } from "react-icons/fa";
 
-const EventModal = ({ show, onClose, event }) => {
+const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
   if (!show || !event) return null;
 
   const formatDate = (dateString) => {
@@ -39,7 +41,7 @@ const EventModal = ({ show, onClose, event }) => {
   };
 
   return (
-    <div className="fixed text-xs  inset-0 flex items-center justify-center z-50">
+    <div className="fixed text-xs inset-0 flex items-center justify-center z-50">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-gray-800 opacity-75"
@@ -47,12 +49,26 @@ const EventModal = ({ show, onClose, event }) => {
       />
       {/* Modal Content */}
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4 relative z-10 overflow-auto no-scrollbar max-h-[90vh]">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-        >
-          <FaTimes className="w-6 h-6" />
-        </button>
+        <div className="absolute top-4 right-4 flex space-x-2">
+          <button
+            onClick={onEdit}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <FaEdit className="w-5 h-5" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <FaTrashAlt className="w-5 h-5" />
+          </button>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <FaTimes className="w-6 h-6" />
+          </button>
+        </div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
           <FaCalendarAlt className="mr-2 text-blue-600" />
           Event Details
@@ -212,6 +228,8 @@ EventModal.propTypes = {
       })
     ),
   }),
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 };
 
 export default EventModal;
