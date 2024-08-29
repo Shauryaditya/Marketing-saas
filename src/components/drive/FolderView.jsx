@@ -8,7 +8,7 @@ import { BreadcrumbDemo } from "../BreadCrumbDemo";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const FolderView = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { brandId, parentId } = useParams();
   const [currentFolder, setCurrentFolder] = useState(null);
   const [folders, setFolders] = useState([]);
@@ -18,7 +18,7 @@ const FolderView = () => {
   const fetchFolders = async (parentId) => {
     try {
       const response = await axios.get(
-        `${apiUrl}/v1/collateral/folder/get/${parentId}`,
+        `${apiUrl}/v1/collateral/folder/get/${parentId}?page=1&limit=50`,
         {
           params: { brand_id: brandId },
         }
@@ -70,7 +70,6 @@ const FolderView = () => {
     }
   }, [folders, parentId]);
 
-
   const handleFolderAdded = (newFolder) => {
     setFolders((prevFolders) => [...prevFolders, newFolder]);
   };
@@ -109,7 +108,6 @@ const FolderView = () => {
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
         <header className="flex justify-between items-center mb-8">
-
           {/* <h1 className="text-xs text-left text-blue-400 font-semibold mb-6">
             {currentFolder
               ? ` ${renderPath(currentFolder.path)}`
@@ -122,8 +120,7 @@ const FolderView = () => {
             ← Back
           </button>
 
-
-          <BreadcrumbDemo currentFolder={path} />
+          {/* <BreadcrumbDemo currentFolder={path} /> */}
           <div className="flex items-center space-x-4">
             <AddCollateralButton onCollateralAdded={handleCollateralAdded} />
             <AddFolderButton

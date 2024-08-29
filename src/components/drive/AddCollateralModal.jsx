@@ -3,16 +3,19 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDropzone } from "react-dropzone";
 import { useParams } from "react-router-dom";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
   const [files, setFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false); // Loading state
   const { brandId, parentId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
       setFiles([]);
+      setIsUploading(false); // Reset loading state when modal is opened
     }
   }, [isOpen]);
 
@@ -24,6 +27,7 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsUploading(true); // Disable the button
     try {
       const formData = new FormData();
       files.forEach((file) => {
@@ -50,6 +54,8 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
       navigate(0);
     } catch (error) {
       console.error("Error adding collateral:", error);
+    } finally {
+      setIsUploading(false); // Re-enable the button after upload
     }
   };
 
@@ -81,11 +87,15 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
             </svg>
 
             {files.length > 0 ? (
-              <ul>
-                {files.map((file, index) => (
-                  <li key={index}>{file.name}</li>
-                ))}
-              </ul>
+              <div className="max-h-24 w-full overflow-y-auto mt-4">
+                <ul className="list-disc list-inside">
+                  {files.map((file, index) => (
+                    <li key={index} className="text-sm text-gray-700">
+                      {file.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : (
               <p className="text-gray-500">
                 Drag 'n' drop files here, or click to select files
@@ -102,9 +112,12 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
+              className={`px-4 py-2 bg-blue-500 text-white rounded ${
+                isUploading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isUploading} // Disable button while uploading
             >
-              Add Collateral
+              {isUploading ? "Uploading..." : "Add Collateral"}
             </button>
           </div>
         </form>
