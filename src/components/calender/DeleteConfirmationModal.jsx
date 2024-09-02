@@ -16,7 +16,7 @@ const DeleteConfirmationModal = ({
       const response = await axios.delete(
         `${apiUrl}/v1/task/delete/${eventId}`
       );
-      if (response.data.success) {
+      if (response.data.message === "Task deleted successfully") {
         console.log("All events deleted successfully.");
         onDeletionSuccess(); // Notify parent on success
       } else {
@@ -32,7 +32,7 @@ const DeleteConfirmationModal = ({
       const response = await axios.delete(
         `${apiUrl}/v1/task/single/delete/${eventId}`
       );
-      if (response.data.success) {
+      if (response.data.message === "Task deleted successfully") {
         console.log("Event deleted successfully.");
         onDeletionSuccess(); // Notify parent on success
       } else {

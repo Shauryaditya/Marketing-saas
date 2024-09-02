@@ -40,6 +40,11 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
     }
   };
 
+  const handleDeletionSuccess = () => {
+    setDeleteConfirmationOpen(false); // Close the delete confirmation modal
+    onClose(); // Close the main event modal
+  };
+
   return (
     <>
       <div className="fixed text-xs inset-0 flex items-center justify-center z-50">
@@ -174,6 +179,7 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
         onClose={() => setDeleteConfirmationOpen(false)}
         eventId={event.id} // Pass the event ID here
         apiUrl={apiUrl} // Pass the API URL here
+        onDeletionSuccess={handleDeletionSuccess} // New callback for handling success
       />
     </>
   );
