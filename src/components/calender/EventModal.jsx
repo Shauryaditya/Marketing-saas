@@ -8,11 +8,14 @@ import {
   FaEdit,
   FaTrashAlt,
 } from "react-icons/fa";
-import axios from "axios"; // Import axios for making API calls
+import axios from "axios";
 import NewEventModal from "./NewEventModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
 
   if (!show || !event) return null;
 
@@ -22,15 +25,13 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
 
   const handleSaveEdit = async (updatedEvent) => {
     try {
-      // Make an API call to update the event
       const response = await axios.put(
-        `${apiUrl}/v1/task/single/edit/${event.id}`, // Use event ID to specify which event to edit
+        `${apiUrl}/v1/task/single/edit/${event.id}`,
         updatedEvent
       );
-
       if (response.data.success) {
-        onEdit(updatedEvent); // Call the onEdit prop if the API call is successful
-        setEditModalOpen(false); // Close the edit modal after saving
+        onEdit(updatedEvent);
+        setEditModalOpen(false);
       } else {
         console.error("Failed to edit the event:", response.data.message);
       }
@@ -55,7 +56,7 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
               <FaEdit className="w-5 h-5" />
             </button>
             <button
-              onClick={onDelete}
+              onClick={() => setDeleteConfirmationOpen(true)}
               className="text-gray-500 hover:text-gray-700"
             >
               <FaTrashAlt className="w-5 h-5" />
@@ -161,12 +162,18 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
         </div>
       </div>
 
-      {/* Render the Edit Event Modal */}
       <NewEventModal
         show={isEditModalOpen}
         onClose={() => setEditModalOpen(false)}
         event={event}
         onSave={handleSaveEdit}
+      />
+
+      <DeleteConfirmationModal
+        show={isDeleteConfirmationOpen}
+        onClose={() => setDeleteConfirmationOpen(false)}
+        eventId={event.id} // Pass the event ID here
+        apiUrl={apiUrl} // Pass the API URL here
       />
     </>
   );
