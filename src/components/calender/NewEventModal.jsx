@@ -46,66 +46,6 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
   }, [event]);
 
   useEffect(() => {
-    if (event) {
-      setEventData({
-        title: event.title || "",
-        date: event.start
-          ? new Date(event.start).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        time: event.start
-          ? new Date(event.start).toTimeString().slice(0, 5)
-          : "",
-        description: event.description || "",
-        repeat: event.repeat || "Does not repeat",
-        color: event.color || colorOptions[0],
-      });
-      // Handle platforms, types, and recurrence if necessary
-    } else {
-      // Reset form for a new event
-    }
-  }, [event]); // Update when the `event` prop changes
-
-  useEffect(() => {
-    if (event) {
-      // If there is an event, populate the state with the event data
-      setEventData({
-        title: event.title || "",
-        date: event.start
-          ? new Date(event.start).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        time: event.start
-          ? new Date(event.start).toTimeString().slice(0, 5)
-          : "",
-        description: event.description || "",
-        repeat: event.repeat || "Does not repeat",
-        color: event.color || colorOptions[0], // Set color from event if available
-      });
-      // Populate selected platforms and types if editing an existing event
-      setSelectedPlatformIds(event.platforms?.map((p) => p.platfrom_id) || []);
-      setSelectedTypes(
-        event.platforms?.reduce((acc, p) => {
-          acc[p.platfrom_id] = p.type_id;
-          return acc;
-        }, {}) || {}
-      );
-      setRecurrenceData(event.recurrence || null);
-    } else {
-      // If no event is provided, reset the state to initial values
-      setEventData({
-        title: "",
-        date: new Date().toISOString().split("T")[0],
-        time: "",
-        description: "",
-        repeat: "Does not repeat",
-        color: colorOptions[0], // Default color
-      });
-      setSelectedPlatformIds([]);
-      setSelectedTypes({});
-      setRecurrenceData(null);
-    }
-  }, [event]);
-
-  useEffect(() => {
     if (eventData.date && brandId) {
       const fetchData = async () => {
         try {
@@ -179,22 +119,25 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
     const requestBody = {
       brand_id: brandId,
       start_date: startDatetime.toISOString(),
-      end_date: endDatetime ? endDatetime.toISOString() : null, // Include end_date if available
+      end_date: endDatetime ? endDatetime.toISOString() : null,
       title: eventData.title,
       description: eventData.description,
       color: eventData.color,
-      event_type: eventType, // Use the dynamically determined event_type
+      event_type: eventType,
       platforms: selectedPlatformIds.map((platformId) => ({
         platfrom_id: platformId,
         type_id: selectedTypes[platformId],
       })),
       ...(eventData.repeat === "Custom" && {
-        recurrence: recurrenceData, // Ensure recurrenceData does not include endDate
+        recurrence: recurrenceData,
       }),
     };
 
     try {
-      const response = await axios.post(`/v1/task/add`, requestBody);
+      const response = event
+        ? await axios.put(`/v1/task/single/edit/${event.id}`, requestBody)
+        : await axios.post(`/v1/task/add`, requestBody);
+
       if (response.data.success) {
         onSave(response.data.event);
         onClose();
@@ -332,11 +275,11 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
                     name="repeat"
                     value={eventData.repeat}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full text-xs rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 py-1 px-3 border-none"
+                    className="mt-1 block w-full rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 text-xs py-1 px-3 border-none"
                   >
-                    <option>Does not repeat</option>
-                    <option>Daily</option>
-                    <option>Custom</option>
+                    <option value="Does not repeat">Does not repeat</option>
+                    <option value="Daily">Daily</option>
+                    <option value="Custom">Custom</option>
                   </select>
                 </label>
               </div>
@@ -347,39 +290,44 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
                   value={eventData.description}
                   onChange={handleInputChange}
                   placeholder="Description"
-                  rows={3}
-                  className="mt-1 block w-full text-xs rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 py-1 px-3 border-none"
-                ></textarea>
+                  className="mt-1 block w-full rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 text-xs py-1 px-3 border-none"
+                />
               </label>
-            </div>
-            <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="button"
-                onClick={handleSave}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
+
+              <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={handleSave}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="mt-3 inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={onClose}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      <CustomModal
-        show={showCustomModal}
-        onClose={() => setShowCustomModal(false)}
-        onSave={(recurrence) => {
-          setRecurrenceData(recurrence);
-          setShowCustomModal(false);
-        }}
-      />
+      {showCustomModal && (
+        <CustomModal
+          show={showCustomModal}
+          onClose={() => setShowCustomModal(false)}
+          onSave={(customRecurrenceData) => {
+            setRecurrenceData(customRecurrenceData);
+            setEventData((prevData) => ({
+              ...prevData,
+              repeat: "Custom",
+            }));
+            setShowCustomModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

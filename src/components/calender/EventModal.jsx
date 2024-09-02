@@ -5,11 +5,10 @@ import {
   FaCalendarAlt,
   FaTag,
   FaInfoCircle,
-  FaCheckCircle,
-  FaExclamationCircle,
   FaEdit,
   FaTrashAlt,
 } from "react-icons/fa";
+import axios from "axios"; // Import axios for making API calls
 import NewEventModal from "./NewEventModal";
 
 const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
@@ -21,9 +20,23 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
     setEditModalOpen(true);
   };
 
-  const handleSaveEdit = (updatedEvent) => {
-    onEdit(updatedEvent);
-    setEditModalOpen(false); // Close the edit modal after saving
+  const handleSaveEdit = async (updatedEvent) => {
+    try {
+      // Make an API call to update the event
+      const response = await axios.put(
+        `${apiUrl}/v1/task/single/edit/${event.id}`, // Use event ID to specify which event to edit
+        updatedEvent
+      );
+
+      if (response.data.success) {
+        onEdit(updatedEvent); // Call the onEdit prop if the API call is successful
+        setEditModalOpen(false); // Close the edit modal after saving
+      } else {
+        console.error("Failed to edit the event:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error editing the event:", error);
+    }
   };
 
   return (
@@ -100,45 +113,6 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
                 {event.event_type || "Not specified"}
               </p>
             </div>
-            {/* <div>
-              <h3 className="text-gray-600 font-medium flex items-center">
-                {event.status === "completed" ? (
-                  <FaCheckCircle className="text-green-600 mr-2" />
-                ) : event.status === "pending" ? (
-                  <FaExclamationCircle className="text-yellow-600 mr-2" />
-                ) : (
-                  <FaInfoCircle className="mr-2 text-gray-600" />
-                )}
-                Status
-              </h3>
-              <p
-                className={`text-lg ${
-                  event.status === "pending"
-                    ? "text-yellow-600"
-                    : "text-green-600"
-                }`}
-              >
-                {event.status}
-              </p>
-            </div> */}
-            {/* {event.recurrence && (
-              <div>
-                <h3 className="text-gray-600 font-medium flex items-center">
-                  <FaCalendarAlt className="mr-2 text-blue-500" />
-                  Recurrence
-                </h3>
-                <p className="text-gray-800">
-                  Frequency: {event.recurrence.frequency}{" "}
-                  {event.recurrence.interval === 1 ? "week" : "weeks"}
-                </p>
-                <p className="text-gray-800">
-                  Days of Week: {event.recurrence.daysOfWeek.join(", ")}
-                </p>
-                <p className="text-gray-800">
-                  End Date: {event.recurrence.endDate}
-                </p>
-              </div>
-            )} */}
             {event.platforms_data && event.platforms_data.length > 0 && (
               <div>
                 <h3 className="text-gray-600 font-medium flex items-center">
