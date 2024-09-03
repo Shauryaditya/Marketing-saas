@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import CustomModal from "./CustomModal";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 setupAxiosInterceptors();
 
@@ -103,18 +104,11 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
   };
 
   const handleSave = async () => {
+    // Combine date and time if necessary
     const startDatetime = new Date(`${eventData.date}T${eventData.time}`);
     const endDatetime = recurrenceData?.endDate
       ? new Date(recurrenceData.endDate)
       : null;
-
-    let eventType = "all_day"; // Default to "all_day" for non-recurring events
-
-    if (eventData.repeat === "Daily") {
-      eventType = "daily";
-    } else if (eventData.repeat === "Custom") {
-      eventType = "recurring";
-    }
 
     const requestBody = {
       brand_id: brandId,
@@ -123,25 +117,38 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
       title: eventData.title,
       description: eventData.description,
       color: eventData.color,
-      event_type: eventType,
+      event_type:
+        eventData.repeat === "Daily"
+          ? "daily"
+          : eventData.repeat === "Custom"
+          ? "recurring"
+          : "all_day",
       platforms: selectedPlatformIds.map((platformId) => ({
-        platfrom_id: platformId,
+        platform_id: platformId,
         type_id: selectedTypes[platformId],
       })),
-      ...(eventData.repeat === "Custom" && {
-        recurrence: recurrenceData,
-      }),
+      ...(eventData.repeat === "Custom" && { recurrence: recurrenceData }),
     };
 
     try {
-      // Check if the event ID is null
-      const response = event?.id
-        ? await axios.put(`/v1/task/single/edit/${event.id}`, requestBody)
-        : await axios.post(`/v1/task/add`, requestBody);
+      let response;
+      if (editScope === "all") {
+        response = await axios.put(
+          `${apiUrl}/v1/task/edit/${event?.eventId}`,
+          requestBody
+        );
+      } else if (event?.id) {
+        response = await axios.put(
+          `${apiUrl}/v1/task/single/edit/${event.id}`,
+          requestBody
+        );
+      } else {
+        response = await axios.post(`${apiUrl}/v1/task/add`, requestBody);
+      }
 
       if (response.data.success) {
-        onSave(response.data.event);
-        onClose();
+        onSave(response.data.event); // Callback to pass the saved event data
+        onClose(); // Close the modal after successful save
       } else {
         console.error("Failed to save the event:", response.data.message);
       }

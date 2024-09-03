@@ -8,7 +8,6 @@ import {
   FaEdit,
   FaTrashAlt,
 } from "react-icons/fa";
-import axios from "axios";
 import NewEventModal from "./NewEventModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -29,24 +28,6 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
     setEditScope(scope);
     setEditDecisionModalOpen(false);
     setEditModalOpen(true);
-  };
-
-  const handleSaveEdit = async (updatedEvent) => {
-    try {
-      let endpoint = `${apiUrl}/v1/task/single/edit/${event.id}`;
-      if (editScope === "all") {
-        endpoint = `${apiUrl}/v1/task/edit-all/${event.id}`;
-      }
-      const response = await axios.put(endpoint, updatedEvent);
-      if (response.data.success) {
-        onEdit(updatedEvent);
-        setEditModalOpen(false);
-      } else {
-        console.error("Failed to edit the event:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Error editing the event:", error);
-    }
   };
 
   const handleDeletionSuccess = () => {
@@ -211,7 +192,11 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
         show={isEditModalOpen}
         onClose={() => setEditModalOpen(false)}
         event={event}
-        onSave={handleSaveEdit}
+        onSave={(updatedEvent) => {
+          // Handle saving the edit here if needed, or pass it directly
+          // to the NewEventModal for processing
+        }}
+        editScope={editScope} // Pass the edit scope to the modal
       />
 
       <DeleteConfirmationModal
