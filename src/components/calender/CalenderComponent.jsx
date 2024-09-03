@@ -41,7 +41,13 @@ const localizer = dateFnsLocalizer({
 });
 
 const CalendarComponent = () => {
-  const { currentDate, view, setView, setShowNewEventModal, showNewEventModal } = useCalenderContext()
+  const {
+    currentDate,
+    view,
+    setView,
+    setShowNewEventModal,
+    showNewEventModal,
+  } = useCalenderContext();
   const [events, setEvents] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
@@ -115,6 +121,7 @@ const CalendarComponent = () => {
       setSelectedEvent({
         id: eventData._id,
         title: eventData.title,
+        eventId: eventData.eventId,
         start_date: eventData.start_date, // Use the raw date string
         end_date: eventData.end_date, // Use the raw date string
         color: eventData.color,
@@ -162,8 +169,6 @@ const CalendarComponent = () => {
     console.log("showNewEventModal:", showNewEventModal);
   }, [showEditModal, showNewEventModal]);
 
-
-
   const { components, defaultDate } = useMemo(
     () => ({
       components: {
@@ -192,10 +197,8 @@ const CalendarComponent = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex h-screen">
-        <Sidebar
-        />
+        <Sidebar />
         <div className="flex-1 p-4">
-
           <div style={{ height: "calc(100vh - 2rem)" }}>
             <BigCalendar
               localizer={localizer}

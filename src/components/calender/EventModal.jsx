@@ -177,7 +177,8 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
       <DeleteConfirmationModal
         show={isDeleteConfirmationOpen}
         onClose={() => setDeleteConfirmationOpen(false)}
-        eventId={event.id} // Pass the event ID here
+        id={event.id}
+        eventId={event.eventId} // Pass the event ID here
         apiUrl={apiUrl} // Pass the API URL here
         onDeletionSuccess={handleDeletionSuccess} // New callback for handling success
       />

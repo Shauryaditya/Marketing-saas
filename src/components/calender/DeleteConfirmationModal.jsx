@@ -5,6 +5,7 @@ import axios from "axios";
 const DeleteConfirmationModal = ({
   show,
   onClose,
+  id,
   eventId,
   apiUrl,
   onDeletionSuccess,
@@ -30,7 +31,7 @@ const DeleteConfirmationModal = ({
   const handleDeleteSingle = async () => {
     try {
       const response = await axios.delete(
-        `${apiUrl}/v1/task/single/delete/${eventId}`
+        `${apiUrl}/v1/task/single/delete/${id}`
       );
       if (response.data.message === "Task deleted successfully") {
         console.log("Event deleted successfully.");
