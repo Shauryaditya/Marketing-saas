@@ -61,13 +61,13 @@ const DeleteConfirmationModal = ({
         <div className="flex justify-between">
           <button
             onClick={handleDeleteAll}
-            className="bg-red-600 text-white py-2 px-4 rounded-lg shadow hover:bg-red-700"
+            className="bg-black text-white py-2 px-4 rounded-lg shadow hover:bg-red-700"
           >
             Delete All
           </button>
           <button
             onClick={handleDeleteSingle}
-            className="bg-red-600 text-white py-2 px-4 rounded-lg shadow hover:bg-red-700"
+            className="bg-black text-white py-2 px-4 rounded-lg shadow hover:bg-red-700"
           >
             Delete Individual
           </button>
