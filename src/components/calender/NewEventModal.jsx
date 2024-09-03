@@ -8,7 +8,7 @@ setupAxiosInterceptors();
 
 const colorOptions = ["#FF8D6F", "#66FF8E", "#66A3FF", "#F4D76D", "#B88CC7"];
 
-const NewEventModal = ({ show, onClose, onSave, event }) => {
+const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
   const [eventData, setEventData] = useState({
     title: "",
     date: new Date().toISOString().split("T")[0],

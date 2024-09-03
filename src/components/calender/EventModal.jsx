@@ -16,19 +16,28 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
+  const [isEditDecisionModalOpen, setEditDecisionModalOpen] = useState(false);
+  const [editScope, setEditScope] = useState(null); // To keep track of the edit scope
 
   if (!show || !event) return null;
 
   const handleEditClick = () => {
+    setEditDecisionModalOpen(true);
+  };
+
+  const handleEditScopeSelection = (scope) => {
+    setEditScope(scope);
+    setEditDecisionModalOpen(false);
     setEditModalOpen(true);
   };
 
   const handleSaveEdit = async (updatedEvent) => {
     try {
-      const response = await axios.put(
-        `${apiUrl}/v1/task/single/edit/${event.id}`,
-        updatedEvent
-      );
+      let endpoint = `${apiUrl}/v1/task/single/edit/${event.id}`;
+      if (editScope === "all") {
+        endpoint = `${apiUrl}/v1/task/edit-all/${event.id}`;
+      }
+      const response = await axios.put(endpoint, updatedEvent);
       if (response.data.success) {
         onEdit(updatedEvent);
         setEditModalOpen(false);
@@ -166,6 +175,37 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
           </div>
         </div>
       </div>
+
+      {isEditDecisionModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div
+            className="absolute inset-0 bg-gray-800 opacity-75"
+            onClick={() => setEditDecisionModalOpen(false)}
+          />
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm mx-4 relative z-10">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Edit Event
+            </h3>
+            <p className="mb-4 text-gray-700">
+              Do you want to edit just this event or all related events?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => handleEditScopeSelection("single")}
+                className="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700"
+              >
+                Edit Single
+              </button>
+              <button
+                onClick={() => handleEditScopeSelection("all")}
+                className="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700"
+              >
+                Edit All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <NewEventModal
         show={isEditModalOpen}
