@@ -134,7 +134,8 @@ const NewEventModal = ({ show, onClose, onSave, event }) => {
     };
 
     try {
-      const response = event
+      // Check if the event ID is null
+      const response = event?.id
         ? await axios.put(`/v1/task/single/edit/${event.id}`, requestBody)
         : await axios.post(`/v1/task/add`, requestBody);
 
