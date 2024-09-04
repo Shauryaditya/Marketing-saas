@@ -172,7 +172,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
               </h3>
             </div>
             <div className="px-4 py-5 space-y-4">
-              <label className="block text-gray-700">
+              {/* <label className="block text-gray-700">
                 <div className="flex space-x-2 mt-1">
                   {colorOptions.map((color) => (
                     <button
@@ -187,7 +187,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                     />
                   ))}
                 </div>
-              </label>
+              </label> */}
               <label className="block text-gray-700">
                 Title
                 <input
