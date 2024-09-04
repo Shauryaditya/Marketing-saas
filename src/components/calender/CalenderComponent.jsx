@@ -152,7 +152,9 @@ const CalendarComponent = () => {
   const handleModalClose = () => {
     setShowEditModal(false);
     setShowNewEventModal(false);
+    setShowEventModal(false);
     setSelectedEvent(null);
+    fetchEvents(); // Fetch events to refresh the calendar
   };
 
   const handleEventChange = (e) => {
@@ -232,7 +234,7 @@ const CalendarComponent = () => {
       />
       <EventModal
         show={showEventModal}
-        onClose={() => setShowEventModal(false)}
+        onClose={handleModalClose} // Use the same handleModalClose function to refresh the calendar
         event={selectedEvent}
       />
     </DndProvider>

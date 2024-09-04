@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const DeleteConfirmationModal = ({
   show,
@@ -17,8 +18,11 @@ const DeleteConfirmationModal = ({
       const response = await axios.delete(
         `${apiUrl}/v1/task/delete/${eventId}`
       );
-      if (response.data.message === "Task deleted successfully") {
-        console.log("All events deleted successfully.");
+      if (
+        response.data.message === "Task deleted successfully" ||
+        "Tasks deleted successfully"
+      ) {
+        toast.success("All events deleted successfully.");
         onDeletionSuccess(); // Notify parent on success
       } else {
         console.error("Failed to delete all events:", response.data.message);
