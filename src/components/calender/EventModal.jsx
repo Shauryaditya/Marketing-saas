@@ -149,7 +149,7 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
           <div className="mt-4 flex justify-end">
             <button
               onClick={onClose}
-              className="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700"
+              className="bg-gray-800 text-white py-1 px-2 rounded-md shadow hover:bg-black"
             >
               Close
             </button>
@@ -163,7 +163,7 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
             className="absolute inset-0 bg-gray-800 opacity-75"
             onClick={() => setEditDecisionModalOpen(false)}
           />
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm mx-4 relative z-10">
+          <div className="bg-white text-xs p-6 rounded-lg shadow-lg w-full max-w-sm mx-4 relative z-10">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Edit Event
             </h3>
@@ -173,13 +173,13 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => handleEditScopeSelection("single")}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700"
+                className="bg-gray-700 text-white py-1 px-2 rounded-md shadow hover:bg-black"
               >
                 Edit Single
               </button>
               <button
                 onClick={() => handleEditScopeSelection("all")}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700"
+                className="bg-gray-700 text-white py-1 px-2 rounded-md shadow hover:bg-black"
               >
                 Edit All
               </button>

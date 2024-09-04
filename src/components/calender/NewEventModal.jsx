@@ -302,17 +302,17 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                 />
               </label>
 
-              <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="px-4 py-3 text-xs bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                  className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 bg-black text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={handleSave}
                 >
                   Save
                 </button>
                 <button
                   type="button"
-                  className="mt-3 inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-2 py-1 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={onClose}
                 >
                   Cancel
