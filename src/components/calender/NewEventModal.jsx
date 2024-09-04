@@ -13,7 +13,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
   const [eventData, setEventData] = useState({
     title: "",
     date: new Date().toISOString().split("T")[0],
-    time: "",
+    time: "00:00",
     description: "",
     repeat: "Does not repeat",
     color: colorOptions[0], // Default color
@@ -25,6 +25,31 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
   const [selectedTypes, setSelectedTypes] = useState({});
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [recurrenceData, setRecurrenceData] = useState(null);
+  const [loading, setLoading] = useState(false); // Add loading state
+
+  useEffect(() => {
+    if (show && eventData.date && brandId) {
+      const fetchData = async () => {
+        setLoading(true); // Set loading state to true
+        try {
+          const response = await axios.get(
+            `/v1/task/current/platfrom/${brandId}/${eventData.date}`
+          );
+          if (response.data.success) {
+            setPlatformData(response.data.data);
+          } else {
+            setPlatformData([]); // Ensure platformData is reset if no data
+          }
+        } catch (error) {
+          setPlatformData([]); // Ensure platformData is reset if an error occurs
+          console.error("Error fetching platform data:", error); // Log error for debugging
+        } finally {
+          setLoading(false); // Set loading state to false
+        }
+      };
+      fetchData();
+    }
+  }, [show, eventData.date, brandId]);
 
   useEffect(() => {
     if (event) {
@@ -40,29 +65,8 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
         repeat: event.repeat || "Does not repeat",
         color: event.color || colorOptions[0],
       });
-      // Handle platforms, types, and recurrence if necessary
-    } else {
-      // Reset form for a new event
     }
   }, [event]);
-
-  useEffect(() => {
-    if (eventData.date && brandId) {
-      const fetchData = async () => {
-        try {
-          const response = await axios.get(
-            `/v1/task/current/platfrom/${brandId}/${eventData.date}`
-          );
-          if (response.data.success) {
-            setPlatformData(response.data.data);
-          }
-        } catch (error) {
-          console.error("Error fetching platform data:", error);
-        }
-      };
-      fetchData();
-    }
-  }, [eventData.date, brandId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -172,6 +176,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
               </h3>
             </div>
             <div className="px-4 py-5 space-y-4">
+              {/* Color selection section (commented out) */}
               {/* <label className="block text-gray-700">
                 <div className="flex space-x-2 mt-1">
                   {colorOptions.map((color) => (
@@ -199,63 +204,76 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                   className="mt-1 block w-full rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 text-xs py-1 px-3 border-none"
                 />
               </label>
-              <div className="space-x-2 flex">
-                {platformData.map((platform) =>
-                  platform.social_post.map((post) => (
-                    <div key={post.social_id} className="space-y-2">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`platform-${post.social_id}`}
-                          name="platform"
-                          value={post.social_id}
-                          checked={selectedPlatformIds.includes(post.social_id)}
-                          onChange={() => handlePlatformSelect(post.social_id)}
-                          className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                        />
-                        <label
-                          htmlFor={`platform-${post.social_id}`}
-                          className="ml-3 block text-xs text-gray-700"
-                        >
-                          <img
-                            src={post.platform_logo}
-                            alt={post.platform_name}
-                            className="h-6 w-6 inline-block"
+
+              {/* Conditionally render platform section */}
+              {loading ? (
+                <p className="text-gray-500 text-xs">Loading platforms...</p>
+              ) : platformData.length > 0 ? (
+                <div className="space-x-2 flex">
+                  {platformData.map((platform) =>
+                    platform.social_post.map((post) => (
+                      <div key={post.social_id} className="space-y-2">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`platform-${post.social_id}`}
+                            name="platform"
+                            value={post.social_id}
+                            checked={selectedPlatformIds.includes(
+                              post.social_id
+                            )}
+                            onChange={() =>
+                              handlePlatformSelect(post.social_id)
+                            }
+                            className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
                           />
-                          <span className="ml-2">{post.platform_name}</span>
-                        </label>
-                      </div>
-                      {selectedPlatformIds.includes(post.social_id) && (
-                        <div className="flex space-x-2">
-                          {post.types.map((type) => (
-                            <div key={type._id} className="flex items-center">
-                              <input
-                                type="radio"
-                                id={`type-${type._id}`}
-                                name={`type-${post.social_id}`}
-                                value={type.type}
-                                checked={
-                                  selectedTypes[post.social_id] === type.type
-                                }
-                                onChange={() =>
-                                  handleTypeSelect(post.social_id, type.type)
-                                }
-                                className="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                              />
-                              <label
-                                htmlFor={`type-${type._id}`}
-                                className="ml-1 block text-xs text-gray-700"
-                              >
-                                {type.content_type}
-                              </label>
-                            </div>
-                          ))}
+                          <label
+                            htmlFor={`platform-${post.social_id}`}
+                            className="ml-3 block text-xs text-gray-700"
+                          >
+                            <img
+                              src={post.platform_logo}
+                              alt={post.platform_name}
+                              className="h-6 w-6 inline-block"
+                            />
+                            <span className="ml-2">{post.platform_name}</span>
+                          </label>
                         </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
+                        {selectedPlatformIds.includes(post.social_id) && (
+                          <div className="flex space-x-2">
+                            {post.types.map((type) => (
+                              <div key={type._id} className="flex items-center">
+                                <input
+                                  type="radio"
+                                  id={`type-${type._id}`}
+                                  name={`type-${post.social_id}`}
+                                  value={type.type}
+                                  checked={
+                                    selectedTypes[post.social_id] === type.type
+                                  }
+                                  onChange={() =>
+                                    handleTypeSelect(post.social_id, type.type)
+                                  }
+                                  className="form-radio h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                                />
+                                <label
+                                  htmlFor={`type-${type._id}`}
+                                  className="ml-1 block text-xs text-gray-700"
+                                >
+                                  {type.content_type}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-xs">No platforms available.</p>
+              )}
+
               <div className="flex items-center space-x-4">
                 <label className="block text-gray-700 flex-1">
                   Date
