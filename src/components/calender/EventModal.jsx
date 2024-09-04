@@ -20,6 +20,19 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
 
   if (!show || !event) return null;
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    }).format(date);
+  };
+
   const handleEditClick = () => {
     setEditDecisionModalOpen(true);
   };
@@ -81,14 +94,14 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
                   <FaCalendarAlt className="mr-2 text-blue-500" />
                   Start Date
                 </h3>
-                <p className="text-gray-800">{event.start_date}</p>
+                <p className="text-gray-800">{formatDate(event.start_date)}</p>
               </div>
               <div className="w-1/2 pl-2">
                 <h3 className="text-gray-600 font-medium flex items-center">
                   <FaCalendarAlt className="mr-2 text-blue-500" />
                   End Date
                 </h3>
-                <p className="text-gray-800">{event.end_date}</p>
+                <p className="text-gray-800">{formatDate(event.end_date)}</p>
               </div>
             </div>
             <div>
