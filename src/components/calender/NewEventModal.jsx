@@ -146,7 +146,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
         response = await axios.post(`${apiUrl}/v1/task/add`, requestBody);
       }
 
-      if (response.data.success) {
+      if (response.data.message) {
         onSave(response.data.event); // Callback to pass the saved event data
         onClose(); // Close the modal after successful save
       } else {
