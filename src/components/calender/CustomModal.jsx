@@ -10,7 +10,7 @@ const weekObject = {
   6: "F",
   7: "2"
 }
-const CustomModal = ({ show, onClose, onSave, recurrence, type }) => {
+const CustomModal = ({ show, onClose, onSave, recurrence, type, recurrenceData }) => {
   const [repeatEvery, setRepeatEvery] = useState(1);
   const [repeatUnit, setRepeatUnit] = useState("week");
   const [selectedDays, setSelectedDays] = useState([]);
@@ -19,7 +19,7 @@ const CustomModal = ({ show, onClose, onSave, recurrence, type }) => {
   const [occurrences, setOccurrences] = useState(13);
 
   useEffect(() => {
-    if (!type) return
+    if (type != 'edit') return
     if (!recurrence) return
     setRepeatUnit(recurrence.frequency)
     setRepeatEvery(recurrence.interval)
@@ -39,6 +39,24 @@ const CustomModal = ({ show, onClose, onSave, recurrence, type }) => {
     }
 
   }, [type, recurrence])
+
+  useEffect(() => {
+    if (!recurrenceData) return
+    if (recurrenceData.endDate) {
+      const dateObject = new Date(recurrenceData?.endDate);
+      const formattedDate = format(dateObject, 'yyyy-MM-dd');
+      setEnds('on')
+      setEndDate(formattedDate)
+    }
+    if (recurrenceData.daysOfWeek) {
+      const seletedDays = recurrenceData.daysOfWeek.map(d => weekObject[d])
+      setSelectedDays(seletedDays)
+    }
+    if (recurrenceData.occurrences) {
+      setEnds('after')
+      setOccurrences(recurrenceData.occurrences)
+    }
+  }, [])
   if (!show) return null;
 
   const handleSave = () => {

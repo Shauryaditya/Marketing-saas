@@ -83,11 +83,14 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       const formattedTime = format(dateObject, 'HH:mm');
       const formattedDate = format(dateObject, 'yyyy-MM-dd');
       var eventType = ''
+      if (event.event_type == 'all_day') {
+        eventType = 'Does not repeat'
+      }
       if (event.event_type == 'daily') {
         eventType = 'daily'
       }
-      if (event.event_type == 'all_day' || event.event_type == 'recurring') {
-        eventType = 'custom'
+      if (event.event_type == 'recurring') {
+        eventType = 'Custom'
       }
       setEventData({
         title: event.title || "",
@@ -121,7 +124,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       [name]: value,
     }));
 
-    if (name === "repeat" && value === "custom") {
+    if (name === "repeat" && value === "Custom") {
       setShowCustomModal(true);
     }
   };
@@ -166,6 +169,17 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       ? new Date(recurrenceData.endDate)
       : null;
 
+    var eventType = ''
+    if (eventData.repeat == 'Does not repeat') {
+      eventType = 'all_day'
+    }
+    if (eventData.repeat === "Custom") {
+      eventType = 'recurring'
+    }
+    if (eventData.repeat === "daily") {
+      eventType = 'daily'
+    }
+
     const requestBody = {
       brand_id: brandId,
       start_date: startDatetime.toISOString(),
@@ -173,12 +187,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       title: eventData.title,
       description: eventData.description,
       color: eventData.color,
-      event_type:
-        eventData.repeat === "daily"
-          ? "daily"
-          : eventData.repeat === "custom"
-            ? "recurring"
-            : "all_day",
+      event_type: eventType,
       platforms: selectedPlatformIds.map((platformId) => ({
         platform_id: platformId,
         type_id: selectedTypes[platformId],
@@ -216,9 +225,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
     }
   };
 
-  console.log('plat form data', platformData);
-  console.log('plat form ids', selectedPlatformIds);
-  console.log('slected types', selectedTypes);
+
   return (
     <div>
       {show && (
@@ -363,7 +370,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   >
                     <option value="Does not repeat">Does not repeat</option>
                     <option value="daily">Daily</option>
-                    <option value="custom">Custom</option>
+                    <option value="Custom">Custom</option>
                   </select>
                 </label>
               </div>
@@ -402,6 +409,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
         <CustomModal
           type='edit'
           recurrence={event?.recurrence}
+          recurrenceData={recurrenceData}
           show={showCustomModal}
           onClose={() => setShowCustomModal(false)}
           onSave={(customRecurrenceData) => {
