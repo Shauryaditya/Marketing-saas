@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import CustomModal from "./CustomModal";
 const apiUrl = import.meta.env.VITE_API_URL;
-
+import { format } from "date-fns";
 setupAxiosInterceptors();
 
 const colorOptions = ["#FF8D6F", "#66FF8E", "#66A3FF", "#F4D76D", "#B88CC7"];
 
-const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
+const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
+  if (type == 'add') console.log('type event data', type, event);
+  if (type == 'edit') console.log('type event data', type, event);
+
   const [eventData, setEventData] = useState({
     title: "",
-    date: new Date().toISOString().split("T")[0],
-    time: "00:00",
+    date: '',
+    time: '',
     description: "",
     repeat: "Does not repeat",
     color: colorOptions[0], // Default color
@@ -26,47 +30,89 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [recurrenceData, setRecurrenceData] = useState(null);
   const [loading, setLoading] = useState(false); // Add loading state
-
+  const [isApiCalledSuccessfully, setIsApiCalledSuccessfully] = useState(false);
   useEffect(() => {
-    if (show && eventData.date && brandId) {
+    if (!type && show) return
+    setIsApiCalledSuccessfully(false)
+  }, [type, show])
+  useEffect(() => {
+    if (eventData && brandId && !isApiCalledSuccessfully) { // Check if the call has not been made successfully
       const fetchData = async () => {
-        setLoading(true); // Set loading state to true
+        setLoading(true);
         try {
           const response = await axios.get(
             `/v1/task/current/platfrom/${brandId}/${eventData.date}`
           );
           if (response.data.success) {
             setPlatformData(response.data.data);
+            setIsApiCalledSuccessfully(true); // Mark as successful to prevent future calls
           } else {
-            setPlatformData([]); // Ensure platformData is reset if no data
+            setPlatformData([]);
           }
         } catch (error) {
-          setPlatformData([]); // Ensure platformData is reset if an error occurs
-          console.error("Error fetching platform data:", error); // Log error for debugging
+          setPlatformData([]);
+          console.error("Error fetching platform data:", error);
         } finally {
-          setLoading(false); // Set loading state to false
+          setLoading(false);
         }
       };
       fetchData();
     }
-  }, [show, eventData.date, brandId]);
+  }, [brandId, eventData, isApiCalledSuccessfully]);
 
   useEffect(() => {
-    if (event) {
+    if (!event) return; // Simply return if there is no event
+
+    if (type === "edit" && event) {
+      console.log("edit event", event);
+      const selectedPlatformids = event.platforms_data.map(d => d._id)
+      const selectedType = event.platforms_data.reduce((acc, d) => {
+        if (d?.content_types) {
+          d.content_types.forEach(p => {
+            if (p) {
+              acc[d._id] = p.type; // Add key-value pair to the object
+            }
+          });
+        }
+        return acc;
+      }, {});
+      setSelectedTypes(selectedType)
+      setSelectedPlatformIds(selectedPlatformids)
+
+      const dateObject = new Date(event?.start);
+      const formattedTime = format(dateObject, 'HH:mm');
+      const formattedDate = format(dateObject, 'yyyy-MM-dd');
+      var eventType = ''
+      if (event.event_type == 'daily') {
+        eventType = 'daily'
+      }
+      if (event.event_type == 'all_day' || event.event_type == 'recurring') {
+        eventType = 'custom'
+      }
       setEventData({
         title: event.title || "",
-        date: event.start
-          ? new Date(event.start).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        time: event.start
-          ? new Date(event.start).toTimeString().slice(0, 5)
-          : "",
+        date: formattedDate,
+        time: formattedTime,
         description: event.description || "",
-        repeat: event.repeat || "Does not repeat",
+        repeat: eventType,
         color: event.color || colorOptions[0],
       });
     }
-  }, [event]);
+    if (type == 'add') {
+      const dateObject = new Date(event.start);
+      setEventData({
+        title: "",
+        date: format(dateObject, 'yyyy-MM-dd'),
+        time: "00:00",
+        description: "",
+        repeat: "Does not repeat",
+        color: colorOptions[0], // Default color
+      });
+      setSelectedTypes({})
+      setSelectedPlatformIds([])
+    }
+  }, [event, type]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -75,17 +121,17 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
       [name]: value,
     }));
 
-    if (name === "repeat" && value === "Custom") {
+    if (name === "repeat" && value === "custom") {
       setShowCustomModal(true);
     }
   };
 
-  const handleColorSelect = (color) => {
-    setEventData((prevData) => ({
-      ...prevData,
-      color: color,
-    }));
-  };
+  // const handleColorSelect = (color) => {
+  //   setEventData((prevData) => ({
+  //     ...prevData,
+  //     color: color,
+  //   }));
+  // };
 
   const handlePlatformSelect = (platformId) => {
     setSelectedPlatformIds((prevIds) =>
@@ -108,7 +154,13 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
   };
 
   const handleSave = async () => {
-    // Combine date and time if necessary
+    if (eventData.repeat == 'custom' && !recurrenceData) {
+      return toast.error("Recurrence details are required for recurring events")
+    }
+
+    if (!selectedPlatformIds.length) {
+      return toast.error("Platform and social is required for event")
+    }
     const startDatetime = new Date(`${eventData.date}T${eventData.time}`);
     const endDatetime = recurrenceData?.endDate
       ? new Date(recurrenceData.endDate)
@@ -122,11 +174,11 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
       description: eventData.description,
       color: eventData.color,
       event_type:
-        eventData.repeat === "Daily"
+        eventData.repeat === "daily"
           ? "daily"
-          : eventData.repeat === "Custom"
-          ? "recurring"
-          : "all_day",
+          : eventData.repeat === "custom"
+            ? "recurring"
+            : "all_day",
       platforms: selectedPlatformIds.map((platformId) => ({
         platform_id: platformId,
         type_id: selectedTypes[platformId],
@@ -136,20 +188,23 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
 
     try {
       let response;
-      if (editScope === "all") {
-        response = await axios.put(
-          `${apiUrl}/v1/task/edit/${event?.eventId}`,
-          requestBody
-        );
-      } else if (event?.id) {
-        response = await axios.put(
-          `${apiUrl}/v1/task/single/edit/${event.id}`,
-          requestBody
-        );
-      } else {
+      if (type == 'add') {
         response = await axios.post(`${apiUrl}/v1/task/add`, requestBody);
       }
 
+      if (type == 'edit') {
+        if (editScope == 'all' && event?.eventId) {
+          response = await axios.put(
+            `${apiUrl}/v1/task/edit/${event?.eventId}`,
+            requestBody
+          );
+        } else {
+          response = await axios.put(
+            `${apiUrl}/v1/task/single/edit/${event.id}`,
+            requestBody
+          );
+        }
+      }
       if (response.data.message) {
         onSave(response.data.event); // Callback to pass the saved event data
         onClose(); // Close the modal after successful save
@@ -161,6 +216,9 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
     }
   };
 
+  console.log('plat form data', platformData);
+  console.log('plat form ids', selectedPlatformIds);
+  console.log('slected types', selectedTypes);
   return (
     <div>
       {show && (
@@ -172,7 +230,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md z-10">
             <div className="px-4 py-2 border-b border-gray-200">
               <h3 className="text-sm font-medium text-gray-900">
-                {event ? "Edit Task" : "Add New Task"}
+                {type == 'edit' ? "Edit Task" : "Add New Task"}
               </h3>
             </div>
             <div className="px-4 py-5 space-y-4">
@@ -209,9 +267,9 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
               {loading ? (
                 <p className="text-gray-500 text-xs">Loading platforms...</p>
               ) : platformData.length > 0 ? (
-                <div className="space-x-2 flex">
-                  {platformData.map((platform) =>
-                    platform.social_post.map((post) => (
+                <div className="grid grid-cols-4 gap-2">
+                  {platformData?.map((platform) =>
+                    platform?.social_post.map((post) => (
                       <div key={post.social_id} className="space-y-2">
                         <div className="flex items-center">
                           <input
@@ -219,7 +277,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                             id={`platform-${post.social_id}`}
                             name="platform"
                             value={post.social_id}
-                            checked={selectedPlatformIds.includes(
+                            checked={selectedPlatformIds?.includes(
                               post.social_id
                             )}
                             onChange={() =>
@@ -229,7 +287,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                           />
                           <label
                             htmlFor={`platform-${post.social_id}`}
-                            className="ml-3 block text-xs text-gray-700"
+                            className="flex flex-col ml-3 block text-xs text-gray-700"
                           >
                             <img
                               src={post.platform_logo}
@@ -240,9 +298,9 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                           </label>
                         </div>
                         {selectedPlatformIds.includes(post.social_id) && (
-                          <div className="flex space-x-2">
+                          <div className="flex flex-col space-y-2">
                             {post.types.map((type) => (
-                              <div key={type._id} className="flex items-center">
+                              <div key={type._id} className="flex  items-center">
                                 <input
                                   type="radio"
                                   id={`type-${type._id}`}
@@ -304,8 +362,8 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                     className="mt-1 block w-full rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 text-xs py-1 px-3 border-none"
                   >
                     <option value="Does not repeat">Does not repeat</option>
-                    <option value="Daily">Daily</option>
-                    <option value="Custom">Custom</option>
+                    <option value="daily">Daily</option>
+                    <option value="custom">Custom</option>
                   </select>
                 </label>
               </div>
@@ -326,7 +384,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
                   className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 bg-black text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={handleSave}
                 >
-                  Save
+                  {type == 'edit' ? "Update" : "Save"}
                 </button>
                 <button
                   type="button"
@@ -342,6 +400,8 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope }) => {
       )}
       {showCustomModal && (
         <CustomModal
+          type='edit'
+          recurrence={event?.recurrence}
           show={showCustomModal}
           onClose={() => setShowCustomModal(false)}
           onSave={(customRecurrenceData) => {

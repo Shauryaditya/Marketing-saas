@@ -81,25 +81,6 @@ const CalendarComponent = () => {
   }, [currentDate, view]);
 
   const handleSaveEvent = async () => {
-    if (selectedEvent.id) {
-      try {
-        await axios.put(`/v1/task/add/${selectedEvent.id}`, selectedEvent);
-        setEvents(
-          events.map((event) =>
-            event.id === selectedEvent.id ? selectedEvent : event
-          )
-        );
-      } catch (error) {
-        console.error("Error updating event:", error);
-      }
-    } else {
-      try {
-        const response = await axios.post(`/v1/task/add`, selectedEvent);
-        setEvents([...events, { ...selectedEvent, id: response.data.id }]);
-      } catch (error) {
-        console.error("Error creating event:", error);
-      }
-    }
     handleModalClose();
   };
 
@@ -122,8 +103,8 @@ const CalendarComponent = () => {
         id: eventData._id,
         title: eventData.title,
         eventId: eventData.eventId,
-        start_date: eventData.start_date, // Use the raw date string
-        end_date: eventData.end_date, // Use the raw date string
+        start: eventData.start_date, // Use the raw date string
+        end: eventData.end_date, // Use the raw date string
         color: eventData.color,
         description: eventData.description,
         event_type: eventData.event_type,
@@ -166,11 +147,8 @@ const CalendarComponent = () => {
     setEvents(events.map((e) => (e.id === event.id ? updatedEvent : e)));
   };
 
-  useEffect(() => {
-    console.log("showEditModal:", showEditModal);
-    console.log("showNewEventModal:", showNewEventModal);
-  }, [showEditModal, showNewEventModal]);
 
+  // Custom Toolbar
   const { components, defaultDate } = useMemo(
     () => ({
       components: {
@@ -231,6 +209,7 @@ const CalendarComponent = () => {
         onDelete={handleDeleteEvent}
         event={selectedEvent}
         onChange={handleEventChange}
+        type='add'
       />
       <EventModal
         show={showEventModal}

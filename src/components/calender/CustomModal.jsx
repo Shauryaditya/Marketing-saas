@@ -1,7 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-
-const CustomModal = ({ show, onClose, onSave }) => {
+import { format } from "date-fns";
+const weekObject = {
+  1: "S1",
+  2: "M",
+  3: "T1",
+  4: "W",
+  5: "T2",
+  6: "F",
+  7: "2"
+}
+const CustomModal = ({ show, onClose, onSave, recurrence, type }) => {
   const [repeatEvery, setRepeatEvery] = useState(1);
   const [repeatUnit, setRepeatUnit] = useState("week");
   const [selectedDays, setSelectedDays] = useState([]);
@@ -9,6 +18,27 @@ const CustomModal = ({ show, onClose, onSave }) => {
   const [endDate, setEndDate] = useState("");
   const [occurrences, setOccurrences] = useState(13);
 
+  useEffect(() => {
+    if (!type) return
+    if (!recurrence) return
+    setRepeatUnit(recurrence.frequency)
+    setRepeatEvery(recurrence.interval)
+    if (recurrence.endDate) {
+      const dateObject = new Date(recurrence?.endDate);
+      const formattedDate = format(dateObject, 'yyyy-MM-dd');
+      setEnds('on')
+      setEndDate(formattedDate)
+    }
+    if (recurrence.daysOfWeek) {
+      const seletedDays = recurrence.daysOfWeek.map(d => weekObject[d])
+      setSelectedDays(seletedDays)
+    }
+    if (recurrence.occurrences) {
+      setEnds('after')
+      setOccurrences(recurrence.occurrences)
+    }
+
+  }, [type, recurrence])
   if (!show) return null;
 
   const handleSave = () => {
@@ -89,11 +119,10 @@ const CustomModal = ({ show, onClose, onSave }) => {
                     key={day}
                     type="button"
                     onClick={() => toggleDaySelection(day)}
-                    className={`w-5 h-5 text-xs rounded-full ${
-                      selectedDays.includes(day)
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
+                    className={`w-5 h-5 text-xs rounded-full ${selectedDays.includes(day)
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                      }`}
                   >
                     {day[0]}
                   </button>

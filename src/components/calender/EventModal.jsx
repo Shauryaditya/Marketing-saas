@@ -94,14 +94,14 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
                   <FaCalendarAlt className="mr-2 text-blue-500" />
                   Start Date
                 </h3>
-                <p className="text-gray-800">{formatDate(event.start_date)}</p>
+                <p className="text-gray-800">{formatDate(event.start)}</p>
               </div>
               <div className="w-1/2 pl-2">
                 <h3 className="text-gray-600 font-medium flex items-center">
                   <FaCalendarAlt className="mr-2 text-blue-500" />
                   End Date
                 </h3>
-                <p className="text-gray-800">{formatDate(event.end_date)}</p>
+                <p className="text-gray-800">{formatDate(event.end)}</p>
               </div>
             </div>
             <div>
@@ -209,7 +209,9 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
           // Handle saving the edit here if needed, or pass it directly
           // to the NewEventModal for processing
         }}
-        editScope={editScope} // Pass the edit scope to the modal
+        editScope={editScope}
+        type='edit'
+      // Pass the edit scope to the modal
       />
 
       <DeleteConfirmationModal
