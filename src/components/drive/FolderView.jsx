@@ -1,29 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaFileAlt, FaFilePdf, FaImage } from "react-icons/fa"; // Import icons from react-icons
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import {
+  FaFileAlt,
+  FaFilePdf,
+  FaTrash,
+  FaEdit,
+  FaFileArchive,
+} from "react-icons/fa";
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
-import { BreadcrumbDemo } from "../BreadCrumbDemo";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const FolderView = () => {
   const navigate = useNavigate();
   const { brandId, parentId } = useParams();
-  const [currentFolder, setCurrentFolder] = useState(null);
   const [folders, setFolders] = useState([]);
   const [files, setFiles] = useState([]);
-  const [path, setPath] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({
+    files: [],
+    folders: [],
+  });
+  const [hoveredItemId, setHoveredItemId] = useState(null);
 
   const fetchFolders = async (parentId) => {
     try {
       const response = await axios.get(
         `${apiUrl}/v1/collateral/folder/get/${parentId}?page=1&limit=50`,
-        {
-          params: { brand_id: brandId },
-        }
+        { params: { brand_id: brandId } }
       );
-      setPath(response.data); // Set the path from the response
       return response.data;
     } catch (error) {
       console.error("Error fetching folders:", error);
@@ -35,15 +43,201 @@ const FolderView = () => {
     try {
       const response = await axios.get(
         `${apiUrl}/v1/collateral/file/get?folder_id=${parentId}`,
-        {
-          params: { brand_id: brandId },
-        }
+        { params: { brand_id: brandId } }
       );
       return response.data.files;
     } catch (error) {
       console.error("Error fetching files:", error);
       return [];
     }
+  };
+
+  const fetchFolderContents = async (folderId) => {
+    try {
+      const response = await axios.get(
+        `${apiUrl}/v1/collateral/folder/get/${folderId}?page=1&limit=50`,
+        { params: { brand_id: brandId } }
+      );
+      const folderFolders = response.data.folders || [];
+      const folderFiles = await fetchFiles(folderId);
+
+      let allFiles = folderFiles;
+      for (const subFolder of folderFolders) {
+        const { files: subFolderFiles } = await fetchFolderContents(
+          subFolder._id
+        );
+        allFiles = [...allFiles, ...subFolderFiles];
+      }
+
+      return { folders: folderFolders, files: allFiles };
+    } catch (error) {
+      console.error("Error fetching folder contents:", error);
+      return { folders: [], files: [] };
+    }
+  };
+
+  const toggleSelectItem = (item, type) => {
+    if (type === "folder") {
+      setSelectedItems((prev) => ({
+        ...prev,
+        folders: prev.folders.includes(item._id)
+          ? prev.folders.filter((id) => id !== item._id)
+          : [...prev.folders, item._id],
+      }));
+    } else if (type === "file") {
+      setSelectedItems((prev) => ({
+        ...prev,
+        files: prev.files.includes(item._id)
+          ? prev.files.filter((id) => id !== item._id)
+          : [...prev.files, item._id],
+      }));
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      // Delete selected folders
+      for (const folderId of selectedItems.folders) {
+        await axios.delete(`${apiUrl}/v1/collateral/folder/${folderId}`, {
+          params: { brand_id: brandId },
+        });
+      }
+
+      // Delete selected files
+      for (const fileId of selectedItems.files) {
+        await axios.delete(`${apiUrl}/v1/collateral/file/${fileId}`, {
+          params: { brand_id: brandId },
+        });
+      }
+
+      // Update the state after deletion
+      setFolders((prev) =>
+        prev.filter((folder) => !selectedItems.folders.includes(folder._id))
+      );
+      setFiles((prev) =>
+        prev.filter((file) => !selectedItems.files.includes(file._id))
+      );
+
+      // Clear selected items
+      setSelectedItems({ files: [], folders: [] });
+    } catch (error) {
+      console.error("Error deleting items:", error);
+    }
+  };
+
+  const handleRename = async () => {
+    try {
+      const newName = prompt("Enter the new name:");
+
+      // Rename first selected folder or file
+      if (selectedItems.folders.length > 0) {
+        const folderId = selectedItems.folders[0];
+        await axios.patch(`${apiUrl}/v1/collateral/folder/${folderId}`, {
+          name: newName,
+        });
+        setFolders((prev) =>
+          prev.map((folder) =>
+            folder._id === folderId ? { ...folder, name: newName } : folder
+          )
+        );
+      } else if (selectedItems.files.length > 0) {
+        const fileId = selectedItems.files[0];
+        await axios.patch(`${apiUrl}/v1/collateral/file/${fileId}`, {
+          name: newName,
+        });
+        setFiles((prev) =>
+          prev.map((file) =>
+            file._id === fileId ? { ...file, name: newName } : file
+          )
+        );
+      }
+
+      setSelectedItems({ files: [], folders: [] });
+    } catch (error) {
+      console.error("Error renaming items:", error);
+    }
+  };
+
+  const handleDownloadFiles = async () => {
+    for (const fileId of selectedItems.files) {
+      const file = files.find((f) => f._id === fileId);
+
+      if (file) {
+        try {
+          console.log(`Fetching file: ${file.path}`);
+
+          // Fetch the file data
+          const response = await fetch(file.path, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // Adjust if needed
+            },
+          });
+
+          if (!response.ok) {
+            console.error(
+              `Failed to fetch file. Status: ${response.status}, StatusText: ${response.statusText}`
+            );
+            continue; // Skip to the next file if the fetch fails
+          }
+
+          // Convert response to blob
+          const blob = await response.blob();
+
+          // Create a temporary link element
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = file.name;
+
+          // Append the link to the document, click it, then remove it
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // Release object URL
+          URL.revokeObjectURL(link.href);
+
+          console.log(`Downloaded file: ${file.name}`);
+        } catch (error) {
+          console.error("Error downloading file:", error);
+        }
+      }
+    }
+
+    // Clear selected items after downloading
+    setSelectedItems({ files: [], folders: [] });
+  };
+
+  const handleZipFolders = async () => {
+    const zip = new JSZip();
+
+    for (const folderId of selectedItems.folders) {
+      const { files, folders } = await fetchFolderContents(folderId);
+      for (const file of files) {
+        try {
+          const response = await fetch(file.path, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // Use auth token if required
+            },
+          });
+          if (response.ok) {
+            const blob = await response.blob();
+            zip.file(file.name, blob);
+          } else {
+            console.error("Failed to fetch file:", response.statusText);
+          }
+        } catch (error) {
+          console.error("Error fetching file:", error);
+        }
+      }
+      // Optionally add folders to the ZIP if you need to include empty folders
+    }
+
+    // Generate the ZIP and trigger the download
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, "selected_folders.zip");
+    });
+
+    setSelectedItems({ files: [], folders: [] });
   };
 
   useEffect(() => {
@@ -56,39 +250,8 @@ const FolderView = () => {
     loadFoldersAndFiles();
   }, [parentId, brandId]);
 
-  useEffect(() => {
-    if (folders.length > 0) {
-      const folder = folders.find((folder) => folder._id === parentId);
-      setCurrentFolder(
-        folder || {
-          name: "Default Folder",
-          path: "",
-          subfolders: [],
-          files: [],
-        }
-      );
-    }
-  }, [folders, parentId]);
-
-  const handleFolderAdded = (newFolder) => {
-    setFolders((prevFolders) => [...prevFolders, newFolder]);
-  };
-
-  const handleCollateralAdded = (newFiles) => {
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  };
-
-  const renderPath = (path) => {
-    const pathParts = path.split("/");
-    if (/^[a-f0-9]{24}$/.test(pathParts[0])) {
-      pathParts.shift();
-    }
-    return pathParts.join("/");
-  };
-
   const renderFilePreview = (file) => {
     const extension = file.name.split(".").pop().toLowerCase();
-
     if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
       return (
         <img
@@ -108,11 +271,6 @@ const FolderView = () => {
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
         <header className="flex justify-between items-center mb-8">
-          {/* <h1 className="text-xs text-left text-blue-400 font-semibold mb-6">
-            {currentFolder
-              ? ` ${renderPath(currentFolder.path)}`
-              : "Loading Folder..."}
-          </h1> */}
           <button
             onClick={() => navigate(-1)}
             className="text-blue-500 text-xs mb-4"
@@ -120,24 +278,62 @@ const FolderView = () => {
             ← Back
           </button>
 
-          {/* <BreadcrumbDemo currentFolder={path} /> */}
           <div className="flex items-center space-x-4">
-            <AddCollateralButton onCollateralAdded={handleCollateralAdded} />
+            <AddCollateralButton onCollateralAdded={() => {}} />
             <AddFolderButton
               parentFolderId={parentId}
               brandId={brandId}
-              onFolderAdded={handleFolderAdded}
+              onFolderAdded={() => {}}
             />
           </div>
         </header>
+
+        {selectedItems.folders.length > 0 || selectedItems.files.length > 0 ? (
+          <div className="mb-4">
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+            >
+              Delete
+            </button>
+            <button
+              onClick={handleRename}
+              className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
+            >
+              Rename
+            </button>
+            <button
+              onClick={handleDownloadFiles}
+              className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+            >
+              Download Files
+            </button>
+            <button
+              onClick={handleZipFolders}
+              className="bg-purple-500 text-white px-4 py-2 rounded"
+            >
+              Zip Folders
+            </button>
+          </div>
+        ) : null}
 
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
             {folders.map((folder) => (
               <div
                 key={folder._id}
-                className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer relative"
+                onMouseEnter={() => setHoveredItemId(folder._id)}
+                onMouseLeave={() => setHoveredItemId(null)}
               >
+                {hoveredItemId === folder._id && (
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.folders.includes(folder._id)}
+                    onChange={() => toggleSelectItem(folder, "folder")}
+                    className="absolute top-2 right-2"
+                  />
+                )}
                 <Link
                   to={`/item/${brandId}/${folder._id}`}
                   className="flex flex-col items-center justify-center"
@@ -151,11 +347,22 @@ const FolderView = () => {
                 </Link>
               </div>
             ))}
+
             {files.map((file) => (
               <div
                 key={file._id}
-                className="flex flex-col items-center justify-center rounded-lg bg-white cursor-pointer"
+                className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer relative"
+                onMouseEnter={() => setHoveredItemId(file._id)}
+                onMouseLeave={() => setHoveredItemId(null)}
               >
+                {hoveredItemId === file._id && (
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.files.includes(file._id)}
+                    onChange={() => toggleSelectItem(file, "file")}
+                    className="absolute top-2 right-2"
+                  />
+                )}
                 <a href={file.path} target="_blank" rel="noopener noreferrer">
                   {renderFilePreview(file)}
                 </a>
