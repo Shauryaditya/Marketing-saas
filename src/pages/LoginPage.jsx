@@ -20,14 +20,12 @@ import { toast } from "../components/ui/use-toast";
 import { login } from "../store/auth/action";
 
 const LoginPage = () => {
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading, token, currentUser } = useSelector((state) => state.auth);
+
   const form = useForm({
     resolver: zodResolver(LoginSchema),
   });
@@ -35,25 +33,32 @@ const LoginPage = () => {
   useEffect(() => {
     console.log("Effect running...");
     if (!isLoading && token && currentUser) {
-        navigate("/admin");
+      navigate("/admin");
     }
-}, [isLoading, token, currentUser, navigate]);
+  }, [isLoading, token, currentUser, navigate]);
 
   async function onSubmit(data) {
     console.log("Form submitted with data: ", data);
     try {
-      dispatch(login(data)).unwrap();
+      // Attempt to dispatch the login action
+      await dispatch(login(data)).unwrap();
+
+      toast({
+        title: "Login successful",
+        description: "You have been logged in successfully!",
+      });
     } catch (err) {
-      console.log(err);
+      console.error("Login failed", err);
+
+      // Check for "Unauthorized" message or any specific error response
+      if (err.message === "Unauthorized") {
+        setError("Invalid employee ID or password.");
+        // Redirect to sign-in page (if that's the requirement) or handle as needed
+        navigate("/signin");
+      } else {
+        setError("An error occurred during login. Please try again.");
+      }
     }
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
   }
 
   return (
