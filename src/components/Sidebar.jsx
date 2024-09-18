@@ -62,15 +62,18 @@ const Sidebar = () => {
     fetchBrands();
   }, []);
 
+  const handleDelete = (id) => {
+    console.log(`Delete brand with ID: ${id}`);
+    // Add your delete logic here
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-
     <div className="min-h-screen h-full w-48 text-xs bg-white shadow-md sticky top-0 overflow-y-scroll no-scrollbar">
-
       <a href="/admin">
-        <div className="p-4 flex items-center justify-center gap-2 ">
+        <div className="p-4 flex items-center justify-center gap-2">
           <img src={logo} alt="Logo" className="h-6 w-6" />
           <p className="font-semibold text-base">21Genx</p>
         </div>
@@ -117,13 +120,17 @@ const Sidebar = () => {
         {isAccountOpen && (
           <div id="account-menu" className="pl-8 mt-1">
             {brands.map((brand) => (
-              <Link
+              <div
                 key={brand._id}
-                to={`/brand/${brand._id}`} // Assuming dynamic links
-                className="block p-1 capitalize hover:bg-gray-200 rounded"
+                className="flex items-center p-1 hover:bg-gray-200 rounded"
               >
-                {brand.brand_name}
-              </Link>
+                <Link
+                  to={`/brand/${brand._id}`} // Assuming dynamic links
+                  className="capitalize"
+                >
+                  {brand.brand_name}
+                </Link>
+              </div>
             ))}
           </div>
         )}
@@ -188,6 +195,29 @@ const Sidebar = () => {
             </Link>
           </div>
         )}
+
+        <Link
+          to="/bin"
+          className="flex items-center justify-between w-full text-left p-2 rounded hover:bg-gray-200 mt-2"
+        >
+          <span className="flex gap-1 items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="size-4 fill-black"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 2.25C6 1.007 7.007 0 8.25 0h7.5C16.993 0 18 1.007 18 2.25V3h3.75a.75.75 0 0 1 .75.75v.75h-2.75v13.5h2.75v.75a.75.75 0 0 1-.75.75h-2.75v1.5a.75.75 0 0 1-.75.75h-11.5a.75.75 0 0 1-.75-.75v-1.5H1.5a.75.75 0 0 1-.75-.75v-.75h2.75V3H.75A.75.75 0 0 1 0 2.25V1.5A.75.75 0 0 1 .75.75h3.75v-.75zm3 0v.75h4.5v-.75H9.75zm-6 6.75a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H6V9.75h-2.25zm6 0a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H12V9.75h-2.25zm6 0a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H18V9.75h-2.25z"
+              />
+            </svg>
+            Recycle Bin
+          </span>
+        </Link>
       </div>
     </div>
   );

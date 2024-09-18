@@ -30,6 +30,7 @@ import Teams from "./components/teams/Teams";
 import TeamProfile from "./components/teams/TeamProfile";
 import TeamManager from "./components/teams/TeamManager";
 import RoleAccess from "./components/role-and-access/RoleAccess";
+import Bin from "./components/drive/Bin";
 
 function App() {
   return (
@@ -258,6 +259,14 @@ function App() {
           element={
             <Layout>
               <AddFolder />
+            </Layout>
+          }
+        />
+        <Route
+          path="/bin"
+          element={
+            <Layout>
+              <Bin />
             </Layout>
           }
         />
