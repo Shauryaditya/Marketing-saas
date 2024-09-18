@@ -166,37 +166,35 @@ const FolderView = () => {
         try {
           console.log(`Fetching file: ${file.path}`);
 
-          // Fetch the file data
           const response = await fetch(file.path, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`, // Adjust if needed
-            },
           });
 
-          if (!response.ok) {
-            console.error(
-              `Failed to fetch file. Status: ${response.status}, StatusText: ${response.statusText}`
-            );
-            continue; // Skip to the next file if the fetch fails
+          // Check if the response is successful
+          if (response.ok) {
+            const blob = await response.blob();
+          
+            // Create a link element
+            const link = document.createElement('a');
+          
+            // Create an object URL for the blob and set it as the href attribute
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+          
+            // Set the download attribute to trigger download
+            link.download = file.path.split('/').pop(); // Use the filename from the path
+          
+            // Append the link to the body (not visible to the user)
+            document.body.appendChild(link);
+          
+            // Programmatically click the link to trigger the download
+            link.click();
+          
+            // Clean up by removing the link and revoking the object URL
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          
+            console.log("File downloaded successfully");
           }
-
-          // Convert response to blob
-          const blob = await response.blob();
-
-          // Create a temporary link element
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = file.name;
-
-          // Append the link to the document, click it, then remove it
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          // Release object URL
-          URL.revokeObjectURL(link.href);
-
-          console.log(`Downloaded file: ${file.name}`);
         } catch (error) {
           console.error("Error downloading file:", error);
         }
@@ -279,11 +277,11 @@ const FolderView = () => {
           </button>
 
           <div className="flex items-center space-x-4">
-            <AddCollateralButton onCollateralAdded={() => {}} />
+            <AddCollateralButton onCollateralAdded={() => { }} />
             <AddFolderButton
               parentFolderId={parentId}
               brandId={brandId}
-              onFolderAdded={() => {}}
+              onFolderAdded={() => { }}
             />
           </div>
         </header>
