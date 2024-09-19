@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaTrash } from "react-icons/fa"; // Use a more modern trash icon
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const OriginalCollateral = () => {
-  const navigate = useNavigate()
-  const { brandId } = useParams(); // Retrieve brandId from URL parameters
+  const navigate = useNavigate();
+  const { brandId } = useParams();
   const [items, setItems] = useState([]);
 
   useEffect(() => {
@@ -32,15 +34,25 @@ const OriginalCollateral = () => {
   }, [brandId]);
 
   const handleFolderAdded = (newFolder) => {
-    setItems([...items, newFolder]);
+    setItems((prevItems) => [...prevItems, newFolder]);
+  };
+
+  // Add a permanent Recycle Bin folder
+  const recycleBinFolder = {
+    _id: "recycle-bin",
+    name: "Recycle Bin",
+    // Add other necessary fields
   };
 
   return (
     <main className="max-w-full flex">
       <div className="min-h-screen text-xs w-full p-2">
-      <button onClick={() => navigate(-1)} className="text-blue-500 text-xs mb-4">
-        ← Back
-      </button>
+        <button
+          onClick={() => navigate(-1)}
+          className="text-blue-500 text-xs mb-4"
+        >
+          ← Back
+        </button>
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-xl text-left text-blue-400 font-semibold mb-6">
             Original Collateral
@@ -74,6 +86,20 @@ const OriginalCollateral = () => {
                 </Link>
               </div>
             ))}
+            {/* Recycle Bin Folder */}
+            <div
+              key={recycleBinFolder._id}
+              className="flex flex-col items-center justify-center rounded-lg  bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
+            >
+              <Link
+                to={`/item/${brandId}/${recycleBinFolder._id}`}
+                className="flex flex-col items-center justify-center"
+              >
+                <FaTrash className="h-12 w-12 mb-4 text-gray-600" />{" "}
+                {/* Updated icon */}
+                <h3 className="font-semibold">{recycleBinFolder.name}</h3>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
