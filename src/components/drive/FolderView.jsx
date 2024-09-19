@@ -83,14 +83,16 @@ const FolderView = () => {
     if (type === "folder") {
       setSelectedItems((prev) => ({
         ...prev,
-        folders: [item._id], // Only select the clicked folder
-        files: [], // Clear files selection
+        folders: prev.folders.includes(item._id)
+          ? prev.folders.filter((id) => id !== item._id)
+          : [...prev.folders, item._id], // Allow multiple selections
       }));
     } else if (type === "file") {
       setSelectedItems((prev) => ({
         ...prev,
-        files: [item._id], // Only select the clicked file
-        folders: [], // Clear folders selection
+        files: prev.files.includes(item._id)
+          ? prev.files.filter((id) => id !== item._id)
+          : [...prev.files, item._id], // Allow multiple selections
       }));
     }
   };
@@ -146,20 +148,23 @@ const FolderView = () => {
       }
 
       if (fileIdsToDelete.length > 0) {
-        for (const fileId of fileIdsToDelete) {
-          await axios.post(
-            `${apiUrl}/v1/collateral/bin/file/${fileId}`,
-            {
-              status: false,
-              file_delete: true,
-            },
-            {
-              params: { brand_id: brandId },
-            }
-          );
-        }
+        await Promise.all(
+          fileIdsToDelete.map((fileId) =>
+            axios.post(
+              `${apiUrl}/v1/collateral/bin/file/${fileId}`,
+              {
+                status: false,
+                file_delete: true,
+              },
+              {
+                params: { brand_id: brandId },
+              }
+            )
+          )
+        );
       }
 
+      // Update the UI by removing the deleted items
       setFolders((prev) =>
         prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
       );
@@ -167,7 +172,8 @@ const FolderView = () => {
         prev.filter((file) => !fileIdsToDelete.includes(file._id))
       );
 
-      setSelectedItems({ files: [], folders: [] });
+      // Clear the selected items
+      // setSelectedItems({ files: [], folders: [] });
     } catch (error) {
       console.error("Error deleting items:", error);
     }
@@ -176,35 +182,34 @@ const FolderView = () => {
   const handleDownload = async () => {
     for (const fileId of selectedItems.files) {
       const file = files.find((f) => f._id === fileId);
-
       if (file) {
         try {
-          const response = await fetch(file.path, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-          });
-
+          console.log(`Fetching file: ${file.path}`);
+          const response = await fetch(file.path, {});
+          // Check if the response is successful
           if (response.ok) {
             const blob = await response.blob();
+            // Create a link element
             const link = document.createElement("a");
+            // Create an object URL for the blob and set it as the href attribute
             const url = URL.createObjectURL(blob);
             link.href = url;
-            link.download = file.name;
+            // Set the download attribute to trigger download
+            link.download = file.path.split("/").pop(); // Use the filename from the path
+            // Append the link to the body (not visible to the user)
             document.body.appendChild(link);
+            // Programmatically click the link to trigger the download
             link.click();
+            // Clean up by removing the link and revoking the object URL
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-          } else {
-            console.error("Failed to fetch file:", response.statusText);
+            console.log("File downloaded successfully");
           }
         } catch (error) {
           console.error("Error downloading file:", error);
         }
       }
     }
-
-    setSelectedItems({ files: [], folders: [] });
   };
 
   const handleZip = async () => {
@@ -332,11 +337,12 @@ const FolderView = () => {
                 />
                 <DropdownMenu
                   ref={menuRef}
-                  onDownload={handleDownload}
+                  // onDownload={handleDownload}
                   onRename={handleRename}
                   onZip={handleZip}
                   onDelete={handleDelete}
                   visible={showMenu === folder._id}
+                  type="folder" // Pass folder type
                 />
               </div>
             ))}
@@ -358,9 +364,10 @@ const FolderView = () => {
                   ref={menuRef}
                   onDownload={handleDownload}
                   onRename={handleRename}
-                  onZip={handleZip}
+                  // onZip={handleZip}
                   onDelete={handleDelete}
                   visible={showMenu === file._id}
+                  type="file" // Pass file type
                 />
                 {renderFilePreview(file)}
               </div>
