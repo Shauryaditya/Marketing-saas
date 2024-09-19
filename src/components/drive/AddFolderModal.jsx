@@ -47,8 +47,8 @@ const AddFolderModal = ({ isOpen, onClose, onFolderAdded }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded-lg">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex z-20 items-center justify-center">
+      <div className="bg-white p-4  rounded-lg">
         <h2 className="text-sm mb-4">Add Folder</h2>
         <input
           type="text"

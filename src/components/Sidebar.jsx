@@ -196,7 +196,7 @@ const Sidebar = () => {
           </div>
         )}
 
-        <Link
+        {/* <Link
           to="/bin"
           className="flex items-center justify-between w-full text-left p-2 rounded hover:bg-gray-200 mt-2"
         >
@@ -217,7 +217,7 @@ const Sidebar = () => {
             </svg>
             Recycle Bin
           </span>
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

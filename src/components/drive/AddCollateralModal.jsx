@@ -62,7 +62,7 @@ const AddCollateralModal = ({ isOpen, onClose, onCollateralAdded }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-20 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg w-1/3">
         <h2 className="text-xl font-semibold mb-4">Add New Collateral</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
