@@ -31,6 +31,7 @@ import TeamProfile from "./components/teams/TeamProfile";
 import TeamManager from "./components/teams/TeamManager";
 import RoleAccess from "./components/role-and-access/RoleAccess";
 import Bin from "./components/drive/Bin";
+import Dashboard from "./components/dashboard/Dashboard";
 
 function App() {
   return (
@@ -69,6 +70,18 @@ function App() {
               element={
                 <Layout>
                   <HomePage />
+                </Layout>
+              }
+            />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <Dashboard />
                 </Layout>
               }
             />
