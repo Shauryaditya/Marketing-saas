@@ -176,15 +176,16 @@ const OriginalCollateral = () => {
                 {recycleBinFiles.map((file) => (
                   <div
                     key={file._id}
-                    className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer relative group" // Add 'group' here
+                    className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer relative group"
                   >
-                    <Link
-                      to={`/file/${brandId}/${file._id}`}
+                    <a
+                      href={file.path} // Ensure this is the correct path to the file
+                      target="_blank" // This ensures the file opens in a new tab
+                      rel="noopener noreferrer" // This is for security reasons to prevent the new tab from accessing the window object
                       className="flex flex-col items-center justify-center"
                     >
                       {renderFilePreview(file)}
-                      {/* <span className="font-semibold">{file.name}</span> */}
-                    </Link>
+                    </a>
                     <span className="absolute bottom-full mb-1 hidden group-hover:block bg-gray-700 text-white text-xs px-2 py-1 rounded">
                       {file.name}
                     </span>
