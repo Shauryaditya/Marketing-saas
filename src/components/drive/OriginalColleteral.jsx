@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaFileAlt, FaFilePdf } from "react-icons/fa"; // Ensure these are imported
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+const renderFilePreview = (file) => {
+  const extension = file.name.split(".").pop().toLowerCase();
+  if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
+    return (
+      <img
+        src={file.path}
+        alt={file.name}
+        className="h-16 w-16 mb-4 object-cover"
+      />
+    );
+  } else if (extension === "pdf") {
+    return <FaFilePdf className="h-16 w-16 mb-4 text-red-600" />;
+  } else {
+    return <FaFileAlt className="h-16 w-16 mb-4 text-gray-500" />;
+  }
+};
+
 const OriginalCollateral = () => {
   const navigate = useNavigate();
   const { brandId } = useParams();
-  const [items, setItems] = useState([]); // Main items (folders)
-  const [recycleBinItems, setRecycleBinItems] = useState([]); // Recycle Bin folders
-  const [recycleBinFiles, setRecycleBinFiles] = useState([]); // Recycle Bin files
+  const [items, setItems] = useState([]);
+  const [recycleBinItems, setRecycleBinItems] = useState([]);
+  const [recycleBinFiles, setRecycleBinFiles] = useState([]);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
 
   useEffect(() => {
@@ -40,7 +57,6 @@ const OriginalCollateral = () => {
     try {
       const accessToken = localStorage.getItem("access_token");
 
-      // Fetch recycle bin folders
       const foldersResponse = await axios.get(
         `${apiUrl}/v1/collateral/bin/folders/${brandId}`,
         {
@@ -51,7 +67,6 @@ const OriginalCollateral = () => {
       );
       setRecycleBinItems(foldersResponse.data);
 
-      // Fetch recycle bin files
       const filesResponse = await axios.get(
         `${apiUrl}/v1/collateral/bin/file/${brandId}`,
         {
@@ -107,7 +122,6 @@ const OriginalCollateral = () => {
         </header>
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
-            {/* Regular Folders */}
             {!isRecycleBinOpen &&
               items.map((item) => (
                 <div
@@ -115,7 +129,7 @@ const OriginalCollateral = () => {
                   className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
                 >
                   <Link
-                    to={`/item/${brandId}/${item._id}`} // This will allow navigation to the folder
+                    to={`/item/${brandId}/${item._id}`}
                     className="flex flex-col items-center justify-center"
                   >
                     <img
@@ -128,7 +142,6 @@ const OriginalCollateral = () => {
                 </div>
               ))}
 
-            {/* Recycle Bin Folder */}
             {!isRecycleBinOpen && (
               <div
                 onClick={handleOpenRecycleBin}
@@ -139,17 +152,15 @@ const OriginalCollateral = () => {
               </div>
             )}
 
-            {/* Render Recycle Bin items if opened */}
             {isRecycleBinOpen && (
               <>
-                {/* Render Recycle Bin Folders */}
                 {recycleBinItems.map((item) => (
                   <div
                     key={item._id}
                     className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
                   >
                     <Link
-                      to={`/item/${brandId}/${item._id}`} // You can navigate to recycle bin items as well
+                      to={`/item/${brandId}/${item._id}`}
                       className="flex flex-col items-center justify-center"
                     >
                       <img
@@ -162,33 +173,23 @@ const OriginalCollateral = () => {
                   </div>
                 ))}
 
-                {/* Render Recycle Bin Files */}
                 {recycleBinFiles.map((file) => (
                   <div
                     key={file._id}
-                    className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                    className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer relative group" // Add 'group' here
                   >
                     <Link
-                      to={`/file/${brandId}/${file._id}`} // You can navigate to the file
+                      to={`/file/${brandId}/${file._id}`}
                       className="flex flex-col items-center justify-center"
                     >
-                      <img
-                        src="https://i.redd.it/cglk1r8sbyf71.png" // Replace with appropriate file icon or preview
-                        alt={file.name}
-                        className="h-16 w-16 mb-4"
-                      />
-                      <h3 className="font-semibold">{file.name}</h3>
+                      {renderFilePreview(file)}
+                      {/* <span className="font-semibold">{file.name}</span> */}
                     </Link>
+                    <span className="absolute bottom-full mb-1 hidden group-hover:block bg-gray-700 text-white text-xs px-2 py-1 rounded">
+                      {file.name}
+                    </span>
                   </div>
                 ))}
-
-                {/* Back Button to close Recycle Bin */}
-                <div
-                  onClick={handleCloseRecycleBin}
-                  className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
-                >
-                  <h3 className="font-semibold">← Back to Folders</h3>
-                </div>
               </>
             )}
           </div>
