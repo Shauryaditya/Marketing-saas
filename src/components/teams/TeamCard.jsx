@@ -34,7 +34,7 @@ const TeamCard = ({ team }) => {
 
   return (
     <div>
-      <div className="max-w-xs rounded-lg shadow-lg p-4 bg-white flex flex-col justify-start ">
+      <div className="max-w-sm rounded-lg shadow-lg p-4 bg-white flex flex-col justify-start ">
         {/* Image Section */}
         <div className="flex justify-between">
           <div
