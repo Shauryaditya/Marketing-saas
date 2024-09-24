@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import NewEventModal from "./NewEventModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import DetailedUploadModal from "./DetailedUploadModal";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
@@ -17,6 +18,7 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
   const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [isEditDecisionModalOpen, setEditDecisionModalOpen] = useState(false);
   const [editScope, setEditScope] = useState(null); // To keep track of the edit scope
+  const [isDetailedModalOpen, setIsDetailedModalOpen] = useState(false);
 
   if (!show || !event) return null;
 
@@ -47,6 +49,9 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
     setDeleteConfirmationOpen(false); // Close the delete confirmation modal
     onClose(); // Close the main event modal
   };
+
+  const openDetailedModal = () => setIsDetailedModalOpen(true);
+  const closeDetailedModal = () => setIsDetailedModalOpen(false);
 
   return (
     <>
@@ -159,13 +164,28 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
               </div>
             )}
           </div>
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={onClose}
-              className="bg-gray-800 text-white py-1 px-2 rounded-md shadow hover:bg-black"
-            >
-              Close
-            </button>
+          <div className="flex justify-between">
+            {" "}
+            <div className="flex justify-end mt-4">
+              <button
+                className="bg-gray-800 text-white py-1 px-2 rounded-md shadow hover:bg-black"
+                onClick={openDetailedModal}
+              >
+                Open Social Media
+              </button>
+            </div>
+            <DetailedUploadModal
+              show={isDetailedModalOpen}
+              onClose={closeDetailedModal}
+            />
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={onClose}
+                className="bg-gray-800 text-white py-1 px-2 rounded-md shadow hover:bg-black"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -210,8 +230,8 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
           // to the NewEventModal for processing
         }}
         editScope={editScope}
-        type='edit'
-      // Pass the edit scope to the modal
+        type="edit"
+        // Pass the edit scope to the modal
       />
 
       <DeleteConfirmationModal
