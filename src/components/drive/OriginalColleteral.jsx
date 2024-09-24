@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { FaTrash, FaFileAlt, FaFilePdf } from "react-icons/fa"; // Ensure these are imported
+import { FaTrash, FaFileAlt, FaFilePdf } from "react-icons/fa";
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = "https://api.21genx.com:5000/v1/collateral"; // Replace this with your API base URL
 
 const renderFilePreview = (file) => {
   const extension = file.name.split(".").pop().toLowerCase();
@@ -30,14 +30,18 @@ const OriginalCollateral = () => {
   const [items, setItems] = useState([]);
   const [recycleBinItems, setRecycleBinItems] = useState([]);
   const [recycleBinFiles, setRecycleBinFiles] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Fetch folders and files for the recycle bin
   useEffect(() => {
     const fetchData = async () => {
       try {
         const accessToken = localStorage.getItem("access_token");
         const response = await axios.get(
-          `${apiUrl}/v1/collateral/folder/get?brand_id=${brandId}`,
+          `${apiUrl}/folder/get?brand_id=${brandId}`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -58,7 +62,7 @@ const OriginalCollateral = () => {
       const accessToken = localStorage.getItem("access_token");
 
       const foldersResponse = await axios.get(
-        `${apiUrl}/v1/collateral/bin/folders/${brandId}`,
+        `${apiUrl}/bin/folders/${brandId}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -67,14 +71,11 @@ const OriginalCollateral = () => {
       );
       setRecycleBinItems(foldersResponse.data);
 
-      const filesResponse = await axios.get(
-        `${apiUrl}/v1/collateral/bin/file/${brandId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const filesResponse = await axios.get(`${apiUrl}/bin/file/${brandId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       setRecycleBinFiles(filesResponse.data);
     } catch (error) {
       console.error("Error fetching recycle bin items or files:", error);
@@ -92,6 +93,57 @@ const OriginalCollateral = () => {
 
   const handleCloseRecycleBin = () => {
     setIsRecycleBinOpen(false);
+  };
+
+  // Select or deselect folder or file
+  const handleSelection = (id) => {
+    setSelectedItems((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((itemId) => itemId !== id)
+        : [...prevSelected, id]
+    );
+  };
+
+  // Handle Restore API Call
+  const handleRestore = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.post(`${apiUrl}/bin/restore`, { folderIds: selectedItems });
+      setRecycleBinItems((prevItems) =>
+        prevItems.filter((item) => !selectedItems.includes(item._id))
+      );
+      setRecycleBinFiles((prevFiles) =>
+        prevFiles.filter((file) => !selectedItems.includes(file._id))
+      );
+      setSelectedItems([]); // Clear selection after restore
+    } catch (error) {
+      setError("Failed to restore items.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Delete API Call
+  const handleDelete = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.post(`${apiUrl}/bin/delete`, { folderIds: selectedItems });
+      setRecycleBinItems((prevItems) =>
+        prevItems.filter((item) => !selectedItems.includes(item._id))
+      );
+      setRecycleBinFiles((prevFiles) =>
+        prevFiles.filter((file) => !selectedItems.includes(file._id))
+      );
+      setSelectedItems([]); // Clear selection after delete
+    } catch (error) {
+      setError("Failed to delete items.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -118,8 +170,30 @@ const OriginalCollateral = () => {
                 />
               </>
             )}
+            {isRecycleBinOpen && (
+              <>
+                <button
+                  onClick={handleRestore}
+                  className="bg-green-100 text-green-500 hover:bg-green-200 px-2 py-1 text-xs rounded-md border border-green-200"
+                  disabled={selectedItems.length === 0 || loading}
+                >
+                  Restore
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-100 text-red-500 hover:bg-red-200 px-2 py-1 text-xs rounded-md border border-red-200"
+                  disabled={selectedItems.length === 0 || loading}
+                >
+                  Delete
+                </button>
+              </>
+            )}
           </div>
         </header>
+
+        {error && <p className="text-center text-red-500">{error}</p>}
+        {loading && <p className="text-center text-gray-500">Processing...</p>}
+
         <div className="bg-white p-1 rounded-lg">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-8 gap-4">
             {!isRecycleBinOpen &&
@@ -157,8 +231,14 @@ const OriginalCollateral = () => {
                 {recycleBinItems.map((item) => (
                   <div
                     key={item._id}
-                    className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                    className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
                   >
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item._id)}
+                      onChange={() => handleSelection(item._id)}
+                      className="absolute top-2 right-2"
+                    />
                     <Link
                       to={`/item/${brandId}/${item._id}`}
                       className="flex flex-col items-center justify-center"
@@ -176,19 +256,22 @@ const OriginalCollateral = () => {
                 {recycleBinFiles.map((file) => (
                   <div
                     key={file._id}
-                    className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer relative group"
+                    className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
                   >
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(file._id)}
+                      onChange={() => handleSelection(file._id)}
+                      className="absolute top-2 right-2"
+                    />
                     <a
-                      href={file.path} // Ensure this is the correct path to the file
-                      target="_blank" // This ensures the file opens in a new tab
-                      rel="noopener noreferrer" // This is for security reasons to prevent the new tab from accessing the window object
+                      href={file.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex flex-col items-center justify-center"
                     >
                       {renderFilePreview(file)}
                     </a>
-                    <span className="absolute bottom-full mb-1 hidden group-hover:block bg-gray-700 text-white text-xs px-2 py-1 rounded">
-                      {file.name}
-                    </span>
                   </div>
                 ))}
               </>
