@@ -226,7 +226,6 @@ const EventModal = ({ show, onClose, event, onEdit, onDelete }) => {
         onClose={() => setEditModalOpen(false)}
         event={event}
         onSave={(updatedEvent) => {
-          // Handle saving the edit here if needed, or pass it directly
           // to the NewEventModal for processing
         }}
         editScope={editScope}
