@@ -77,7 +77,7 @@ const DetailedUploadModal = ({ show, onClose }) => {
             <div>
               <span className="block font-medium text-gray-700">Work</span>
               <span className="block text-gray-500">
-                {taskData.work || "Novium Pen"}
+                {taskData.brand_name || "Novium Pen"}
               </span>
             </div>
           </div>
