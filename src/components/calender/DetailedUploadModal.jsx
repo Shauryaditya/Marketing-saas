@@ -57,11 +57,10 @@ const DetailedUploadModal = ({ show, onClose }) => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-xl font-semibold text-gray-900">
-                Task: {taskData.title}
+                Task: {taskData.title || "NOVIUM-202407290730"}
               </h3>
               <p className="text-sm text-gray-500">
                 Date & Time: 24/08/2024, 15:35{" "}
-                {/* You can dynamically add the date from taskData if available */}
               </p>
             </div>
             <button
@@ -78,6 +77,18 @@ const DetailedUploadModal = ({ show, onClose }) => {
               <span className="block font-medium text-gray-700">Work</span>
               <span className="block text-gray-500">
                 {taskData.brand_name || "Novium Pen"}
+              </span>
+            </div>
+            <div>
+              <span className="block font-medium text-gray-700">Task ID</span>
+              <span className="block text-gray-500">
+                {taskData.task_id || "N/A"}
+              </span>
+            </div>
+            <div>
+              <span className="block font-medium text-gray-700">CW Status</span>
+              <span className="block text-gray-500">
+                {taskData.cw_status || "N/A"}
               </span>
             </div>
           </div>
@@ -121,23 +132,19 @@ const DetailedUploadModal = ({ show, onClose }) => {
 
         {/* Image Upload Grid */}
         <div className="grid grid-cols-3 gap-4 mb-4">
-          {[
-            "Instagram/Facebook",
-            "LinkedIn",
-            "Pinterest/Twitter",
-            "Instagram Story",
-            "WhatsApp Story",
-            "YouTube",
-          ].map((label) => (
+          {taskData.images.map((image) => (
             <div
-              key={label}
+              key={image.platform_id}
               className="flex flex-col items-center justify-center border border-gray-300 rounded-md h-36"
             >
-              <div className="text-gray-400">1600x900</div>
-              <div className="text-gray-600 mt-2">{label}</div>
+              <div className="text-gray-400">{image.content_type.type}</div>
+              <div className="text-gray-600 mt-2">{image.platform_name}</div>
+              <div className="text-sm text-gray-500">
+                Size: {image.content_type.size} {/* Display the size */}
+              </div>
               <button
                 className="mt-3 text-blue-500 hover:underline"
-                onClick={() => handleUpload(label)}
+                onClick={() => handleUpload(image.platform_name)}
               >
                 Upload
               </button>
