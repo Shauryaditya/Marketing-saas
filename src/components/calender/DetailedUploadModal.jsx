@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { FaTimes, FaUpload } from "react-icons/fa";
 import axios from "axios"; // Import Axios
@@ -9,6 +9,7 @@ const DetailedUploadModal = ({ show, onClose }) => {
   const [loading, setLoading] = useState(true); // Loading state while fetching data
   const [selectedPlatforms, setSelectedPlatforms] = useState([]); // State to store selected platforms
   const [selectAll, setSelectAll] = useState(false); // State to track if 'All' is selected
+  const fileInputRef = useRef(null); // Ref for the file input
 
   // Fetch task data when the modal is shown
   useEffect(() => {
@@ -66,9 +67,33 @@ const DetailedUploadModal = ({ show, onClose }) => {
     setSelectAll(!selectAll); // Toggle select all state
   };
 
-  // Placeholder function to handle image upload
+  // Handle file upload
   const handleUpload = (platformName) => {
     console.log(`Uploading content for ${platformName}`);
+
+    // Simulate triggering the file input
+    fileInputRef.current.click();
+  };
+
+  // Handle file change event
+  const handleFileChange = (e) => {
+    const files = e.target.files; // Get the selected files
+
+    if (files.length > 0) {
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]); // Append each file to form data
+      }
+      // You can send the formData to your backend API
+      axios
+        .post("YOUR_UPLOAD_URL_HERE", formData)
+        .then((response) => {
+          console.log("File uploaded successfully", response.data);
+        })
+        .catch((error) => {
+          console.error("Error uploading file:", error);
+        });
+    }
   };
 
   return (
@@ -124,6 +149,7 @@ const DetailedUploadModal = ({ show, onClose }) => {
             </p>
           </div>
         </div>
+
         {/* Platform Selection (First Instance) */}
         <div className="mb-4">
           <div className="flex items-center space-x-2">
@@ -247,6 +273,15 @@ const DetailedUploadModal = ({ show, onClose }) => {
             Upload
           </button>
         </div>
+
+        {/* Hidden File Input for Uploading */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: "none" }} // Hide the file input
+          multiple // Allow multiple file uploads
+        />
       </div>
     </div>
   );
