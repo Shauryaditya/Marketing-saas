@@ -7,6 +7,8 @@ const DetailedUploadModal = ({ show, onClose }) => {
   const [taskData, setTaskData] = useState(null); // For storing task data
   const [tags, setTags] = useState(""); // For storing hashtags input
   const [loading, setLoading] = useState(true); // Loading state while fetching data
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]); // State to store selected platforms
+  const [selectAll, setSelectAll] = useState(false); // State to track if 'All' is selected
 
   // Fetch task data when the modal is shown
   useEffect(() => {
@@ -37,6 +39,31 @@ const DetailedUploadModal = ({ show, onClose }) => {
   // Handler for hashtags input
   const handleTagChange = (e) => {
     setTags(e.target.value);
+  };
+
+  // Handle platform selection toggle
+  const handlePlatformToggle = (platformId) => {
+    setSelectedPlatforms((prevSelected) =>
+      prevSelected.includes(platformId)
+        ? prevSelected.filter((id) => id !== platformId)
+        : [...prevSelected, platformId]
+    );
+    setSelectAll(false); // If selecting/deselecting individual platforms, uncheck "All"
+  };
+
+  // Handle "Select All/Deselect All" platforms
+  const handleSelectAllToggle = () => {
+    if (selectAll) {
+      // Deselect all platforms
+      setSelectedPlatforms([]);
+    } else {
+      // Select all platforms
+      const allPlatformIds = taskData.platforms.map(
+        (platform) => platform.platform_id
+      );
+      setSelectedPlatforms(allPlatformIds);
+    }
+    setSelectAll(!selectAll); // Toggle select all state
   };
 
   // Placeholder function to handle image upload
@@ -79,12 +106,7 @@ const DetailedUploadModal = ({ show, onClose }) => {
                 {taskData.brand_name || "Novium Pen"}
               </span>
             </div>
-            <div>
-              <span className="block font-medium text-gray-700">Task ID</span>
-              <span className="block text-gray-500">
-                {taskData.task_id || "N/A"}
-              </span>
-            </div>
+
             <div>
               <span className="block font-medium text-gray-700">CW Status</span>
               <span className="block text-gray-500">
@@ -102,19 +124,35 @@ const DetailedUploadModal = ({ show, onClose }) => {
             </p>
           </div>
         </div>
-
-        {/* Platform Selection */}
+        {/* Platform Selection (First Instance) */}
         <div className="mb-4">
           <div className="flex items-center space-x-2">
+            {/* All Button */}
+            <button
+              onClick={handleSelectAllToggle}
+              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                selectAll
+                  ? "bg-gray-300 text-white"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              <span>All</span>
+            </button>
+            {/* Platform Buttons */}
             {taskData.platforms.map((platform) => (
               <button
                 key={platform.platform_id}
-                className="bg-gray-100 text-gray-800 px-3 py-2 rounded-md shadow flex items-center space-x-2"
+                onClick={() => handlePlatformToggle(platform.platform_id)}
+                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                  selectedPlatforms.includes(platform.platform_id)
+                    ? "bg-gray-300 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
               >
                 <img
                   src={platform.platform_logo}
                   alt={platform.platform_name}
-                  className="w-6 h-6"
+                  className="w-4 h-4"
                 />
                 <span>{platform.platform_name}</span>
               </button>
@@ -150,6 +188,42 @@ const DetailedUploadModal = ({ show, onClose }) => {
               </button>
             </div>
           ))}
+        </div>
+
+        {/* Platform Selection (Second Instance) */}
+        <div className="mb-4">
+          <div className="flex items-center space-x-2">
+            {/* All Button */}
+            <button
+              onClick={handleSelectAllToggle}
+              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                selectAll
+                  ? "bg-gray-300 text-white"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              <span>All</span>
+            </button>
+            {/* Platform Buttons */}
+            {taskData.platforms.map((platform) => (
+              <button
+                key={platform.platform_id}
+                onClick={() => handlePlatformToggle(platform.platform_id)}
+                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                  selectedPlatforms.includes(platform.platform_id)
+                    ? "bg-gray-300 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                <img
+                  src={platform.platform_logo}
+                  alt={platform.platform_name}
+                  className="w-4 h-4"
+                />
+                <span>{platform.platform_name}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Write Hashtags */}

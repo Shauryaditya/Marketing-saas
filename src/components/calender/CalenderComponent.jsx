@@ -147,7 +147,6 @@ const CalendarComponent = () => {
     setEvents(events.map((e) => (e.id === event.id ? updatedEvent : e)));
   };
 
-
   // Custom Toolbar
   const { components, defaultDate } = useMemo(
     () => ({
@@ -209,7 +208,7 @@ const CalendarComponent = () => {
         onDelete={handleDeleteEvent}
         event={selectedEvent}
         onChange={handleEventChange}
-        type='add'
+        type="add"
       />
       <EventModal
         show={showEventModal}
