@@ -7,8 +7,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   const [taskData, setTaskData] = useState(null); // For storing task data
   const [tags, setTags] = useState(""); // For storing hashtags input
   const [loading, setLoading] = useState(true); // Loading state while fetching data
-  const [selectedPlatforms, setSelectedPlatforms] = useState([]); // State to store selected platforms
-  const [selectAll, setSelectAll] = useState(false); // State to track if 'All' is selected
+  const [selectedUploadPlatforms, setSelectedUploadPlatforms] = useState([]); // For upload platform selection
+  const [selectedPublishPlatforms, setSelectedPublishPlatforms] = useState([]); // For publish platform selection
+  const [selectAllUpload, setSelectAllUpload] = useState(false); // Track 'All' for upload platforms
+  const [selectAllPublish, setSelectAllPublish] = useState(false); // Track 'All' for publish platforms
   const fileInputRef = useRef(null); // Ref for the file input
 
   // Fetch task data when the modal is shown
@@ -42,36 +44,55 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
     setTags(e.target.value);
   };
 
-  // Handle platform selection toggle
-  const handlePlatformToggle = (platformId) => {
-    setSelectedPlatforms((prevSelected) =>
+  // Handle platform selection toggle for uploading
+  const handleUploadPlatformToggle = (platformId) => {
+    setSelectedUploadPlatforms((prevSelected) =>
       prevSelected.includes(platformId)
         ? prevSelected.filter((id) => id !== platformId)
         : [...prevSelected, platformId]
     );
-    setSelectAll(false); // If selecting/deselecting individual platforms, uncheck "All"
+    setSelectAllUpload(false); // Uncheck "All" when individual toggled
   };
 
-  // Handle "Select All/Deselect All" platforms
-  const handleSelectAllToggle = () => {
-    if (selectAll) {
-      // Deselect all platforms
-      setSelectedPlatforms([]);
+  // Handle platform selection toggle for publishing
+  const handlePublishPlatformToggle = (platformId) => {
+    setSelectedPublishPlatforms((prevSelected) =>
+      prevSelected.includes(platformId)
+        ? prevSelected.filter((id) => id !== platformId)
+        : [...prevSelected, platformId]
+    );
+    setSelectAllPublish(false); // Uncheck "All" when individual toggled
+  };
+
+  // Handle "Select All/Deselect All" for upload platforms
+  const handleSelectAllUploadToggle = () => {
+    if (selectAllUpload) {
+      setSelectedUploadPlatforms([]); // Deselect all upload platforms
     } else {
-      // Select all platforms
       const allPlatformIds = taskData.platforms.map(
         (platform) => platform.platform_id
       );
-      setSelectedPlatforms(allPlatformIds);
+      setSelectedUploadPlatforms(allPlatformIds); // Select all upload platforms
     }
-    setSelectAll(!selectAll); // Toggle select all state
+    setSelectAllUpload(!selectAllUpload); // Toggle the state
+  };
+
+  // Handle "Select All/Deselect All" for publish platforms
+  const handleSelectAllPublishToggle = () => {
+    if (selectAllPublish) {
+      setSelectedPublishPlatforms([]); // Deselect all publish platforms
+    } else {
+      const allPlatformIds = taskData.platforms.map(
+        (platform) => platform.platform_id
+      );
+      setSelectedPublishPlatforms(allPlatformIds); // Select all publish platforms
+    }
+    setSelectAllPublish(!selectAllPublish); // Toggle the state
   };
 
   // Handle file upload
   const handleUpload = (platformName) => {
     console.log(`Uploading content for ${platformName}`);
-
-    // Simulate triggering the file input
     fileInputRef.current.click();
   };
 
@@ -84,7 +105,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       for (let i = 0; i < files.length; i++) {
         formData.append("files", files[i]); // Append each file to form data
       }
-      // You can send the formData to your backend API
       axios
         .post("YOUR_UPLOAD_URL_HERE", formData)
         .then((response) => {
@@ -97,7 +117,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="fixed inset-0 text-xs flex items-center justify-center z-50">
       <div
         className="absolute inset-0 bg-gray-800 opacity-75"
         onClick={onClose}
@@ -149,28 +169,30 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </p>
           </div>
         </div>
-
-        {/* Platform Selection (First Instance) */}
+        {/* Platform Selection for Upload */}
         <div className="mb-4">
+          <h4 className="text-lg font-medium mb-2">
+            Select Platforms to Upload:
+          </h4>
           <div className="flex items-center space-x-2">
-            {/* All Button */}
+            {/* Select All Button */}
             <button
-              onClick={handleSelectAllToggle}
+              onClick={handleSelectAllUploadToggle}
               className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                selectAll
+                selectAllUpload
                   ? "bg-gray-300 text-white"
                   : "bg-gray-100 text-gray-800"
               }`}
             >
               <span>All</span>
             </button>
-            {/* Platform Buttons */}
+            {/* Upload Platform Buttons */}
             {taskData.platforms.map((platform) => (
               <button
                 key={platform.platform_id}
-                onClick={() => handlePlatformToggle(platform.platform_id)}
+                onClick={() => handleUploadPlatformToggle(platform.platform_id)}
                 className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                  selectedPlatforms.includes(platform.platform_id)
+                  selectedUploadPlatforms.includes(platform.platform_id)
                     ? "bg-gray-300 text-white"
                     : "bg-gray-100 text-gray-800"
                 }`}
@@ -185,7 +207,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             ))}
           </div>
         </div>
-
         {/* Write Caption */}
         <div className="mb-4">
           <textarea
@@ -216,27 +237,32 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           ))}
         </div>
 
-        {/* Platform Selection (Second Instance) */}
+        {/* Platform Selection for Publishing */}
         <div className="mb-4">
+          <h4 className="text-lg font-medium mb-2">
+            Select Platforms to Publish:
+          </h4>
           <div className="flex items-center space-x-2">
-            {/* All Button */}
+            {/* Select All Button */}
             <button
-              onClick={handleSelectAllToggle}
+              onClick={handleSelectAllPublishToggle}
               className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                selectAll
+                selectAllPublish
                   ? "bg-gray-300 text-white"
                   : "bg-gray-100 text-gray-800"
               }`}
             >
               <span>All</span>
             </button>
-            {/* Platform Buttons */}
+            {/* Publish Platform Buttons */}
             {taskData.platforms.map((platform) => (
               <button
                 key={platform.platform_id}
-                onClick={() => handlePlatformToggle(platform.platform_id)}
+                onClick={() =>
+                  handlePublishPlatformToggle(platform.platform_id)
+                }
                 className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                  selectedPlatforms.includes(platform.platform_id)
+                  selectedPublishPlatforms.includes(platform.platform_id)
                     ? "bg-gray-300 text-white"
                     : "bg-gray-100 text-gray-800"
                 }`}
@@ -290,6 +316,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
 DetailedUploadModal.propTypes = {
   show: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  event: PropTypes.object.isRequired, // Make sure to pass event object as a prop
 };
 
 export default DetailedUploadModal;
