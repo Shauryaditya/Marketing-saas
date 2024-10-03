@@ -1,31 +1,19 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import {
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  addMonths,
-  subMonths,
-  startOfToday,
-  addWeeks,
-  subWeeks,
-  addDays,
-  subDays,
-} from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./CalenderComponent.css";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import NewEventModal from "./NewEventModal";
 import Sidebar from "./Sidebar";
 import CustomToolbar from "./CustomToolbar";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
-import EventModal from "./EventModal";
 import { useCalenderContext } from "../../contexts/CalenderContext";
+import DetailedUploadModal from "./DetailedUploadModal";
+
 setupAxiosInterceptors();
 
 const locales = {
@@ -41,15 +29,9 @@ const localizer = dateFnsLocalizer({
 });
 
 const CalendarComponent = () => {
-  const {
-    currentDate,
-    view,
-    setView,
-    setShowNewEventModal,
-    showNewEventModal,
-  } = useCalenderContext();
+  const { currentDate, view, setView, setShowNewEventModal } =
+    useCalenderContext();
   const [events, setEvents] = useState([]);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { id: brandId } = useParams();
@@ -80,25 +62,12 @@ const CalendarComponent = () => {
     fetchEvents();
   }, [currentDate, view]);
 
-  const handleSaveEvent = async () => {
-    handleModalClose();
-  };
-
-  const handleDeleteEvent = async () => {
-    try {
-      await axios.delete(`/v1/events/${selectedEvent.id}`);
-      setEvents(events.filter((event) => event.id !== selectedEvent.id));
-    } catch (error) {
-      console.error("Error deleting event:", error);
-    }
-    handleModalClose();
-  };
-
   const handleEventClick = async (event) => {
     try {
       const response = await axios.get(`/v1/task/get/${event.id}`);
       const eventData = response.data;
 
+      // Set selected event with necessary properties including the _id
       setSelectedEvent({
         id: eventData._id,
         title: eventData.title,
@@ -113,33 +82,16 @@ const CalendarComponent = () => {
         platforms_data: eventData.platforms_data,
       });
 
-      setShowEventModal(true);
+      setShowEventModal(true); // Open DetailedUploadModal
     } catch (error) {
       console.error("Error fetching event details:", error.message);
     }
   };
 
-  const handleSelectSlot = ({ start, end }) => {
-    setSelectedEvent({
-      id: null,
-      title: "",
-      start,
-      end,
-      color: "#FFEBCC",
-    });
-    setShowNewEventModal(true);
-  };
-
   const handleModalClose = () => {
-    setShowEditModal(false);
-    setShowNewEventModal(false);
     setShowEventModal(false);
     setSelectedEvent(null);
     fetchEvents(); // Fetch events to refresh the calendar
-  };
-
-  const handleEventChange = (e) => {
-    setSelectedEvent({ ...selectedEvent, [e.target.name]: e.target.value });
   };
 
   const moveEvent = ({ event, start, end }) => {
@@ -147,7 +99,6 @@ const CalendarComponent = () => {
     setEvents(events.map((e) => (e.id === event.id ? updatedEvent : e)));
   };
 
-  // Custom Toolbar
   const { components, defaultDate } = useMemo(
     () => ({
       components: {
@@ -167,8 +118,7 @@ const CalendarComponent = () => {
           </div>
         ),
       },
-
-      defaultDate: new Date(2015, 3, 13),
+      defaultDate: new Date(),
     }),
     []
   );
@@ -193,7 +143,6 @@ const CalendarComponent = () => {
               }
               resizable
               selectable
-              onSelectSlot={handleSelectSlot}
               date={currentDate}
               view={view}
               onView={setView}
@@ -201,19 +150,12 @@ const CalendarComponent = () => {
           </div>
         </div>
       </div>
-      <NewEventModal
-        show={showNewEventModal || showEditModal}
-        onClose={handleModalClose}
-        onSave={handleSaveEvent}
-        onDelete={handleDeleteEvent}
-        event={selectedEvent}
-        onChange={handleEventChange}
-        type="add"
-      />
-      <EventModal
+
+      {/* Detailed Event Modal */}
+      <DetailedUploadModal
         show={showEventModal}
-        onClose={handleModalClose} // Use the same handleModalClose function to refresh the calendar
-        event={selectedEvent}
+        onClose={handleModalClose}
+        event={selectedEvent} // Pass selected event to modal
       />
     </DndProvider>
   );

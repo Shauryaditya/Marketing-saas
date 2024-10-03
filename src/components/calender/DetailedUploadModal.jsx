@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { FaTimes, FaUpload } from "react-icons/fa";
 import axios from "axios"; // Import Axios
 
-const DetailedUploadModal = ({ show, onClose }) => {
+const DetailedUploadModal = ({ show, onClose, event }) => {
   const [taskData, setTaskData] = useState(null); // For storing task data
   const [tags, setTags] = useState(""); // For storing hashtags input
   const [loading, setLoading] = useState(true); // Loading state while fetching data
@@ -17,7 +17,7 @@ const DetailedUploadModal = ({ show, onClose }) => {
       const fetchData = async () => {
         try {
           const response = await axios.get(
-            "https://api.21genx.com:5000/v1/task/get/submit/66f4107fb6aab0705152b616"
+            `https://api.21genx.com:5000/v1/task/get/submit/${event.id}`
           );
           setTaskData(response.data.data);
           setLoading(false);
