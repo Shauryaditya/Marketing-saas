@@ -1,10 +1,6 @@
-import setupAxiosInterceptors from "../../AxiosInterceptor";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
-const ActivityTable = ({tasks,error}) => {
-  setupAxiosInterceptors();
-
+const ActivityTable = ({ tasks, error, fetchTasks }) => {
   const getStatusClass = (status) => {
     switch (status) {
       case "done":
@@ -18,8 +14,10 @@ const ActivityTable = ({tasks,error}) => {
     }
   };
 
-
-
+  useEffect(() => {
+    fetchTasks()
+  },[])
+  console.log("Tasks passed to activity table",tasks)
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-lg font-semibold mb-4">Activity</h2>
@@ -37,7 +35,7 @@ const ActivityTable = ({tasks,error}) => {
           </thead>
           <tbody>
             {tasks.map((item, index) => (
-              <tr key={index} className="text-gray-700 text-sm">
+              <tr key={item._id || index} className="text-gray-700 text-sm">
                 <td className="p-3 border-b text-xs">{item.brand_name}</td>
                 <td className="p-3 border-b text-center text-xs">
                   <span className={getStatusClass(item.sm_status)}>{item.sm_status}</span>

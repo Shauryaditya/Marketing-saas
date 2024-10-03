@@ -3,24 +3,8 @@ import React, { useEffect, useState } from "react";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import { useNavigate } from "react-router-dom";
 
-const BrandTable = () => {
+const BrandTable = ({brands}) => {
   const navigate = useNavigate();
-  const [brands, setBrands] = useState([]);
-
-  setupAxiosInterceptors();
-
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const response = await axios.get(`/v1/brand/profile/get?limit=100`);
-        setBrands(response.data.data); // Assuming response.data is an array of brands
-      } catch (error) {
-        console.error("Error fetching brands:", error);
-      }
-    };
-
-    fetchBrands();
-  }, []); // Empty dependency array to run the effect only once on mount
 
   return (
     <div>
