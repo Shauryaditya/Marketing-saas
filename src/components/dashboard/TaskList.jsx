@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TaskModal from "./ContentWriterModal";
-import TaskViewModal from "./TaskViewModal";
+import TaskViewModal from "./TaskView";
 
 const TaskList = ({tasks}) => {
   // State to manage which tab is active (Pending or Approved)
