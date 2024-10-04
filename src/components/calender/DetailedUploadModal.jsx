@@ -75,7 +75,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         platform_id: platform.platform_id,
         content_caption: allCaption,
         copy_writing: allCopywriting,
-        image_url: "", // Placeholder for the image_url
+        image_url: "", // Placeholder for the image_url, will be updated below
         tags: allTags.split(",").map((tag) => tag.trim()),
       }));
     } else {
@@ -87,7 +87,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         platform_id: platform.platform_id,
         content_caption: platformCaptions[selectedUploadPlatform],
         copy_writing: platformCopywriting[selectedUploadPlatform],
-        image_url: "", // Placeholder for the image_url
+        image_url: "", // Placeholder for the image_url, will be updated below
         tags: Array.isArray(platformTags[selectedUploadPlatform])
           ? platformTags[selectedUploadPlatform]
           : platformTags[selectedUploadPlatform]
@@ -100,6 +100,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
     const formData = new FormData();
     formData.append("task_id", uploadData.task_id); // Append task_id to form data
 
+    // Append each platform's data and files
     uploadData.submitted_tasks.forEach((task, index) => {
       formData.append(
         `submitted_tasks[${index}][platform_id]`,
@@ -120,9 +121,9 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
 
       // Append files if they exist
       if (files[task.platform_id]) {
-        for (let file of files[task.platform_id]) {
-          formData.append(`submitted_tasks[${index}][image_url]`, file); // Use the same key for image_url
-        }
+        files[task.platform_id].forEach((file) => {
+          formData.append(`submitted_tasks[${index}][image_url]`, file); // Attach files under image_url
+        });
       }
     });
 
@@ -154,12 +155,12 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="fixed inset-0 text-xs flex items-center justify-center z-50">
+    <div className="fixed inset-0 text-xs flex items-center  justify-center z-50">
       <div
         className="absolute inset-0 bg-gray-800 opacity-75"
         onClick={onClose}
       />
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
+      <div className="bg-white p-6 rounded-lg no-scrollbar shadow-lg w-full max-w-6xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
         <div className="border-b pb-3 mb-4">
           <div className="flex justify-between items-center">
             <div>
