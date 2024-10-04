@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay, add } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./CalenderComponent.css";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import NewEventModal from "./NewEventModal"; // Import NewEventModal
 import Sidebar from "./Sidebar";
 import CustomToolbar from "./CustomToolbar";
 import axios from "axios";
@@ -29,8 +30,13 @@ const localizer = dateFnsLocalizer({
 });
 
 const CalendarComponent = () => {
-  const { currentDate, view, setView, setShowNewEventModal } =
-    useCalenderContext();
+  const {
+    currentDate,
+    view,
+    setView,
+    setShowNewEventModal,
+    showNewEventModal,
+  } = useCalenderContext();
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -72,8 +78,8 @@ const CalendarComponent = () => {
         id: eventData._id,
         title: eventData.title,
         eventId: eventData.eventId,
-        start: eventData.start_date, // Use the raw date string
-        end: eventData.end_date, // Use the raw date string
+        start: eventData.start_date,
+        end: eventData.end_date,
         color: eventData.color,
         description: eventData.description,
         event_type: eventData.event_type,
@@ -88,8 +94,21 @@ const CalendarComponent = () => {
     }
   };
 
+  const handleSelectSlot = ({ start, end }) => {
+    // Open NewEventModal on slot select
+    setSelectedEvent({
+      id: null,
+      title: "",
+      start,
+      end,
+      color: "#FFEBCC", // Default color for new events
+    });
+    setShowNewEventModal(true);
+  };
+
   const handleModalClose = () => {
     setShowEventModal(false);
+    setShowNewEventModal(false); // Close NewEventModal
     setSelectedEvent(null);
     fetchEvents(); // Fetch events to refresh the calendar
   };
@@ -143,6 +162,7 @@ const CalendarComponent = () => {
               }
               resizable
               selectable
+              onSelectSlot={handleSelectSlot} // Handle slot selection
               date={currentDate}
               view={view}
               onView={setView}
@@ -150,6 +170,14 @@ const CalendarComponent = () => {
           </div>
         </div>
       </div>
+
+      {/* New Event Modal */}
+      <NewEventModal
+        show={showNewEventModal} // Control visibility
+        onClose={handleModalClose} // Close modal function
+        event={selectedEvent} // Pass the selected event to the modal
+        type="add"
+      />
 
       {/* Detailed Event Modal */}
       <DetailedUploadModal

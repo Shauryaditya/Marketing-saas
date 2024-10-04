@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { FaTimes, FaUpload } from "react-icons/fa";
-import axios from "axios"; // Import Axios
+import axios from "axios";
+import { useDropzone } from "react-dropzone";
 
 const DetailedUploadModal = ({ show, onClose, event }) => {
-  const [taskData, setTaskData] = useState(null); // For storing task data
-  const [tags, setTags] = useState(""); // For storing hashtags input
-  const [loading, setLoading] = useState(true); // Loading state while fetching data
-  const [selectedUploadPlatforms, setSelectedUploadPlatforms] = useState([]); // For upload platform selection
-  const [selectedPublishPlatforms, setSelectedPublishPlatforms] = useState([]); // For publish platform selection
-  const [selectAllUpload, setSelectAllUpload] = useState(false); // Track 'All' for upload platforms
-  const [selectAllPublish, setSelectAllPublish] = useState(false); // Track 'All' for publish platforms
-  const fileInputRef = useRef(null); // Ref for the file input
+  const [taskData, setTaskData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedUploadPlatform, setSelectedUploadPlatform] = useState(null);
+  const [platformCaptions, setPlatformCaptions] = useState({});
+  const [platformTags, setPlatformTags] = useState({});
+  const [platformCopywriting, setPlatformCopywriting] = useState({});
+  const [allCaption, setAllCaption] = useState("");
+  const [allTags, setAllTags] = useState();
+  const [allCopywriting, setAllCopywriting] = useState("");
+  const [files, setFiles] = useState({}); // Object to store files per platform
 
-  // Fetch task data when the modal is shown
+  // Check if event is null and handle appropriately
   useEffect(() => {
-    if (show) {
+    if (show && event) {
       const fetchData = async () => {
         try {
           const response = await axios.get(
@@ -31,90 +34,151 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
 
       fetchData();
     }
-  }, [show]);
+  }, [show, event]);
 
-  // Close the modal if not shown
-  if (!show) return null;
-
-  // Loading state while fetching data
-  if (loading) return <div>Loading...</div>;
-
-  // Handler for hashtags input
-  const handleTagChange = (e) => {
-    setTags(e.target.value);
+  const onDrop = (acceptedFiles, platformId) => {
+    setFiles((prevFiles) => ({
+      ...prevFiles,
+      [platformId]: acceptedFiles, // Store files for each platform
+    }));
   };
 
-  // Handle platform selection toggle for uploading
   const handleUploadPlatformToggle = (platformId) => {
-    setSelectedUploadPlatforms((prevSelected) =>
-      prevSelected.includes(platformId)
-        ? prevSelected.filter((id) => id !== platformId)
-        : [...prevSelected, platformId]
-    );
-    setSelectAllUpload(false); // Uncheck "All" when individual toggled
-  };
-
-  // Handle platform selection toggle for publishing
-  const handlePublishPlatformToggle = (platformId) => {
-    setSelectedPublishPlatforms((prevSelected) =>
-      prevSelected.includes(platformId)
-        ? prevSelected.filter((id) => id !== platformId)
-        : [...prevSelected, platformId]
-    );
-    setSelectAllPublish(false); // Uncheck "All" when individual toggled
-  };
-
-  // Handle "Select All/Deselect All" for upload platforms
-  const handleSelectAllUploadToggle = () => {
-    if (selectAllUpload) {
-      setSelectedUploadPlatforms([]); // Deselect all upload platforms
+    if (platformId === "all") {
+      setSelectedUploadPlatform("all");
     } else {
-      const allPlatformIds = taskData.platforms.map(
-        (platform) => platform.platform_id
+      setSelectedUploadPlatform((prevPlatform) =>
+        prevPlatform === platformId ? null : platformId
       );
-      setSelectedUploadPlatforms(allPlatformIds); // Select all upload platforms
     }
-    setSelectAllUpload(!selectAllUpload); // Toggle the state
   };
 
-  // Handle "Select All/Deselect All" for publish platforms
-  const handleSelectAllPublishToggle = () => {
-    if (selectAllPublish) {
-      setSelectedPublishPlatforms([]); // Deselect all publish platforms
+  const handleUpload = () => {
+    if (!event || !event.id) {
+      console.error("Event or event.id is not defined");
+      return;
+    }
+
+    // Constructing the payload
+    const uploadData = {
+      task_id: event.id, // Send event.id as task_id
+      submitted_tasks: [],
+      applyToAllPlatforms: {
+        content_caption_and_copy_writing: selectedUploadPlatform === "all",
+        tags: selectedUploadPlatform === "all",
+      },
+    };
+
+    // Process each platform
+    if (selectedUploadPlatform === "all") {
+      uploadData.submitted_tasks = taskData.platforms.map((platform) => ({
+        platform_id: platform.platform_id,
+        content_caption: allCaption,
+        copy_writing: allCopywriting,
+        image_url: "", // Placeholder, adjust as needed
+        tags: allTags.split(",").map((tag) => tag.trim()),
+      }));
     } else {
-      const allPlatformIds = taskData.platforms.map(
-        (platform) => platform.platform_id
+      const platform = taskData.platforms.find(
+        (p) => p.platform_id === selectedUploadPlatform
       );
-      setSelectedPublishPlatforms(allPlatformIds); // Select all publish platforms
-    }
-    setSelectAllPublish(!selectAllPublish); // Toggle the state
-  };
 
-  // Handle file upload
-  const handleUpload = (platformName) => {
-    console.log(`Uploading content for ${platformName}`);
-    fileInputRef.current.click();
-  };
+      uploadData.submitted_tasks.push({
+        platform_id: platform.platform_id,
+        content_caption: platformCaptions[selectedUploadPlatform],
+        copy_writing: platformCopywriting[selectedUploadPlatform],
+        image_url: "", // Placeholder, adjust as needed
+        tags: Array.isArray(platformTags[selectedUploadPlatform])
+          ? platformTags[selectedUploadPlatform]
+          : platformTags[selectedUploadPlatform]
+              .split(",")
+              .map((tag) => tag.trim()),
+      });
 
-  // Handle file change event
-  const handleFileChange = (e) => {
-    const files = e.target.files; // Get the selected files
-
-    if (files.length > 0) {
       const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append("files", files[i]); // Append each file to form data
+      formData.append("task_id", uploadData.task_id); // Append task_id to form data
+
+      for (let i = 0; i < uploadData.submitted_tasks.length; i++) {
+        const task = uploadData.submitted_tasks[i];
+        formData.append(`submitted_tasks[${i}][platform_id]`, task.platform_id);
+        formData.append(
+          `submitted_tasks[${i}][content_caption]`,
+          task.content_caption
+        );
+        formData.append(
+          `submitted_tasks[${i}][copy_writing]`,
+          task.copy_writing
+        );
+
+        // Append tags as an array
+        task.tags.forEach((tag) => {
+          formData.append(`submitted_tasks[${i}][tags][]`, tag);
+        });
+
+        // Append files
+        if (files[task.platform_id]) {
+          for (let file of files[task.platform_id]) {
+            formData.append(`submitted_tasks[${i}][files]`, file);
+          }
+        }
       }
+
+      // Send the request
       axios
-        .post("YOUR_UPLOAD_URL_HERE", formData)
+        .post(`/v1/task/submit`, formData)
         .then((response) => {
-          console.log("File uploaded successfully", response.data);
+          console.log("Upload successful", response.data);
+          // Optionally, reset state or close modal
+          onClose(); // Close the modal after successful upload
         })
         .catch((error) => {
-          console.error("Error uploading file:", error);
+          console.error("Error uploading files:", error);
         });
     }
+
+    const formData = new FormData();
+    formData.append("task_id", uploadData.task_id); // Append task_id to form data
+
+    for (let i = 0; i < uploadData.submitted_tasks.length; i++) {
+      const task = uploadData.submitted_tasks[i];
+      formData.append(`submitted_tasks[${i}][platform_id]`, task.platform_id);
+      formData.append(
+        `submitted_tasks[${i}][content_caption]`,
+        task.content_caption
+      );
+      formData.append(`submitted_tasks[${i}][copy_writing]`, task.copy_writing);
+      formData.append(`submitted_tasks[${i}][tags]`, JSON.stringify(task.tags));
+
+      // Append files
+      if (files[task.platform_id]) {
+        for (let file of files[task.platform_id]) {
+          formData.append(`submitted_tasks[${i}][files]`, file);
+        }
+      }
+    }
+
+    // Send the request
+    axios
+      .post(`/v1/task/submit`, formData)
+      .then((response) => {
+        console.log("Upload successful", response.data);
+        // Optionally, reset state or close modal
+        onClose(); // Close the modal after successful upload
+      })
+      .catch((error) => {
+        console.error("Error uploading files:", error);
+      });
   };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => onDrop(acceptedFiles, selectedUploadPlatform), // Dropzone handler
+    multiple: true,
+    accept: "image/*,video/*,audio/*", // Accept images, videos, and GIFs
+  });
+
+  if (!show) return null;
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="fixed inset-0 text-xs flex items-center justify-center z-50">
@@ -123,9 +187,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         onClick={onClose}
       />
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
-        {/* Modal Header */}
         <div className="border-b pb-3 mb-4">
-          {/* Task Information */}
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-xl font-semibold text-gray-900">
@@ -143,7 +205,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </button>
           </div>
 
-          {/* Additional Task Info */}
           <div className="mt-3 grid grid-cols-3 gap-4">
             <div>
               <span className="block font-medium text-gray-700">Work</span>
@@ -160,7 +221,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </div>
           </div>
 
-          {/* Description */}
           <div className="mt-4">
             <span className="block font-medium text-gray-700">Description</span>
             <p className="text-gray-500">
@@ -169,100 +229,28 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </p>
           </div>
         </div>
-        {/* Platform Selection for Upload */}
+
         <div className="mb-4">
           <h4 className="text-lg font-medium mb-2">
-            Select Platforms to Upload:
+            Select Platform to Upload:
           </h4>
           <div className="flex items-center space-x-2">
-            {/* Select All Button */}
             <button
-              onClick={handleSelectAllUploadToggle}
+              onClick={() => handleUploadPlatformToggle("all")}
               className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                selectAllUpload
+                selectedUploadPlatform === "all"
                   ? "bg-gray-300 text-white"
                   : "bg-gray-100 text-gray-800"
               }`}
             >
               <span>All</span>
             </button>
-            {/* Upload Platform Buttons */}
             {taskData.platforms.map((platform) => (
               <button
                 key={platform.platform_id}
                 onClick={() => handleUploadPlatformToggle(platform.platform_id)}
                 className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                  selectedUploadPlatforms.includes(platform.platform_id)
-                    ? "bg-gray-300 text-white"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                <img
-                  src={platform.platform_logo}
-                  alt={platform.platform_name}
-                  className="w-4 h-4"
-                />
-                <span>{platform.platform_name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Write Caption */}
-        <div className="mb-4">
-          <textarea
-            className="w-full border border-gray-300 p-3 rounded-md h-20"
-            placeholder="Write Captions..."
-          ></textarea>
-        </div>
-
-        {/* Image Upload Grid */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          {taskData.images.map((image) => (
-            <div
-              key={image.platform_id}
-              className="flex flex-col items-center justify-center border border-gray-300 rounded-md h-36"
-            >
-              <div className="text-gray-400">{image.content_type.type}</div>
-              <div className="text-gray-600 mt-2">{image.platform_name}</div>
-              <div className="text-sm text-gray-500">
-                Size: {image.content_type.size} {/* Display the size */}
-              </div>
-              <button
-                className="mt-3 text-blue-500 hover:underline"
-                onClick={() => handleUpload(image.platform_name)}
-              >
-                Upload
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Platform Selection for Publishing */}
-        <div className="mb-4">
-          <h4 className="text-lg font-medium mb-2">
-            Select Platforms to Publish:
-          </h4>
-          <div className="flex items-center space-x-2">
-            {/* Select All Button */}
-            <button
-              onClick={handleSelectAllPublishToggle}
-              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                selectAllPublish
-                  ? "bg-gray-300 text-white"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              <span>All</span>
-            </button>
-            {/* Publish Platform Buttons */}
-            {taskData.platforms.map((platform) => (
-              <button
-                key={platform.platform_id}
-                onClick={() =>
-                  handlePublishPlatformToggle(platform.platform_id)
-                }
-                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                  selectedPublishPlatforms.includes(platform.platform_id)
+                  selectedUploadPlatform === platform.platform_id
                     ? "bg-gray-300 text-white"
                     : "bg-gray-100 text-gray-800"
                 }`}
@@ -278,36 +266,118 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           </div>
         </div>
 
-        {/* Write Hashtags */}
         <div className="mb-4">
-          <input
-            type="text"
-            value={tags}
-            onChange={handleTagChange}
-            className="w-full border border-gray-300 p-3 rounded-md"
-            placeholder="Write #tags"
-          />
+          {selectedUploadPlatform === "all" ? (
+            <>
+              <textarea
+                className="w-full border border-gray-300 p-3 rounded-md h-20"
+                placeholder="Write caption for all platforms..."
+                value={allCaption}
+                onChange={(e) => setAllCaption(e.target.value)}
+              />
+              <input
+                type="text"
+                className="w-full border border-gray-300 p-3 rounded-md mt-2"
+                placeholder="Write #tags for all platforms"
+                value={allTags}
+                onChange={(e) => setAllTags(e.target.value)}
+              />
+              <textarea
+                className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
+                placeholder="Write copywriting for all platforms..."
+                value={allCopywriting}
+                onChange={(e) => setAllCopywriting(e.target.value)}
+              />
+            </>
+          ) : (
+            taskData.platforms.map((platform) => {
+              if (platform.platform_id === selectedUploadPlatform) {
+                return (
+                  <div key={platform.platform_id} className="mt-4">
+                    <h5 className="text-sm font-medium text-gray-700">
+                      Caption, Tags & Copywriting for {platform.platform_name}:
+                    </h5>
+                    <textarea
+                      className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
+                      placeholder={`Write caption for ${platform.platform_name}...`}
+                      value={platformCaptions[platform.platform_id] || ""}
+                      onChange={(e) =>
+                        setPlatformCaptions((prev) => ({
+                          ...prev,
+                          [platform.platform_id]: e.target.value,
+                        }))
+                      }
+                    />
+                    <input
+                      type="text"
+                      className="w-full border border-gray-300 p-3 rounded-md mt-2"
+                      placeholder={`Write #tags for ${platform.platform_name}`}
+                      value={platformTags[platform.platform_id] || ""}
+                      onChange={(e) =>
+                        setPlatformTags((prev) => ({
+                          ...prev,
+                          [platform.platform_id]: e.target.value,
+                        }))
+                      }
+                    />
+                    <textarea
+                      className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
+                      placeholder={`Write copywriting for ${platform.platform_name}...`}
+                      value={platformCopywriting[platform.platform_id] || ""}
+                      onChange={(e) =>
+                        setPlatformCopywriting((prev) => ({
+                          ...prev,
+                          [platform.platform_id]: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })
+          )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-3">
-          <button className="bg-green-500 text-white py-2 px-4 rounded-md shadow hover:bg-green-600">
-            Preview
-          </button>
-          <button className="bg-blue-500 text-white py-2 px-4 rounded-md shadow hover:bg-blue-600 flex items-center">
-            <FaUpload className="mr-2" />
-            Upload
-          </button>
+        <div className="mt-4">
+          <h4 className="text-lg font-medium mb-2">Files to Upload:</h4>
+          <div className="grid grid-cols-5 gap-4">
+            {taskData.images.map((image) => {
+              const currentFiles = files[image.platform_id] || [];
+              return (
+                <div
+                  key={image.platform_id}
+                  {...getRootProps()} // Spread the dropzone props to the box
+                  className="flex flex-col items-center justify-center border border-gray-300 rounded-md h-36 cursor-pointer"
+                >
+                  <input {...getInputProps()} />
+                  <div className="text-gray-400">{image.content_type.type}</div>
+                  <div className="text-gray-600 mt-2">
+                    {image.platform_name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Size: {image.content_type.size}
+                  </div>
+                  {currentFiles.length > 0 && (
+                    <div className="text-sm text-gray-500 mt-2">
+                      {currentFiles.length > 1
+                        ? `${currentFiles.length} files selected`
+                        : `1 file: ${currentFiles[0].name}`}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Hidden File Input for Uploading */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          style={{ display: "none" }} // Hide the file input
-          multiple // Allow multiple file uploads
-        />
+        <button
+          onClick={handleUpload}
+          className="mt-2 flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+        >
+          <FaUpload className="mr-2" />
+          Upload
+        </button>
       </div>
     </div>
   );
@@ -316,7 +386,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
 DetailedUploadModal.propTypes = {
   show: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  event: PropTypes.object.isRequired, // Make sure to pass event object as a prop
+  event: PropTypes.object.isRequired,
+};
+
+DetailedUploadModal.defaultProps = {
+  event: { id: null }, // Set default value for event
 };
 
 export default DetailedUploadModal;
