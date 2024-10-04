@@ -75,7 +75,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         platform_id: platform.platform_id,
         content_caption: allCaption,
         copy_writing: allCopywriting,
-        image_url: "", // Placeholder, adjust as needed
+        image_url: "", // Placeholder for the image_url
         tags: allTags.split(",").map((tag) => tag.trim()),
       }));
     } else {
@@ -87,79 +87,52 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         platform_id: platform.platform_id,
         content_caption: platformCaptions[selectedUploadPlatform],
         copy_writing: platformCopywriting[selectedUploadPlatform],
-        image_url: "", // Placeholder, adjust as needed
+        image_url: "", // Placeholder for the image_url
         tags: Array.isArray(platformTags[selectedUploadPlatform])
           ? platformTags[selectedUploadPlatform]
           : platformTags[selectedUploadPlatform]
               .split(",")
               .map((tag) => tag.trim()),
       });
-
-      const formData = new FormData();
-      formData.append("task_id", uploadData.task_id); // Append task_id to form data
-
-      for (let i = 0; i < uploadData.submitted_tasks.length; i++) {
-        const task = uploadData.submitted_tasks[i];
-        formData.append(`submitted_tasks[${i}][platform_id]`, task.platform_id);
-        formData.append(
-          `submitted_tasks[${i}][content_caption]`,
-          task.content_caption
-        );
-        formData.append(
-          `submitted_tasks[${i}][copy_writing]`,
-          task.copy_writing
-        );
-
-        // Append tags as an array
-        task.tags.forEach((tag) => {
-          formData.append(`submitted_tasks[${i}][tags][]`, tag);
-        });
-
-        // Append files
-        if (files[task.platform_id]) {
-          for (let file of files[task.platform_id]) {
-            formData.append(`submitted_tasks[${i}][files]`, file);
-          }
-        }
-      }
-
-      // Send the request
-      axios
-        .post(`/v1/task/submit`, formData)
-        .then((response) => {
-          console.log("Upload successful", response.data);
-          // Optionally, reset state or close modal
-          onClose(); // Close the modal after successful upload
-        })
-        .catch((error) => {
-          console.error("Error uploading files:", error);
-        });
     }
 
+    // Create a FormData object for the file upload
     const formData = new FormData();
     formData.append("task_id", uploadData.task_id); // Append task_id to form data
 
-    for (let i = 0; i < uploadData.submitted_tasks.length; i++) {
-      const task = uploadData.submitted_tasks[i];
-      formData.append(`submitted_tasks[${i}][platform_id]`, task.platform_id);
+    uploadData.submitted_tasks.forEach((task, index) => {
       formData.append(
-        `submitted_tasks[${i}][content_caption]`,
+        `submitted_tasks[${index}][platform_id]`,
+        task.platform_id
+      );
+      formData.append(
+        `submitted_tasks[${index}][content_caption]`,
         task.content_caption
       );
-      formData.append(`submitted_tasks[${i}][copy_writing]`, task.copy_writing);
-      formData.append(`submitted_tasks[${i}][tags]`, JSON.stringify(task.tags));
+      formData.append(
+        `submitted_tasks[${index}][copy_writing]`,
+        task.copy_writing
+      );
+      formData.append(
+        `submitted_tasks[${index}][tags]`,
+        JSON.stringify(task.tags)
+      );
 
-      // Append files
+      // Append files if they exist
       if (files[task.platform_id]) {
         for (let file of files[task.platform_id]) {
-          formData.append(`submitted_tasks[${i}][files]`, file);
+          formData.append(`submitted_tasks[${index}][image_url]`, file); // Use the same key for image_url
         }
       }
-    }
+    });
 
     // Send the request
     axios
-      .post(`/v1/task/submit`, formData)
+      .post(`/v1/task/submit`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Ensure the content type is set for file upload
+        },
+      })
       .then((response) => {
         console.log("Upload successful", response.data);
         // Optionally, reset state or close modal
