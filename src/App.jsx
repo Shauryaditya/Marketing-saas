@@ -32,6 +32,7 @@ import TeamManager from "./components/teams/TeamManager";
 import RoleAccess from "./components/role-and-access/RoleAccess";
 import Bin from "./components/drive/Bin";
 import Dashboard from "./components/dashboard/Dashboard";
+import TaskView from "./components/dashboard/TaskView";
 
 function App() {
   return (
@@ -82,6 +83,18 @@ function App() {
               element={
                 <Layout>
                   <Dashboard />
+                </Layout>
+              }
+            />
+          }
+        />
+       <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <TaskView />
                 </Layout>
               }
             />
