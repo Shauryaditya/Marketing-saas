@@ -12,9 +12,11 @@ import TaskList from "./TaskList";
 import BrandTable from "./BrandList";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   setupAxiosInterceptors();
+  const router = useNavigate()
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState(null);
   const [brands, setBrands] = useState([]);
@@ -89,6 +91,9 @@ const Dashboard = () => {
         <h1 className="text-sm font-semibold">Dashboard</h1>
 
         {/* Dropdown for Brand Selection */}
+        <div className="flex gap-x-40">
+          
+          <p className="text-sm font-semibold ">Tasks <span className="text-xs font-normal text-blue-800 cursor-pointer hover:text-blue-950 hover:underline" onClick={() => router(`/tasks`)}>View All</span></p>
         <DropdownMenu>
           <DropdownMenuTrigger className="border text-xs px-4 bg-white text-sky-800 rounded outline-0">
             {selectedBrandId
@@ -116,6 +121,7 @@ const Dashboard = () => {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
 
       {/* Main Dashboard Layout */}
