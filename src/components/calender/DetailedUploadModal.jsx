@@ -61,7 +61,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
 
     // Constructing the payload
     const uploadData = {
-      task_id: event.id, // Send event.id as task_id
+      task_id: event.id,
       submitted_tasks: [],
       applyToAllPlatforms: {
         content_caption_and_copy_writing: selectedUploadPlatform === "all",
@@ -69,13 +69,12 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       },
     };
 
-    // Process each platform
     if (selectedUploadPlatform === "all") {
       uploadData.submitted_tasks = taskData.platforms.map((platform) => ({
         platform_id: platform.platform_id,
         content_caption: allCaption,
         copy_writing: allCopywriting,
-        image_url: "", // Placeholder for the image_url, will be updated below
+        files: "", // Placeholder for the files, will be updated below
         tags: allTags.split(",").map((tag) => tag.trim()),
       }));
     } else {
@@ -87,7 +86,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         platform_id: platform.platform_id,
         content_caption: platformCaptions[selectedUploadPlatform],
         copy_writing: platformCopywriting[selectedUploadPlatform],
-        image_url: "", // Placeholder for the image_url, will be updated below
+        files: "", // Placeholder for the files, will be updated below
         tags: Array.isArray(platformTags[selectedUploadPlatform])
           ? platformTags[selectedUploadPlatform]
           : platformTags[selectedUploadPlatform]
@@ -96,11 +95,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       });
     }
 
-    // Create a FormData object for the file upload
-    const formData = new FormData();
-    formData.append("task_id", uploadData.task_id); // Append task_id to form data
+    console.log("Upload Data:", uploadData); // Debugging the uploadData structure
 
-    // Append each platform's data and files
+    const formData = new FormData();
+    formData.append("task_id", uploadData.task_id);
+
     uploadData.submitted_tasks.forEach((task, index) => {
       formData.append(
         `submitted_tasks[${index}][platform_id]`,
@@ -119,28 +118,31 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         JSON.stringify(task.tags)
       );
 
-      // Append files if they exist
       if (files[task.platform_id]) {
         files[task.platform_id].forEach((file) => {
-          formData.append(`submitted_tasks[${index}][image_url]`, file); // Attach files under image_url
+          console.log(
+            `Appending file: ${file.name} to platform: ${task.platform_id}`
+          ); // Debugging file appending
+          formData.append(`submitted_tasks[${index}][files]`, file);
         });
       }
     });
 
-    // Send the request
     axios
       .post(`/v1/task/submit`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data", // Ensure the content type is set for file upload
+          "Content-Type": "multipart/form-data",
         },
       })
       .then((response) => {
         console.log("Upload successful", response.data);
-        // Optionally, reset state or close modal
-        onClose(); // Close the modal after successful upload
+        onClose();
       })
       .catch((error) => {
-        console.error("Error uploading files:", error);
+        console.error(
+          "Error uploading files:",
+          error.response ? error.response.data : error.message
+        ); // Improved error logging
       });
   };
 
