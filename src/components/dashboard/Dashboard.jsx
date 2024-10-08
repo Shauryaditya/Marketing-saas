@@ -37,7 +37,7 @@ const Dashboard = () => {
     try {
       const response = await axios.get(`/v1/task/dashboard/task`, {
         params: {
-          limit: 10, // Set the page limit here
+          limit: 6, // Set the page limit here
           brand_id: brandId || "", // Pass the selected brandId as a query parameter
         },
       });

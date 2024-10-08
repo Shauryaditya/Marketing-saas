@@ -1,17 +1,26 @@
-import React, { useState } from "react";
-import TaskModal from "./ContentWriterModal";
-import TaskViewModal from "./TaskView";
+import React, { useEffect, useState } from "react";
+import { useCalenderContext } from "../../contexts/CalenderContext";
+import DetailedUploadModal from "../calender/DetailedUploadModal";
+import axios from "axios";
 
-const TaskList = ({tasks}) => {
-  // State to manage which tab is active (Pending or Approved)
+const TaskList = ({ tasks }) => {
+  const {
+    currentDate,
+    view,
+    setView,
+    setShowNewEventModal,
+    showNewEventModal,
+  } = useCalenderContext();
+  const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
   const [showModal, setShowModal] = useState(false);
   const [viewMore, setViewMore] = useState(null);
+  const [selectedBrandId, setSelectedBrandId] = useState(null); // Track selected brandId
 
   const handleClose = () => {
     setShowModal(false);
-    setViewMore(false)
-  }
+    setViewMore(false);
+  };
 
   // Filter tasks based on the active tab
   const filteredTasks = tasks.filter((task) => task.status === activeTab);
@@ -24,6 +33,41 @@ const TaskList = ({tasks}) => {
       day: "numeric",
     });
   };
+
+  // Fetch events for a specific brand
+  const fetchEvents = async (brandId) => {
+    try {
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const response = await axios.get(
+        `/v1/task/currect/month?brand_id=${brandId}&year=${year}&month=${month}`
+      );
+      const apiEvents = response.data.data.map((event) => ({
+        id: event._id,
+        title: event.title,
+        start: new Date(event.start_date),
+        end: new Date(event.end_date),
+        color: event.color,
+        description: event.description,
+        eventType: event.event_type,
+      }));
+      setEvents(apiEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  };
+
+  const handlePreviewClick = (brandId) => {
+    setSelectedBrandId(brandId); // Save the brandId
+    fetchEvents(brandId); // Fetch events for the clicked brand
+    setShowModal(true); // Show the modal
+  };
+
+  useEffect(() => {
+    if (selectedBrandId) {
+      fetchEvents(selectedBrandId);
+    }
+  }, [currentDate, view, selectedBrandId]);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
@@ -57,19 +101,23 @@ const TaskList = ({tasks}) => {
           >
             <div>
               <h3 className="text-sm font-semibold">{task.title}</h3>
-              <p className="text-xs text-gray-500">{formatDate(task.submitd_date)}</p>
+              <p className="text-xs text-gray-500">
+                {formatDate(task.submitd_date)}
+              </p>
             </div>
             <button
               className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md text-xs hover:bg-blue-50"
-              onClick={() => setShowModal(true)}
+              onClick={() => handlePreviewClick(task.brand_id)} // Pass the brandId here
             >
               Preview
             </button>
-            {showModal && 
-            <TaskModal 
-              showModal={showModal}
-              onClose = {handleClose}
-            />}
+            {showModal && (
+              <DetailedUploadModal
+                event={events}
+                show={showModal}
+                onClose={handleClose}
+              />
+            )}
           </div>
         ))}
       </div>
