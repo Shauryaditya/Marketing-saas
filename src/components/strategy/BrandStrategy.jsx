@@ -9,8 +9,8 @@ import setupAxiosInterceptors from "../../AxiosInterceptor";
 const url = import.meta.env.VITE_API_URL;
 
 const BrandStrategy = () => {
-  setupAxiosInterceptors()
-  const { id,strategyId } = useParams(); // Fetch brand_id from URL
+  setupAxiosInterceptors();
+  const { id, strategyId } = useParams(); // Fetch brand_id from URL
   const [platforms, setPlatforms] = useState([]);
   const [focus, setFocus] = useState([]);
   const token = localStorage.getItem("access_token");
@@ -68,18 +68,20 @@ const BrandStrategy = () => {
   useEffect(() => {
     const fetchStrategy = async () => {
       try {
-        const response = await axios.get(`/v1/strategy/sigle/get/${strategyId}`);
-        
-        if(response.data.data.length > 0){
-          const data = response.data.data[0]
+        const response = await axios.get(
+          `/v1/strategy/sigle/get/${strategyId}`
+        );
+
+        if (response.data.data.length > 0) {
+          const data = response.data.data[0];
           setFormData((prevState) => ({
             ...prevState,
             ...data,
           }));
         }
       } catch (error) {
-        setError('Failed to fetch strategy data');
-        console.error('Error fetching strategy data:', error);
+        setError("Failed to fetch strategy data");
+        console.error("Error fetching strategy data:", error);
       } finally {
         setLoading(false);
       }
@@ -89,7 +91,6 @@ const BrandStrategy = () => {
       fetchStrategy();
     }
   }, [strategyId]);
- 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -234,6 +235,7 @@ const BrandStrategy = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
+  // Function to handle changing date fields
   const handleDateChange = (index, field, value) => {
     const updatedDates = formData.important_date.map((date, i) =>
       i === index ? { ...date, [field]: value } : date
@@ -244,13 +246,21 @@ const BrandStrategy = () => {
     }));
   };
 
-  const handleAddDate = () => {
+  // Function to remove a date
+  const handleRemoveDate = (index) => {
+    const updatedDates = formData.important_date.filter((_, i) => i !== index);
     setFormData((prevData) => ({
       ...prevData,
-      important_date: [
-        ...prevData.important_date,
-        { date: "", name: "", description: "" },
-      ],
+      important_date: updatedDates,
+    }));
+  };
+
+  // Function to add a new date
+  const handleAddDate = () => {
+    const newDate = { date: "", name: "", description: "" };
+    setFormData((prevData) => ({
+      ...prevData,
+      important_date: [...prevData.important_date, newDate],
     }));
   };
 
@@ -347,10 +357,10 @@ const BrandStrategy = () => {
       });
       console.log(response.data);
       const data = response.data;
-      toast.success(data.message)
+      toast.success(data.message);
       // Handle successful submission
     } catch (error) {
-      toast.error(error.response.data.message)
+      toast.error(error.response.data.message);
       console.error("Error submitting form:", error);
     }
   };
@@ -740,19 +750,15 @@ const BrandStrategy = () => {
                 onChange={(e) => handleInputChange(e, "tags")}
               />
             </div>
-
             <div className="bg-white p-2 mt-2">
               <h2 className="text-xs font-bold mb-2 uppercase">
                 Important Dates
               </h2>
               <div className="flex flex-wrap space-x-3">
                 {formData.important_date.map((date, index) => (
-                  <div className="flex justify-end items-end">
-                    <div
-                      key={index}
-                      className="flex flex-col  items-center space-y-2 mb-2"
-                    >
-                      <div className="flex gap-x-4 ">
+                  <div className="flex justify-end items-end" key={index}>
+                    <div className="flex flex-col items-center space-y-2 mb-2">
+                      <div className="flex gap-x-4">
                         <input
                           type="date"
                           className="border p-1 rounded bg-gray-50"
@@ -772,24 +778,34 @@ const BrandStrategy = () => {
                         />
                       </div>
                       <textarea
-                        type="text"
                         className="border w-full p-1 rounded bg-gray-50 h-24 resize-none"
                         placeholder="Description"
                         value={date.description}
-                        re
                         onChange={(e) =>
                           handleDateChange(index, "description", e.target.value)
                         }
                       />
                     </div>
-                    <PlusCircle
-                      onClick={handleAddDate}
-                      height="18"
-                      width="18"
-                    />
+                    {formData.important_date.length > 1 && (
+                      <button
+                        type="button"
+                        className="text-red-500 ml-2"
+                        onClick={() => handleRemoveDate(index)}
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 ))}
+                              <button
+                type="button"
+                className="flex items-center justify-end mt-2 text-blue-500"
+                onClick={handleAddDate}
+              >
+                <PlusCircle />
+              </button>
               </div>
+
             </div>
           </div>
 

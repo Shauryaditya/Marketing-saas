@@ -1,17 +1,26 @@
-import React, { useState } from "react";
-import TaskModal from "./ContentWriterModal";
-import TaskViewModal from "./TaskView";
+import React, { useEffect, useState } from "react";
+import { useCalenderContext } from "../../contexts/CalenderContext";
+import DetailedUploadModal from "../calender/DetailedUploadModal";
+import axios from "axios";
+import GraphicDesignerModal from "./GraphicDesignerModal";
 
-const TaskList = ({tasks}) => {
-  // State to manage which tab is active (Pending or Approved)
+const TaskList = ({ tasks }) => {
+  const {
+    currentDate,
+    view,
+    setView,
+    setShowNewEventModal,
+    showNewEventModal,
+  } = useCalenderContext();
+  const [events, setEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
   const [showModal, setShowModal] = useState(false);
-  const [viewMore, setViewMore] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null); // Track selected taskId
 
   const handleClose = () => {
     setShowModal(false);
-    setViewMore(false)
-  }
+    setSelectedTaskId(null); // Reset selected taskId when closing modal
+  };
 
   // Filter tasks based on the active tab
   const filteredTasks = tasks.filter((task) => task.status === activeTab);
@@ -23,6 +32,11 @@ const TaskList = ({tasks}) => {
       month: "long", // Use "short" for abbreviated month
       day: "numeric",
     });
+  };
+
+  const handlePreviewClick = (taskId) => {
+    setSelectedTaskId(taskId); // Set the selected taskId
+    setShowModal(true); // Show the modal
   };
 
   return (
@@ -57,19 +71,23 @@ const TaskList = ({tasks}) => {
           >
             <div>
               <h3 className="text-sm font-semibold">{task.title}</h3>
-              <p className="text-xs text-gray-500">{formatDate(task.submitd_date)}</p>
+              <p className="text-xs text-gray-500">
+                {formatDate(task.submitd_date)}
+              </p>
             </div>
             <button
               className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md text-xs hover:bg-blue-50"
-              onClick={() => setShowModal(true)}
+              onClick={() => handlePreviewClick(task._id)} // Pass the correct task ID
             >
               Preview
             </button>
-            {showModal && 
-            <TaskModal 
-              showModal={showModal}
-              onClose = {handleClose}
-            />}
+            {showModal && selectedTaskId === task._id && (
+              <GraphicDesignerModal
+                show={showModal}
+                onClose={handleClose}
+                taskId={selectedTaskId} // Pass the selected taskId to the modal
+              />
+            )}
           </div>
         ))}
       </div>
