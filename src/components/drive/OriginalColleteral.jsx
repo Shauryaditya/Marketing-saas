@@ -130,7 +130,12 @@ const OriginalCollateral = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${apiUrl}/bin/delete`, { folderIds: selectedItems });
+      // Use axios.delete instead of post, and pass data as part of config
+      await axios.post(`${apiUrl}/delete/folder`, {
+        folderIds: selectedItems,
+      });
+
+      // Update UI after successful delete
       setRecycleBinItems((prevItems) =>
         prevItems.filter((item) => !selectedItems.includes(item._id))
       );
