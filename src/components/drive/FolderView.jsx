@@ -8,6 +8,8 @@ import { saveAs } from "file-saver";
 import { FaFileAlt, FaFilePdf } from "react-icons/fa";
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -275,11 +277,14 @@ const FolderView = () => {
     const extension = file.name.split(".").pop().toLowerCase();
     if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
       return (
-        <img
-          src={file.path}
-          alt={file.name}
-          className="h-16 w-16 mb-4 object-cover"
-        />
+        <Zoom>
+          {" "}
+          <img
+            src={file.path}
+            alt={file.name}
+            className="h-16 w-16 mb-4 object-cover"
+          />
+        </Zoom>
       );
     } else if (extension === "pdf") {
       return <FaFilePdf className="h-16 w-16 mb-4 text-red-600" />;
