@@ -167,7 +167,6 @@ const OriginalCollateral = () => {
           <div className="flex items-center space-x-4">
             {!isRecycleBinOpen && (
               <>
-                <AddCollateralButton />
                 <AddFolderButton
                   parentFolderId={null}
                   brandId={brandId}
