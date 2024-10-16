@@ -324,7 +324,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                 <div
                   key={image.platform_id}
                   {...getRootProps()} // Spread the dropzone props to the box
-                  className="flex flex-col items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer"
+                  className="flex flex-col bg-blue-100 items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer"
                 >
                   <input {...getInputProps()} />
                   <div className="text-gray-400">{image.content_type.type}</div>
