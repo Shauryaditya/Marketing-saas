@@ -130,18 +130,61 @@ const OriginalCollateral = () => {
     setLoading(true);
     setError(null);
     try {
-      // Use axios.delete instead of post, and pass data as part of config
-      await axios.post(`${apiUrl}/delete/folder`, {
-        folderIds: selectedItems,
-      });
+      const accessToken = localStorage.getItem("access_token");
 
-      // Update UI after successful delete
-      setRecycleBinItems((prevItems) =>
-        prevItems.filter((item) => !selectedItems.includes(item._id))
-      );
-      setRecycleBinFiles((prevFiles) =>
-        prevFiles.filter((file) => !selectedItems.includes(file._id))
-      );
+      // Prepare separate arrays for folders and files
+      const folderIds = recycleBinItems
+        .filter((item) => selectedItems.includes(item._id))
+        .map((item) => item._id);
+
+      const fileIds = recycleBinFiles
+        .filter((file) => selectedItems.includes(file._id))
+        .map((file) => file._id);
+
+      // If there are folders to delete
+      if (folderIds.length > 0) {
+        const folderDeleteApiUrl =
+          "https://api.21genx.com:5000/v1/collateral/delete/folder";
+        await axios.post(
+          folderDeleteApiUrl,
+          {
+            folderIds: folderIds,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Update UI after folder delete
+        setRecycleBinItems((prevItems) =>
+          prevItems.filter((item) => !selectedItems.includes(item._id))
+        );
+      }
+
+      // If there are files to delete
+      if (fileIds.length > 0) {
+        const fileDeleteApiUrl =
+          "https://api.21genx.com:5000/v1/collateral/files/delete";
+        await axios.post(
+          fileDeleteApiUrl,
+          {
+            fileIds: fileIds,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Update UI after file delete
+        setRecycleBinFiles((prevFiles) =>
+          prevFiles.filter((file) => !selectedItems.includes(file._id))
+        );
+      }
+
       setSelectedItems([]); // Clear selection after delete
     } catch (error) {
       setError("Failed to delete items.");
