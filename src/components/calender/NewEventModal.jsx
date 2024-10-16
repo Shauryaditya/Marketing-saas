@@ -241,7 +241,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                 {type == "edit" ? "Edit Task" : "Add New Task"}
               </h3>
             </div>
-            <div className="px-4 py-5 space-y-4">
+            <div className="space-y-4">
               {/* Color selection section (commented out) */}
               {/* <label className="block text-gray-700">
                 <div className="flex space-x-2 mt-1">
@@ -259,6 +259,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   ))}
                 </div>
               </label> */}
+              <div className="p-3 space-y-4">
               <label className="block text-gray-700">
                 Title
                 <input
@@ -295,12 +296,14 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                           />
                           <label
                             htmlFor={`platform-${post.social_id}`}
+
                             className="flex flex-col  justify-center items-left ml-3 text-xs text-gray-700"
+
                           >
                             <img
                               src={post.platform_logo}
                               alt={post.platform_name}
-                              className="h-6 w-6 inline-block"
+                              className="h-4 w-4 inline-block"
                             />
                             <span className="">{post.platform_name}</span>
                           </label>
@@ -388,7 +391,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   className="mt-1 block w-full rounded-md shadow-sm bg-gray-100 focus:ring-indigo-500 text-xs py-1 px-3 border-none"
                 />
               </label>
-
+              </div>
               <div className="px-4 py-3 text-xs bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"

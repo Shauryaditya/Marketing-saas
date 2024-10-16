@@ -138,7 +138,7 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
           ? `${apiUrl}/v1/people/edit/${emp_id}`
           : `${apiUrl}/v1/people/add`;
 
-      const { _id, designation_name, sub_department_name, department_name, ...dataToSubmit } = formData;
+      const { _id, designation_name, sub_department_name, department_name,loginStatus, ...dataToSubmit } = formData;
 
       const body = JSON.stringify(dataToSubmit);
 
