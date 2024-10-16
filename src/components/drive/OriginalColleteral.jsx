@@ -287,7 +287,7 @@ const OriginalCollateral = () => {
                       className="absolute top-2 right-2"
                     />
                     <Link
-                      to={`/item/${brandId}/${item._id}`}
+                      // to={`/item/${brandId}/${item._id}`}
                       className="flex flex-col items-center justify-center"
                     >
                       <img
