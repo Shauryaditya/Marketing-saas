@@ -11,13 +11,13 @@ setupAxiosInterceptors();
 const colorOptions = ["#FF8D6F", "#66FF8E", "#66A3FF", "#F4D76D", "#B88CC7"];
 
 const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
-  if (type == 'add') console.log('type event data', type, event);
-  if (type == 'edit') console.log('type event data', type, event);
+  if (type == "add") console.log("type event data", type, event);
+  if (type == "edit") console.log("type event data", type, event);
 
   const [eventData, setEventData] = useState({
     title: "",
-    date: '',
-    time: '',
+    date: "",
+    time: "",
     description: "",
     repeat: "Does not repeat",
     color: colorOptions[0], // Default color
@@ -32,11 +32,12 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
   const [loading, setLoading] = useState(false); // Add loading state
   const [isApiCalledSuccessfully, setIsApiCalledSuccessfully] = useState(false);
   useEffect(() => {
-    if (!type && show) return
-    setIsApiCalledSuccessfully(false)
-  }, [type, show])
+    if (!type && show) return;
+    setIsApiCalledSuccessfully(false);
+  }, [type, show]);
   useEffect(() => {
-    if (eventData && brandId && !isApiCalledSuccessfully) { // Check if the call has not been made successfully
+    if (eventData && brandId && !isApiCalledSuccessfully) {
+      // Check if the call has not been made successfully
       const fetchData = async () => {
         setLoading(true);
         try {
@@ -65,10 +66,10 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
 
     if (type === "edit" && event) {
       console.log("edit event", event);
-      const selectedPlatformids = event.platforms_data.map(d => d._id)
+      const selectedPlatformids = event.platforms_data.map((d) => d._id);
       const selectedType = event.platforms_data.reduce((acc, d) => {
         if (d?.content_types) {
-          d.content_types.forEach(p => {
+          d.content_types.forEach((p) => {
             if (p) {
               acc[d._id] = p.type; // Add key-value pair to the object
             }
@@ -76,21 +77,21 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
         }
         return acc;
       }, {});
-      setSelectedTypes(selectedType)
-      setSelectedPlatformIds(selectedPlatformids)
+      setSelectedTypes(selectedType);
+      setSelectedPlatformIds(selectedPlatformids);
 
       const dateObject = new Date(event?.start);
-      const formattedTime = format(dateObject, 'HH:mm');
-      const formattedDate = format(dateObject, 'yyyy-MM-dd');
-      var eventType = ''
-      if (event.event_type == 'all_day') {
-        eventType = 'Does not repeat'
+      const formattedTime = format(dateObject, "HH:mm");
+      const formattedDate = format(dateObject, "yyyy-MM-dd");
+      var eventType = "";
+      if (event.event_type == "all_day") {
+        eventType = "Does not repeat";
       }
-      if (event.event_type == 'daily') {
-        eventType = 'daily'
+      if (event.event_type == "daily") {
+        eventType = "daily";
       }
-      if (event.event_type == 'recurring') {
-        eventType = 'Custom'
+      if (event.event_type == "recurring") {
+        eventType = "Custom";
       }
       setEventData({
         title: event.title || "",
@@ -101,21 +102,20 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
         color: event.color || colorOptions[0],
       });
     }
-    if (type == 'add') {
+    if (type == "add") {
       const dateObject = new Date(event.start);
       setEventData({
         title: "",
-        date: format(dateObject, 'yyyy-MM-dd'),
+        date: format(dateObject, "yyyy-MM-dd"),
         time: "00:00",
         description: "",
         repeat: "Does not repeat",
         color: colorOptions[0], // Default color
       });
-      setSelectedTypes({})
-      setSelectedPlatformIds([])
+      setSelectedTypes({});
+      setSelectedPlatformIds([]);
     }
   }, [event, type]);
-
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -157,27 +157,29 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
   };
 
   const handleSave = async () => {
-    if (eventData.repeat == 'custom' && !recurrenceData) {
-      return toast.error("Recurrence details are required for recurring events")
+    if (eventData.repeat == "custom" && !recurrenceData) {
+      return toast.error(
+        "Recurrence details are required for recurring events"
+      );
     }
 
     if (!selectedPlatformIds.length) {
-      return toast.error("Platform and social is required for event")
+      return toast.error("Platform and social is required for event");
     }
     const startDatetime = new Date(`${eventData.date}T${eventData.time}`);
     const endDatetime = recurrenceData?.endDate
       ? new Date(recurrenceData.endDate)
       : null;
 
-    var eventType = ''
-    if (eventData.repeat == 'Does not repeat') {
-      eventType = 'all_day'
+    var eventType = "";
+    if (eventData.repeat == "Does not repeat") {
+      eventType = "all_day";
     }
     if (eventData.repeat === "Custom") {
-      eventType = 'recurring'
+      eventType = "recurring";
     }
     if (eventData.repeat === "daily") {
-      eventType = 'daily'
+      eventType = "daily";
     }
 
     const requestBody = {
@@ -197,12 +199,12 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
 
     try {
       let response;
-      if (type == 'add') {
+      if (type == "add") {
         response = await axios.post(`${apiUrl}/v1/task/add`, requestBody);
       }
 
-      if (type == 'edit') {
-        if (editScope == 'all' && event?.eventId) {
+      if (type == "edit") {
+        if (editScope == "all" && event?.eventId) {
           response = await axios.put(
             `${apiUrl}/v1/task/edit/${event?.eventId}`,
             requestBody
@@ -225,7 +227,6 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
     }
   };
 
-
   return (
     <div>
       {show && (
@@ -237,7 +238,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md z-10">
             <div className="px-4 py-2 border-b border-gray-200">
               <h3 className="text-sm font-medium text-gray-900">
-                {type == 'edit' ? "Edit Task" : "Add New Task"}
+                {type == "edit" ? "Edit Task" : "Add New Task"}
               </h3>
             </div>
             <div className="space-y-4">
@@ -295,20 +296,25 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                           />
                           <label
                             htmlFor={`platform-${post.social_id}`}
-                            className="flex flex-col ml-3 text-xs text-gray-700"
+
+                            className="flex flex-col  justify-center items-left ml-3 text-xs text-gray-700"
+
                           >
                             <img
                               src={post.platform_logo}
                               alt={post.platform_name}
                               className="h-4 w-4 inline-block"
                             />
-                            <span className="ml-2">{post.platform_name}</span>
+                            <span className="">{post.platform_name}</span>
                           </label>
                         </div>
                         {selectedPlatformIds.includes(post.social_id) && (
                           <div className="flex flex-col space-y-2">
                             {post.types.map((type) => (
-                              <div key={type._id} className="flex  items-center">
+                              <div
+                                key={type._id}
+                                className="flex  items-center"
+                              >
                                 <input
                                   type="radio"
                                   id={`type-${type._id}`}
@@ -392,7 +398,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-2 py-1 bg-black text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={handleSave}
                 >
-                  {type == 'edit' ? "Update" : "Save"}
+                  {type == "edit" ? "Update" : "Save"}
                 </button>
                 <button
                   type="button"
@@ -408,7 +414,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       )}
       {showCustomModal && (
         <CustomModal
-          type='edit'
+          type="edit"
           recurrence={event?.recurrence}
           recurrenceData={recurrenceData}
           show={showCustomModal}
