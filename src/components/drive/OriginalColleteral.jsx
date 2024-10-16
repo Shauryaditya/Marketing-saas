@@ -104,19 +104,38 @@ const OriginalCollateral = () => {
     );
   };
 
-  // Handle Restore API Call
   const handleRestore = async () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${apiUrl}/bin/restore`, { folderIds: selectedItems });
-      setRecycleBinItems((prevItems) =>
-        prevItems.filter((item) => !selectedItems.includes(item._id))
-      );
-      setRecycleBinFiles((prevFiles) =>
-        prevFiles.filter((file) => !selectedItems.includes(file._id))
-      );
-      setSelectedItems([]); // Clear selection after restore
+      const accessToken = localStorage.getItem("access_token");
+
+      // Prepare an array of folder IDs for restoration
+      const folderIds = recycleBinItems
+        .filter((item) => selectedItems.includes(item._id))
+        .map((item) => item._id);
+
+      if (folderIds.length > 0) {
+        await axios.post(
+          `${apiUrl}/update/status`,
+          {
+            folderIds: folderIds,
+            status: true, // Restore the folder by setting status to true
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Remove restored folders from the recycle bin list
+        setRecycleBinItems((prevItems) =>
+          prevItems.filter((item) => !selectedItems.includes(item._id))
+        );
+
+        setSelectedItems([]); // Clear selection after restore
+      }
     } catch (error) {
       setError("Failed to restore items.");
       console.error(error);
