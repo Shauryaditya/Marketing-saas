@@ -10,6 +10,12 @@ import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -113,47 +119,78 @@ const FolderView = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (e, type, folderId, fileId) => {
+    e.stopPropagation()
+    console.log('selected folder', type, folderId, fileId);
     try {
       const folderIdsToDelete = selectedItems.folders;
       const fileIdsToDelete = selectedItems.files;
 
-      if (folderIdsToDelete.length > 0) {
+      if (type == 'folder') {
         await axios.post(
           `${apiUrl}/v1/collateral/update/status`,
           {
-            folderIds: folderIdsToDelete,
+            folderIds: [folderId],
             status: false,
           },
           {
             params: { brand_id: brandId },
           }
         );
-      }
-
-      if (fileIdsToDelete.length > 0) {
-        await Promise.all(
-          fileIdsToDelete.map((fileId) =>
-            axios.post(
-              `${apiUrl}/v1/collateral/bin/file/${fileId}`,
-              {
-                status: false,
-                file_delete: true,
-              },
-              {
-                params: { brand_id: brandId },
-              }
-            )
-          )
+        return setFolders((prev) =>
+          prev.filter((folder) => folder._id !== folderId)
         );
       }
+      if (type == 'file') {
+        await axios.post(
+          `${apiUrl}/v1/collateral/bin/file/${fileId}`,
+          {
+            status: false,
+            file_delete: true,
+          },
+          {
+            params: { brand_id: brandId },
+          }
+        )
+        return setFiles((prev) =>
+          prev.filter((file) => file._id !== fileId));
+      }
+      // if (folderIdsToDelete.length > 0) {
+      //   await axios.post(
+      //     `${apiUrl}/v1/collateral/update/status`,
+      //     {
+      //       folderIds: folderIdsToDelete,
+      //       status: false,
+      //     },
+      //     {
+      //       params: { brand_id: brandId },
+      //     }
+      //   );
+      // }
 
-      setFolders((prev) =>
-        prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
-      );
-      setFiles((prev) =>
-        prev.filter((file) => !fileIdsToDelete.includes(file._id))
-      );
+      // if (fileIdsToDelete.length > 0) {
+      //   await Promise.all(
+      //     fileIdsToDelete.map((fileId) =>
+      //       axios.post(
+      //         `${apiUrl}/v1/collateral/bin/file/${fileId}`,
+      //         {
+      //           status: false,
+      //           file_delete: true,
+      //         },
+      //         {
+      //           params: { brand_id: brandId },
+      //         }
+      //       )
+      //     )
+      //   );
+      // }
+
+      // setFolders((prev) =>
+      //   prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
+      // );
+      // setFiles((prev) =>
+      //   prev.filter((file) => !fileIdsToDelete.includes(file._id))
+      // );
 
       setSelectedItems({ files: [], folders: [] });
     } catch (error) {
@@ -264,7 +301,7 @@ const FolderView = () => {
           </button>
 
           <div className="flex items-center space-x-4">
-            <AddCollateralButton onCollateralAdded={() => {}} />
+            <AddCollateralButton onCollateralAdded={() => { }} />
             <AddFolderButton
               parentFolderId={parentId}
               brandId={brandId}
@@ -280,15 +317,15 @@ const FolderView = () => {
             {folders.map((folder) => (
               <div
                 key={folder._id}
-                className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
-                  selectedItems.folders.includes(folder._id)
-                    ? "border-2 border-blue-500"
-                    : ""
-                }`}
+                className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${selectedItems.folders.includes(folder._id)
+                  ? "border-2 border-blue-500"
+                  : ""
+                  }`}
+                onClick={() => toggleSelectItem(folder, "folder")} // Select folder on click
                 onDoubleClick={() => handleFolderDoubleClick(folder._id)} // Navigate on double-click
               >
                 <div
-                  onClick={() => toggleSelectItem(folder, "folder")} // Select folder on click
+
                   className="flex flex-col items-center justify-center cursor-pointer"
                 >
                   <img
@@ -298,64 +335,64 @@ const FolderView = () => {
                   />
                   <h3 className="font-semibold">{folder.name}</h3>
                 </div>
-
-                <FaEllipsisV
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent the click from bubbling up
-                    handleMenuClick(folder); // Show the menu for the folder
-                  }}
-                  className="absolute top-2 right-2 text-gray-500 cursor-pointer"
-                />
-
-                <DropdownMenu
-                  ref={menuRef}
-                  onRename={handleRename}
-                  onZip={handleZip}
-                  onDelete={handleDelete}
-                  visible={showMenu === folder._id}
-                  type="folder" // Pass folder type
-                />
+                <Popover>
+                  <PopoverTrigger><FaEllipsisV
+                    className="absolute top-2 right-2 text-gray-500 cursor-pointer"
+                  />
+                  </PopoverTrigger>
+                  <PopoverContent className='w-48' side="right">
+                    <DropdownMenu
+                      ref={menuRef}
+                      onRename={handleRename}
+                      onZip={handleZip}
+                      onDelete={handleDelete}
+                      // visible={showMenu === folder._id}
+                      folderId={folder._id}
+                      type="folder" // Pass folder type
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             ))}
 
             {files.map((file) => (
               <div
                 key={file._id}
-                className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
-                  selectedItems.files.includes(file._id)
-                    ? "border-2 border-blue-500"
-                    : ""
-                }`}
+                className={`w-full basis-full shrink-0 relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${selectedItems.files.includes(file._id)
+                  ? "border-2 border-blue-500"
+                  : ""
+                  }`}
+                onClick={() => toggleSelectItem(file, "file")}
               >
                 <div
-                  onClick={() => toggleSelectItem(file, "file")} // Select file on click
+                  // Select file on click
                   className="cursor-pointer"
                 >
                   {renderFilePreview(file)}
                 </div>
-
-                <FaEllipsisV
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent the click from bubbling up
-                    handleMenuClick(file); // Show the menu for the file
-                  }}
-                  className="absolute top-2 right-2 text-gray-500 cursor-pointer"
-                />
-
-                <DropdownMenu
-                  ref={menuRef}
-                  onDownload={handleDownload}
-                  onRename={handleRename}
-                  onDelete={handleDelete}
-                  visible={showMenu === file._id}
-                  type="file" // Pass file type
-                />
+                <Popover >
+                  <PopoverTrigger>
+                    <FaEllipsisV
+                      className="absolute top-2 right-2 text-gray-500 cursor-pointer"
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent className='w-48' side="right">
+                    <DropdownMenu
+                      ref={menuRef}
+                      onDownload={handleDownload}
+                      onRename={handleRename}
+                      onDelete={handleDelete}
+                      fileId={file._id}
+                      type="file" // Pass file type
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </main>
+    </main >
   );
 };
 
