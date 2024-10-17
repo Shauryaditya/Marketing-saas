@@ -14,8 +14,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-
+} from "@/components/ui/popover";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -120,13 +119,13 @@ const FolderView = () => {
   };
 
   const handleDelete = async (e, type, folderId, fileId) => {
-    e.stopPropagation()
-    console.log('selected folder', type, folderId, fileId);
+    e.stopPropagation();
+    console.log("selected folder", type, folderId, fileId);
     try {
       const folderIdsToDelete = selectedItems.folders;
       const fileIdsToDelete = selectedItems.files;
 
-      if (type == 'folder') {
+      if (type == "folder") {
         await axios.post(
           `${apiUrl}/v1/collateral/update/status`,
           {
@@ -141,7 +140,7 @@ const FolderView = () => {
           prev.filter((folder) => folder._id !== folderId)
         );
       }
-      if (type == 'file') {
+      if (type == "file") {
         await axios.post(
           `${apiUrl}/v1/collateral/bin/file/${fileId}`,
           {
@@ -151,9 +150,8 @@ const FolderView = () => {
           {
             params: { brand_id: brandId },
           }
-        )
-        return setFiles((prev) =>
-          prev.filter((file) => file._id !== fileId));
+        );
+        return setFiles((prev) => prev.filter((file) => file._id !== fileId));
       }
       // if (folderIdsToDelete.length > 0) {
       //   await axios.post(
@@ -301,7 +299,7 @@ const FolderView = () => {
           </button>
 
           <div className="flex items-center space-x-4">
-            <AddCollateralButton onCollateralAdded={() => { }} />
+            <AddCollateralButton onCollateralAdded={() => {}} />
             <AddFolderButton
               parentFolderId={parentId}
               brandId={brandId}
@@ -317,17 +315,15 @@ const FolderView = () => {
             {folders.map((folder) => (
               <div
                 key={folder._id}
-                className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${selectedItems.folders.includes(folder._id)
-                  ? "border-2 border-blue-500"
-                  : ""
-                  }`}
+                className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
+                  selectedItems.folders.includes(folder._id)
+                    ? "border-2 border-blue-500"
+                    : ""
+                }`}
                 onClick={() => toggleSelectItem(folder, "folder")} // Select folder on click
                 onDoubleClick={() => handleFolderDoubleClick(folder._id)} // Navigate on double-click
               >
-                <div
-
-                  className="flex flex-col items-center justify-center cursor-pointer"
-                >
+                <div className="flex flex-col items-center justify-center cursor-pointer">
                   <img
                     src="https://i.redd.it/cglk1r8sbyf71.png"
                     alt={folder.name}
@@ -336,11 +332,10 @@ const FolderView = () => {
                   <h3 className="font-semibold">{folder.name}</h3>
                 </div>
                 <Popover>
-                  <PopoverTrigger><FaEllipsisV
-                    className="absolute top-2 right-2 text-gray-500 cursor-pointer"
-                  />
+                  <PopoverTrigger>
+                    <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
                   </PopoverTrigger>
-                  <PopoverContent className='w-48' side="right">
+                  <PopoverContent className="w-36 text-xs" side="right">
                     <DropdownMenu
                       ref={menuRef}
                       onRename={handleRename}
@@ -358,10 +353,11 @@ const FolderView = () => {
             {files.map((file) => (
               <div
                 key={file._id}
-                className={`w-full basis-full shrink-0 relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${selectedItems.files.includes(file._id)
-                  ? "border-2 border-blue-500"
-                  : ""
-                  }`}
+                className={`w-full basis-full shrink-0 relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
+                  selectedItems.files.includes(file._id)
+                    ? "border-2 border-blue-500"
+                    : ""
+                }`}
                 onClick={() => toggleSelectItem(file, "file")}
               >
                 <div
@@ -370,13 +366,11 @@ const FolderView = () => {
                 >
                   {renderFilePreview(file)}
                 </div>
-                <Popover >
+                <Popover>
                   <PopoverTrigger>
-                    <FaEllipsisV
-                      className="absolute top-2 right-2 text-gray-500 cursor-pointer"
-                    />
+                    <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
                   </PopoverTrigger>
-                  <PopoverContent className='w-48' side="right">
+                  <PopoverContent className="w-36 text-xs" side="right">
                     <DropdownMenu
                       ref={menuRef}
                       onDownload={handleDownload}
@@ -392,7 +386,7 @@ const FolderView = () => {
           </div>
         </div>
       </div>
-    </main >
+    </main>
   );
 };
 
