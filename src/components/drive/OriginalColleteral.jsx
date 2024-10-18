@@ -266,7 +266,13 @@ const OriginalCollateral = () => {
               items.map((item) => (
                 <div
                   key={item._id}
-                  className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                  className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
+                    selectedItems.folders.includes(folder._id)
+                      ? "border-2 border-blue-500"
+                      : ""
+                  }`}
+                  onClick={() => toggleSelectItem(folder, "folder")} // Select folder on click
+                  onDoubleClick={() => handleFolderDoubleClick(folder._id)}
                 >
                   <Link
                     to={`/item/${brandId}/${item._id}`}
@@ -278,6 +284,22 @@ const OriginalCollateral = () => {
                       className="h-16 w-16 mb-4"
                     />
                     <h3 className="font-semibold">{item.name}</h3>
+                    <Popover>
+                      <PopoverTrigger>
+                        <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-36 text-xs" side="right">
+                        <DropdownMenu
+                          ref={menuRef}
+                          onRename={handleRename}
+                          onZip={handleZip}
+                          onDelete={handleDelete}
+                          // visible={showMenu === folder._id}
+                          folderId={folder._id}
+                          type="folder" // Pass folder type
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </Link>
                 </div>
               ))}
