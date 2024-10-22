@@ -118,77 +118,48 @@ const FolderView = () => {
     }
   };
 
-  const handleDelete = async (e, type, folderId, fileId) => {
+  const handleDelete = async (e, type) => {
     e.stopPropagation();
-    console.log("selected folder", type, folderId, fileId);
+    console.log("selected folder", type);
     try {
       const folderIdsToDelete = selectedItems.folders;
       const fileIdsToDelete = selectedItems.files;
 
-      if (type == "folder") {
+      if (type === "folder" && folderIdsToDelete.length > 0) {
+        // Delete multiple folders
         await axios.post(
           `${apiUrl}/v1/collateral/update/status`,
           {
-            folderIds: [folderId],
+            folderIds: folderIdsToDelete,
             status: false,
           },
           {
             params: { brand_id: brandId },
           }
         );
-        return setFolders((prev) =>
-          prev.filter((folder) => folder._id !== folderId)
+        setFolders((prev) =>
+          prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
         );
       }
-      if (type == "file") {
+
+      if (type === "file" && fileIdsToDelete.length > 0) {
+        // Prepare the request payload for multiple files
+        const filesToDelete = fileIdsToDelete.map((fileId) => ({
+          fileId: fileId,
+          status: false,
+          file_delete: true,
+        }));
+
+        // Send the deletion request for multiple files
         await axios.post(
-          `${apiUrl}/v1/collateral/bin/file/${fileId}`,
-          {
-            status: false,
-            file_delete: true,
-          },
-          {
-            params: { brand_id: brandId },
-          }
+          `${apiUrl}/v1/collateral/bin/file`,
+          { files: filesToDelete } // Wrap in the "files" object
         );
-        return setFiles((prev) => prev.filter((file) => file._id !== fileId));
+
+        setFiles((prev) =>
+          prev.filter((file) => !fileIdsToDelete.includes(file._id))
+        );
       }
-      // if (folderIdsToDelete.length > 0) {
-      //   await axios.post(
-      //     `${apiUrl}/v1/collateral/update/status`,
-      //     {
-      //       folderIds: folderIdsToDelete,
-      //       status: false,
-      //     },
-      //     {
-      //       params: { brand_id: brandId },
-      //     }
-      //   );
-      // }
-
-      // if (fileIdsToDelete.length > 0) {
-      //   await Promise.all(
-      //     fileIdsToDelete.map((fileId) =>
-      //       axios.post(
-      //         `${apiUrl}/v1/collateral/bin/file/${fileId}`,
-      //         {
-      //           status: false,
-      //           file_delete: true,
-      //         },
-      //         {
-      //           params: { brand_id: brandId },
-      //         }
-      //       )
-      //     )
-      //   );
-      // }
-
-      // setFolders((prev) =>
-      //   prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
-      // );
-      // setFiles((prev) =>
-      //   prev.filter((file) => !fileIdsToDelete.includes(file._id))
-      // );
 
       setSelectedItems({ files: [], folders: [] });
     } catch (error) {

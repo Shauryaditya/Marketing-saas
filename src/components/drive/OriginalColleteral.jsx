@@ -212,17 +212,20 @@ const OriginalCollateral = () => {
     try {
       const accessToken = localStorage.getItem("access_token");
 
-      // Prepare an array of folder IDs for restoration
-      const folderIds = recycleBinItems
-        .filter((item) => selectedItems.includes(item._id))
-        .map((item) => item._id);
+      // Prepare an array of files for restoration
+      const fileRestoreData = recycleBinFiles
+        .filter((file) => selectedItems.includes(file._id))
+        .map((file) => ({
+          fileId: file._id,
+          status: true, // Restore the file by setting status to true
+          file_delete: false, // Assuming this flag indicates the file should not be deleted
+        }));
 
-      if (folderIds.length > 0) {
+      if (fileRestoreData.length > 0) {
         await axios.post(
-          `${apiUrl}/update/status`,
+          `${apiUrl}/bin/file`, // Update the API URL to the correct endpoint for restoring files
           {
-            folderIds: folderIds,
-            status: true, // Restore the folder by setting status to true
+            files: fileRestoreData, // Pass the constructed array
           },
           {
             headers: {
@@ -231,9 +234,9 @@ const OriginalCollateral = () => {
           }
         );
 
-        // Remove restored folders from the recycle bin list
-        setRecycleBinItems((prevItems) =>
-          prevItems.filter((item) => !selectedItems.includes(item._id))
+        // Remove restored files from the recycle bin list
+        setRecycleBinFiles((prevFiles) =>
+          prevFiles.filter((file) => !selectedItems.includes(file._id))
         );
 
         setSelectedItems([]); // Clear selection after restore
