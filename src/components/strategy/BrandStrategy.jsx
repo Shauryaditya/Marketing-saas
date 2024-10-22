@@ -37,6 +37,8 @@ const BrandStrategy = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [tags, setTags] = useState("");
   const [fileUri, setFileUri] = useState("");
+  const[errorMessage,setErrorMessage]= useState()
+  const [loading,setLoading] = useState(true)
 
   useEffect(() => {
     if (selectedMonth && selectedYear) {
@@ -132,20 +134,39 @@ const BrandStrategy = () => {
   }, [selectedMonth, selectedYear]);
 
   const handleAddGroup = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      focus: [...prevFormData.focus, { percent: "", focus_id: "" }],
-    }));
+    setFormData((prevFormData) => {
+      if (prevFormData.focus.length >= focus.length) {
+        setErrorMessage("Cannot add more focus groups than available options.");
+        return prevFormData;
+      }
+
+      setErrorMessage(""); // Clear any previous error
+      return {
+        ...prevFormData,
+        focus: [...prevFormData.focus, { percent: "", focus_id: "" }],
+      };
+    });
   };
+
   const handleRemoveGroup = (index) => {
     setFormData((prevFormData) => {
       const updatedFocus = prevFormData.focus.filter((_, i) => i !== index);
+
+      const totalPercentage = updatedFocus.reduce((sum, group) => {
+        return sum + (parseFloat(group.percent) || 0);
+      }, 0);
+
+      if (totalPercentage <= 100) {
+        setErrorMessage(""); // Clear error if within limits
+      }
+
       return {
         ...prevFormData,
         focus: updatedFocus,
       };
     });
   };
+
   const handleInputChange = (e, field) => {
     const value = e.target.value;
     if (field === "tags") {
@@ -172,6 +193,17 @@ const BrandStrategy = () => {
       const updatedFocus = prevFormData.focus.map((item, i) =>
         i === index ? { ...item, [name]: value } : item
       );
+
+      const totalPercentage = updatedFocus.reduce((sum, group) => {
+        return sum + (parseFloat(group.percent) || 0);
+      }, 0);
+
+      if (totalPercentage > 100) {
+        setErrorMessage("Total percentage cannot exceed 100%");
+        return prevFormData; // Prevent updating if percentage exceeds 100%
+      }
+
+      setErrorMessage(""); // Clear error if within limits
       return {
         ...prevFormData,
         focus: updatedFocus,
@@ -484,13 +516,17 @@ const BrandStrategy = () => {
                 ))}
 
                 <div className="mt-2">
-                  <PlusCircle
-                    onClick={handleAddGroup}
-                    height="18"
-                    width="18"
-                    className="cursor-pointer text-green-500"
-                  />
+                  {formData.focus.length < focus.length && (
+                    <PlusCircle
+                      onClick={handleAddGroup}
+                      height="18"
+                      width="18"
+                      className="cursor-pointer text-green-500"
+                    />
+                  )}
                 </div>
+
+                {errorMessage && <p className="text-red-500">{errorMessage}</p>}
               </div>
             </div>
           </div>
