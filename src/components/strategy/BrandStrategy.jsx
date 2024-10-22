@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Facebook, PlusCircle } from "lucide-react";
+import { Facebook, MinusCircle, PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
@@ -137,7 +137,15 @@ const BrandStrategy = () => {
       focus: [...prevFormData.focus, { percent: "", focus_id: "" }],
     }));
   };
-
+  const handleRemoveGroup = (index) => {
+    setFormData((prevFormData) => {
+      const updatedFocus = prevFormData.focus.filter((_, i) => i !== index);
+      return {
+        ...prevFormData,
+        focus: updatedFocus,
+      };
+    });
+  };
   const handleInputChange = (e, field) => {
     const value = e.target.value;
     if (field === "tags") {
@@ -464,14 +472,25 @@ const BrandStrategy = () => {
                         </option>
                       ))}
                     </select>
-                    <PlusCircle
-                      onClick={handleAddGroup}
-                      height="18"
-                      width="18"
-                      className="cursor-pointer"
-                    />
+                    {formData.focus.length > 1 && (
+                      <MinusCircle
+                        onClick={() => handleRemoveGroup(index)}
+                        height="18"
+                        width="18"
+                        className="cursor-pointer text-red-500"
+                      />
+                    )}
                   </div>
                 ))}
+
+                <div className="mt-2">
+                  <PlusCircle
+                    onClick={handleAddGroup}
+                    height="18"
+                    width="18"
+                    className="cursor-pointer text-green-500"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -797,15 +816,14 @@ const BrandStrategy = () => {
                     )}
                   </div>
                 ))}
-                              <button
-                type="button"
-                className="flex items-center justify-end mt-2 text-blue-500"
-                onClick={handleAddDate}
-              >
-                <PlusCircle />
-              </button>
+                <button
+                  type="button"
+                  className="flex items-center justify-end mt-2 text-blue-500"
+                  onClick={handleAddDate}
+                >
+                  <PlusCircle />
+                </button>
               </div>
-
             </div>
           </div>
 
