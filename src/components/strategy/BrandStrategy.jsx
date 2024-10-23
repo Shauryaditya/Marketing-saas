@@ -37,8 +37,8 @@ const BrandStrategy = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [tags, setTags] = useState("");
   const [fileUri, setFileUri] = useState("");
-  const[errorMessage,setErrorMessage]= useState()
-  const [loading,setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (selectedMonth && selectedYear) {
@@ -76,6 +76,19 @@ const BrandStrategy = () => {
 
         if (response.data.data.length > 0) {
           const data = response.data.data[0];
+
+          // Extract the month and year from the API response
+          if (data.month) {
+            const date = new Date(data.month); // Parse the date from the API (ISO format)
+            const apiYear = date.getFullYear(); // Get the year
+            const apiMonth = date.getMonth() + 1; // Get the month (0-indexed, so add 1)
+
+            // Update the selectedMonth and selectedYear states
+            setSelectedMonth(apiMonth);
+            setSelectedYear(apiYear);
+          }
+
+          // Update formData with the rest of the API data
           setFormData((prevState) => ({
             ...prevState,
             ...data,
@@ -94,7 +107,12 @@ const BrandStrategy = () => {
     }
   }, [strategyId]);
 
+  console.log("Strategy Id>>>??", strategyId, formData);
+
   useEffect(() => {
+    // Skip this call if strategyId is available
+    if (strategyId) return;
+
     const fetchData = async () => {
       const formattedMonth =
         selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
@@ -102,16 +120,13 @@ const BrandStrategy = () => {
 
       console.log("Month", formattedDate);
       try {
-        // Construct the URL with the parameters
         const apiurl = `${url}/v1/Strategy/get/${id}/${formattedDate}`;
-        // Make the GET request
         const response = await axios.get(apiurl, {
           headers: {
             Authorization: `Bearer ${token}`, // Add token if required
           },
         });
 
-        // Update formData with the response data
         if (
           response.data &&
           response.data.data &&
@@ -130,8 +145,9 @@ const BrandStrategy = () => {
         );
       }
     };
+
     fetchData();
-  }, [selectedMonth, selectedYear]);
+  }, [selectedMonth, selectedYear, strategyId]); // Added strategyId to dependency array
 
   const handleAddGroup = () => {
     setFormData((prevFormData) => {
@@ -274,6 +290,13 @@ const BrandStrategy = () => {
   };
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
+  const handleRemoveFile = (index) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      documents: prevFormData.documents.filter((_, i) => i !== index),
+    }));
+  };
 
   // Function to handle changing date fields
   const handleDateChange = (index, field, value) => {
@@ -901,9 +924,12 @@ const BrandStrategy = () => {
                 <h1 className="text-sm font-semibold">Preview :</h1>
                 {formData.documents.length > 0
                   ? formData.documents.map((file, index) => {
-                      const isImage = file;
+                      const isImage = file; // You can add more logic to check if it's an image based on file type
                       return (
-                        <div key={index} className="mt-2">
+                        <div
+                          key={index}
+                          className="mt-2 flex flex-col items-center"
+                        >
                           {isImage ? (
                             <a
                               href={file}
@@ -912,7 +938,7 @@ const BrandStrategy = () => {
                             >
                               <img
                                 src={file}
-                                alt={file.name}
+                                alt={`file-${index}`}
                                 className="mt-1 max-h-32"
                               />
                             </a>
@@ -926,6 +952,13 @@ const BrandStrategy = () => {
                               View File
                             </a>
                           )}
+                          {/* Remove button */}
+                          <button
+                            onClick={() => handleRemoveFile(index)}
+                            className="mt-1 text-xs text-red-500 hover:underline"
+                          >
+                            Remove
+                          </button>
                         </div>
                       );
                     })
