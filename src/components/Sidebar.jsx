@@ -186,7 +186,7 @@ const Sidebar = () => {
       <div className="p-4">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 w-full p-2 rounded bg-red-500 text-white hover:bg-red-600"
+          className="flex items-center gap-2 w-full p-2 rounded bg-gray-400 text-white hover:bg-red-400"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
