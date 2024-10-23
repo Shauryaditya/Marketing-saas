@@ -1,89 +1,246 @@
 import React, { useState } from "react";
 
 const ProfileSection = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [reportingTo, setReportingTo] = useState("");
+  const [formData, setFormData] = useState({
+    name: "Alexa Rawles",
+    employeeId: "ID09864",
+    mobileNumber: "0000000000",
+    email: "alexarawles@gmail.com",
+    designation: "Designation name",
+    department: "Department name",
+    subDepartment: "Sub-Department name",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission
+    // Handle form submission here
   };
 
   return (
-    <div className="max-w-xs mx-auto p-6 mt-8 bg-white shadow-lg rounded-lg">
-      <div className="flex items-center space-x-4 mb-6">
-        <img
-          className="w-24 h-24 rounded-full object-cover"
-          src="https://via.placeholder.com/150"
-          alt="Profile"
-        />
+    <div className="max-w-4xl mx-auto p-8 text-xs bg-gray-50">
+      {/* Profile and Info Section */}
+      <div className="bg-white shadow-md p-6 rounded-lg flex items-center space-x-6">
+        <div className="relative">
+          <img
+            className="w-20 h-20 rounded-full object-cover"
+            src="https://via.placeholder.com/150"
+            alt="Profile"
+          />
+          <button className="absolute bottom-0 right-0 bg-blue-500 text-white p-1 rounded-full">
+            📷
+          </button>
+        </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Profile</h2>
+          <h2 className="text-lg font-semibold">{formData.name}</h2>
+          <p className="text-sm text-gray-500">{formData.email}</p>
+          <p className="text-sm text-gray-500">
+            Employee ID: {formData.employeeId}
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+      {/* Form Section */}
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-3 gap-4 mt-6 max-w-3xl mx-auto"
+      >
+        {/* Name */}
+        <div className="col-span-1">
           <label
-            htmlFor="username"
+            htmlFor="name"
             className="block text-sm font-medium text-gray-700"
           >
-            Username
+            Name
           </label>
           <input
-            id="username"
+            id="name"
+            name="name"
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            value={formData.name}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
         </div>
 
-        <div>
+        {/* Employee ID */}
+        <div className="col-span-1">
           <label
-            htmlFor="password"
+            htmlFor="employeeId"
             className="block text-sm font-medium text-gray-700"
           >
-            Password
+            Employee ID
           </label>
           <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            required
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="reportingTo"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Reporting To
-          </label>
-          <input
-            id="reportingTo"
+            id="employeeId"
+            name="employeeId"
             type="text"
-            value={reportingTo}
-            onChange={(e) => setReportingTo(e.target.value)}
-            className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            value={formData.employeeId}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
             required
           />
         </div>
 
-        <div>
+        {/* Mobile Number */}
+        <div className="col-span-1">
+          <label
+            htmlFor="mobileNumber"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Mobile Number
+          </label>
+          <input
+            id="mobileNumber"
+            name="mobileNumber"
+            type="text"
+            value={formData.mobileNumber}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+        </div>
+
+        {/* Designation */}
+        <div className="col-span-1">
+          <label
+            htmlFor="designation"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Designation
+          </label>
+          <input
+            id="designation"
+            name="designation"
+            type="text"
+            value={formData.designation}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+        </div>
+
+        {/* Department */}
+        <div className="col-span-1">
+          <label
+            htmlFor="department"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Department
+          </label>
+          <input
+            id="department"
+            name="department"
+            type="text"
+            value={formData.department}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+        </div>
+
+        {/* Sub-Department */}
+        <div className="col-span-1">
+          <label
+            htmlFor="subDepartment"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Sub-Department
+          </label>
+          <input
+            id="subDepartment"
+            name="subDepartment"
+            type="text"
+            value={formData.subDepartment}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+        </div>
+
+        {/* Email (Pre-filled, non-editable) */}
+        <div className="col-span-1">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            readOnly
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        {/* Save Button */}
+        <div className="col-span-3 flex justify-end mt-4">
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-1 px-4 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md"
           >
-            Save Changes
+            Save
           </button>
         </div>
       </form>
+
+      {/* Brand Table Section */}
+      <div className="mt-8 bg-white shadow-md rounded-lg w-1/3">
+        <table className="min-w-full bg-white rounded-lg">
+          <thead>
+            <tr>
+              <th className="px-2 py-2 border-b">Sr.</th>
+              <th className="px-2 py-2 border-b">Brand Name</th>
+              <th className="px-2 py-2 border-b">Preview</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="px-2 py-2 border-b">1</td>
+              <td className="px-2 py-2 border-b">Novium</td>
+              <td className="px-2 py-2 border-b">
+                <button className="text-blue-500">🔍</button>
+              </td>
+            </tr>
+            <tr>
+              <td className="px-2 py-2 border-b">2</td>
+              <td className="px-2 py-2 border-b">Blacksmith</td>
+              <td className="px-2 py-2 border-b">
+                <button className="text-blue-500">🔍</button>
+              </td>
+            </tr>
+            <tr>
+              <td className="px-2 py-2 border-b">3</td>
+              <td className="px-2 py-2 border-b">Sinex</td>
+              <td className="px-2 py-2 border-b">
+                <button className="text-blue-500">🔍</button>
+              </td>
+            </tr>
+            <tr>
+              <td className="px-2 py-2 border-b">4</td>
+              <td className="px-2 py-2 border-b">Bombol</td>
+              <td className="px-2 py-2 border-b">
+                <button className="text-blue-500">🔍</button>
+              </td>
+            </tr>
+            <tr>
+              <td className="px-2 py-2 border-b">5</td>
+              <td className="px-2 py-2 border-b">Lofree</td>
+              <td className="px-2 py-2 border-b">
+                <button className="text-blue-500">🔍</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
