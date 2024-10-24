@@ -98,23 +98,27 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
         {/* Description */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium text-sm uppercase">
+          <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Description
           </h3>
-          <p className="text-gray-500 text-xs">{taskData?.description}</p>
+          <p className="text-start text-gray-500 text-xs">{taskData?.description}</p>
         </div>
 
         {/* Captions */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium text-sm uppercase">
+          <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Captions
           </h3>
           <div className="text-gray-500 text-xs">
             {/* Check if contentWriterData exists and map it */}
             {contentWriterData?.length > 0 ? (
               contentWriterData.map((item, index) => (
-                <p key={index} className="mb-2">
-                  {item.content_caption}
+
+                <p key={index} className="mb-2 text-start text-xs font-semibold text-gray-500">
+                  {item.content_caption?.trim()
+                    ? item.content_caption
+                    : "No caption available"}
+
                 </p>
               ))
             ) : (
@@ -124,21 +128,29 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
         </div>
         {/* Captions */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium text-sm uppercase">
+          <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Uploaded Images
           </h3>
           <div className="flex flex-wrap space-x-2">
             {/* Check if contentWriterData exists and map it */}
             {taskData?.images?.length > 0 ? (
-              taskData?.images.map((item, index) => (
-                <div key={index} className="mb-4">
-                  <img
-                    src={item.image_url} // Assuming image_url is the key for the image source
-                    alt={item.content_caption}
-                    className="w-24 h-24 object-cover rounded-lg" // Adjust width and height as per your layout
-                  />
-                </div>
-              ))
+
+              taskData.images.every((item) => item.image_url) ? (
+                taskData.images.map((item, index) => (
+                  <div key={index} className="mb-4">
+                    <img
+                      src={item.image_url}
+                      alt={item.content_caption || "Image"}
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-start text-xs font-semibold text-gray-500">
+                  No images available
+                </p>
+              )
+
             ) : (
               <p>No images available</p>
             )}
@@ -147,7 +159,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
         {/* Social Media Buttons */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium uppercase text-sm">
+          <h3 className="text-start text-gray-700 font-medium uppercase text-sm">
             Platform
           </h3>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -166,9 +178,9 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
         </div>
 
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium uppercase text-sm">
-           #Tags
-          </h3>
+
+          <h3 className="text-start text-gray-700 font-medium uppercase text-sm">#Tags</h3>
+
           <div className="flex flex-wrap gap-2 mt-2">
             {/* Map over the platforms to create buttons dynamically */}
             {taskData?.tags_data.map((item, index) => (

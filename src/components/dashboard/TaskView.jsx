@@ -110,8 +110,11 @@ const TaskView = () => {
                         Preview
                       </button>
                       {showModal && (
-                        <TaskModal
-                          showModal={showModal}
+
+                        <GraphicDesignerModal
+                          show={showModal}
+                          taskId={selectedTaskId} // Pass the selected task ID to the modal
+
                           onClose={() => setShowModal(false)}
                         />
                       )}
@@ -173,8 +176,11 @@ const TaskView = () => {
                         Preview
                       </button>
                       {showModal && (
-                        <TaskModal
-                          showModal={showModal}
+
+                        <GraphicDesignerModal
+                          show={showModal}
+                          taskId={selectedTaskId} // Pass the selected task ID to the modal
+
                           onClose={() => setShowModal(false)}
                         />
                       )}
@@ -237,8 +243,11 @@ const TaskView = () => {
                         Preview
                       </button>
                       {showModal && (
-                        <TaskModal
-                          showModal={showModal}
+
+                        <GraphicDesignerModal
+                          show={showModal}
+                          taskId={selectedTaskId} // Pass the selected task ID to the modal
+
                           onClose={() => setShowModal(false)}
                         />
                       )}
