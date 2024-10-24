@@ -119,6 +119,7 @@ const OriginalCollateral = () => {
           }
         );
         setItems(response.data);
+        console.log("data", response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -361,8 +362,8 @@ const OriginalCollateral = () => {
           ← Back
         </button>
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-xl text-left text-blue-400 font-semibold mb-6">
-            {isRecycleBinOpen ? "Recycle Bin" : "Original Collateral"}
+          <h1 className="text-xl text-left font-semibold mb-6">
+            {isRecycleBinOpen ? "Recycle Bin" : ``}
           </h1>
           <div className="flex items-center space-x-4">
             {!isRecycleBinOpen && (
