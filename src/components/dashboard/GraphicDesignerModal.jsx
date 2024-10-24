@@ -122,7 +122,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
                 </p>
               ))
             ) : (
-              <p>No captions available</p>
+              <p className="text-start text-xs font-semibold text-gray-500">No captions available</p>
             )}
           </div>
         </div>
@@ -152,7 +152,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
               )
 
             ) : (
-              <p>No images available</p>
+              <p className="text-start text-xs font-semibold text-gray-500">No images available</p>
             )}
           </div>
         </div>
