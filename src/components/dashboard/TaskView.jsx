@@ -116,7 +116,7 @@ const TaskView = () => {
                       </button>
                       {showModal && (
                         <GraphicDesignerModal
-                          showModal={showModal}
+                          show={showModal}
                           taskId={selectedTaskId} // Pass the selected task ID to the modal
                           onClose={() => setShowModal(false)}
                         />
@@ -183,7 +183,7 @@ const TaskView = () => {
                       </button>
                       {showModal && (
                         <GraphicDesignerModal
-                          showModal={showModal}
+                          show={showModal}
                           taskId={selectedTaskId} // Pass the selected task ID to the modal
                           onClose={() => setShowModal(false)}
                         />
@@ -252,7 +252,7 @@ const TaskView = () => {
                       </button>
                       {showModal && (
                         <GraphicDesignerModal
-                          showModal={showModal}
+                          show={showModal}
                           taskId={selectedTaskId} // Pass the selected task ID to the modal
                           onClose={() => setShowModal(false)}
                         />

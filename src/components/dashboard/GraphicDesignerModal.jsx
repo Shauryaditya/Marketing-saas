@@ -98,22 +98,22 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
         {/* Description */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium text-sm uppercase">
+          <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Description
           </h3>
-          <p className="text-gray-500 text-xs">{taskData?.description}</p>
+          <p className="text-start text-gray-500 text-xs">{taskData?.description}</p>
         </div>
 
         {/* Captions */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium text-sm uppercase">
+          <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Captions
           </h3>
           <div className="text-gray-500 text-xs">
             {/* Check if contentWriterData exists and map it */}
             {contentWriterData?.length > 0 ? (
               contentWriterData.map((item, index) => (
-                <p key={index} className="mb-2 text-xs font-semibold text-gray-500">
+                <p key={index} className="mb-2 text-start text-xs font-semibold text-gray-500">
                   {item.content_caption?.trim()
                     ? item.content_caption
                     : "No caption available"}
@@ -126,7 +126,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
         </div>
         {/* Captions */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium text-sm uppercase">
+          <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Uploaded Images
           </h3>
           <div className="flex flex-wrap space-x-2">
@@ -143,7 +143,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
                   </div>
                 ))
               ) : (
-                <p className="text-xs font-semibold text-gray-500">
+                <p className="text-start text-xs font-semibold text-gray-500">
                   No images available
                 </p>
               )
@@ -155,7 +155,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
         {/* Social Media Buttons */}
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium uppercase text-sm">
+          <h3 className="text-start text-gray-700 font-medium uppercase text-sm">
             Platform
           </h3>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -174,7 +174,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
         </div>
 
         <div className="mb-4 px-4">
-          <h3 className="text-gray-700 font-medium uppercase text-sm">#Tags</h3>
+          <h3 className="text-start text-gray-700 font-medium uppercase text-sm">#Tags</h3>
           <div className="flex flex-wrap gap-2 mt-2">
             {/* Check if taskData and tags_data exist and if tags_data is not an empty array */}
             {taskData?.tags_data && taskData.tags_data.length > 0 ? (
