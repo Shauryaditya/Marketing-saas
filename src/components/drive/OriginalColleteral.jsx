@@ -218,20 +218,25 @@ const OriginalCollateral = () => {
     try {
       const accessToken = localStorage.getItem("access_token");
 
-      // Prepare an array of files for restoration
+      // Prepare data for restoration
       const fileRestoreData = recycleBinFiles
         .filter((file) => selectedItem.includes(file._id))
         .map((file) => ({
           fileId: file._id,
           status: true, // Restore the file by setting status to true
-          file_delete: false, // Assuming this flag indicates the file should not be deleted
+          file_delete: false, // Indicate the file should not be deleted
         }));
 
+      const folderIds = recycleBinItems
+        .filter((item) => selectedItem.includes(item._id))
+        .map((item) => item._id);
+
+      // Restore files if any
       if (fileRestoreData.length > 0) {
         await axios.post(
-          `${apiUrl}/bin/file`, // Update the API URL to the correct endpoint for restoring files
+          `${apiUrl}/bin/file`, // Endpoint for restoring files
           {
-            files: fileRestoreData, // Pass the constructed array
+            files: fileRestoreData,
           },
           {
             headers: {
@@ -244,9 +249,31 @@ const OriginalCollateral = () => {
         setRecycleBinFiles((prevFiles) =>
           prevFiles.filter((file) => !selectedItem.includes(file._id))
         );
-
-        setSelectedItem([]); // Clear selection after restore
       }
+
+      // Restore folders if any
+      if (folderIds.length > 0) {
+        await axios.post(
+          `${apiUrl}/update/status`, // Endpoint for restoring folders
+          {
+            folderIds: folderIds,
+            status: true, // Restore the folder by setting status to true
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Remove restored folders from the recycle bin list
+        setRecycleBinItems((prevItems) =>
+          prevItems.filter((item) => !selectedItem.includes(item._id))
+        );
+      }
+
+      // Clear selection after restore
+      setSelectedItem([]);
     } catch (error) {
       setError("Failed to restore items.");
       console.error(error);
