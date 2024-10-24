@@ -44,6 +44,7 @@ const OriginalCollateral = () => {
     files: [],
     folders: [],
   });
+  const [selectedItem, setSelectedItem] = useState([]);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -191,7 +192,7 @@ const OriginalCollateral = () => {
 
   // Select or deselect folder or file
   const handleSelection = (id) => {
-    setSelectedItems((prevSelected) =>
+    setSelectedItem((prevSelected) =>
       prevSelected.includes(id)
         ? prevSelected.filter((itemId) => itemId !== id)
         : [...prevSelected, id]
@@ -219,7 +220,7 @@ const OriginalCollateral = () => {
 
       // Prepare an array of files for restoration
       const fileRestoreData = recycleBinFiles
-        .filter((file) => selectedItems.includes(file._id))
+        .filter((file) => selectedItem.includes(file._id))
         .map((file) => ({
           fileId: file._id,
           status: true, // Restore the file by setting status to true
@@ -241,10 +242,10 @@ const OriginalCollateral = () => {
 
         // Remove restored files from the recycle bin list
         setRecycleBinFiles((prevFiles) =>
-          prevFiles.filter((file) => !selectedItems.includes(file._id))
+          prevFiles.filter((file) => !selectedItem.includes(file._id))
         );
 
-        setSelectedItems([]); // Clear selection after restore
+        setSelectedItem([]); // Clear selection after restore
       }
     } catch (error) {
       setError("Failed to restore items.");
@@ -263,11 +264,11 @@ const OriginalCollateral = () => {
 
       // Prepare separate arrays for folders and files
       const folderIds = recycleBinItems
-        .filter((item) => selectedItems.includes(item._id))
+        .filter((item) => selectedItem.includes(item._id))
         .map((item) => item._id);
 
       const fileIds = recycleBinFiles
-        .filter((file) => selectedItems.includes(file._id))
+        .filter((file) => selectedItem.includes(file._id))
         .map((file) => file._id);
 
       // If there are folders to delete
@@ -288,7 +289,7 @@ const OriginalCollateral = () => {
 
         // Update UI after folder delete
         setRecycleBinItems((prevItems) =>
-          prevItems.filter((item) => !selectedItems.includes(item._id))
+          prevItems.filter((item) => !selectedItem.includes(item._id))
         );
       }
 
@@ -310,11 +311,11 @@ const OriginalCollateral = () => {
 
         // Update UI after file delete
         setRecycleBinFiles((prevFiles) =>
-          prevFiles.filter((file) => !selectedItems.includes(file._id))
+          prevFiles.filter((file) => !selectedItem.includes(file._id))
         );
       }
 
-      setSelectedItems([]); // Clear selection after delete
+      setSelectedItem([]); // Clear selection after delete
     } catch (error) {
       setError("Failed to delete items.");
       console.error(error);
@@ -351,14 +352,14 @@ const OriginalCollateral = () => {
                 <button
                   onClick={handleRestore}
                   className="bg-green-100 text-green-500 hover:bg-green-200 px-2 py-1 text-xs rounded-md border border-green-200"
-                  disabled={selectedItems.length === 0 || loading}
+                  disabled={selectedItem.length === 0 || loading}
                 >
                   Restore
                 </button>
                 <button
                   onClick={handleDelete}
                   className="bg-red-100 text-red-500 hover:bg-red-200 px-2 py-1 text-xs rounded-md border border-red-200"
-                  disabled={selectedItems.length === 0 || loading}
+                  disabled={selectedItem.length === 0 || loading}
                 >
                   Delete
                 </button>
@@ -430,7 +431,7 @@ const OriginalCollateral = () => {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(item._id)}
+                      checked={selectedItem.includes(item._id)}
                       onChange={() => handleSelection(item._id)}
                       className="absolute top-2 right-2"
                     />
@@ -455,7 +456,7 @@ const OriginalCollateral = () => {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(file._id)}
+                      checked={selectedItem.includes(file._id)}
                       onChange={() => handleSelection(file._id)}
                       className="absolute top-2 right-2"
                     />
