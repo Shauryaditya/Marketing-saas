@@ -183,7 +183,7 @@ const Dashboard = () => {
           </div>
 
           {/* Additional sections */}
-          <div className="w-full flex mt-2 justify-between">
+          <div className="w-full flex mt-2 gap-4">
             <TeamsList />
             <BrandTable brands={brands} />
           </div>

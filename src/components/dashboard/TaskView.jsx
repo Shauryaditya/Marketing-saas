@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import TaskModal from "./ContentWriterModal";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
 import axios from "axios";
+import GraphicDesignerModal from "./GraphicDesignerModal";
 
 const TaskView = () => {
   setupAxiosInterceptors();
   const [showModal, setShowModal] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null); // State to hold the selected task ID
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState(null);
 
@@ -50,14 +52,14 @@ const TaskView = () => {
   };
 
   return (
-    <div className=" bg-gray-50  ">
+    <div className="bg-gray-50">
       <div className="p-2 max-w-full mx-auto">
         <div className="grid grid-cols-3 items-center mb-2">
           <h2 className="text-lg font-bold">Task</h2>
         </div>
 
         {/* Flex container for horizontal alignment */}
-        <div className="flex space-x-4 ">
+        <div className="flex space-x-4">
           {/* Pending Tasks Table */}
           <div className="w-1/2 border rounded-md bg-white h-screen overflow-y-scroll no-scrollbar">
             <div className="flex justify-center items-center bg-red-200 p-2">
@@ -105,16 +107,17 @@ const TaskView = () => {
                     <div className="w-1/3 text-center">
                       <button
                         className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md text-xs hover:bg-blue-50"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => {
+                          setSelectedTaskId(task._id); // Set the selected task ID
+                          setShowModal(true);
+                        }}
                       >
                         Preview
                       </button>
                       {showModal && (
-
                         <GraphicDesignerModal
                           show={showModal}
                           taskId={selectedTaskId} // Pass the selected task ID to the modal
-
                           onClose={() => setShowModal(false)}
                         />
                       )}
@@ -171,16 +174,17 @@ const TaskView = () => {
                     <div className="w-1/3 text-center">
                       <button
                         className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md text-xs hover:bg-blue-50"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => {
+                          setSelectedTaskId(task._id); // Set the selected task ID
+                          setShowModal(true);
+                        }}
                       >
                         Preview
                       </button>
                       {showModal && (
-
                         <GraphicDesignerModal
                           show={showModal}
                           taskId={selectedTaskId} // Pass the selected task ID to the modal
-
                           onClose={() => setShowModal(false)}
                         />
                       )}
@@ -194,6 +198,7 @@ const TaskView = () => {
               </p>
             )}
           </div>
+
           {/* Done Tasks Table */}
           <div className="w-1/2 border rounded-md bg-white h-screen overflow-y-scroll no-scrollbar">
             <div className="flex justify-center items-center bg-green-200 p-2">
@@ -238,16 +243,17 @@ const TaskView = () => {
                     <div className="w-1/3 text-center">
                       <button
                         className="px-3 py-1 border border-blue-500 text-blue-500 rounded-md text-xs hover:bg-blue-50"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => {
+                          setSelectedTaskId(task._id); // Set the selected task ID
+                          setShowModal(true);
+                        }}
                       >
                         Preview
                       </button>
                       {showModal && (
-
                         <GraphicDesignerModal
                           show={showModal}
                           taskId={selectedTaskId} // Pass the selected task ID to the modal
-
                           onClose={() => setShowModal(false)}
                         />
                       )}
@@ -256,7 +262,7 @@ const TaskView = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No approved tasks.</p>
+              <p className="text-gray-500 p-2">No approved tasks.</p>
             )}
           </div>
         </div>

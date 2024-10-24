@@ -88,10 +88,11 @@ const BrandStrategy = () => {
             setSelectedYear(apiYear);
           }
 
-          // Update formData with the rest of the API data
+          // Update formData with the API data, including social_post
           setFormData((prevState) => ({
             ...prevState,
             ...data,
+            social_post: data.social_post || [], // Ensure social_post is set, or an empty array if missing
           }));
         }
       } catch (error) {
@@ -107,47 +108,6 @@ const BrandStrategy = () => {
     }
   }, [strategyId]);
 
-  console.log("Strategy Id>>>??", strategyId, formData);
-
-  useEffect(() => {
-    // Skip this call if strategyId is available
-    if (strategyId) return;
-
-    const fetchData = async () => {
-      const formattedMonth =
-        selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
-      const formattedDate = `${selectedYear}-${formattedMonth}-01`;
-
-      console.log("Month", formattedDate);
-      try {
-        const apiurl = `${url}/v1/Strategy/get/${id}/${formattedDate}`;
-        const response = await axios.get(apiurl, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token if required
-          },
-        });
-
-        if (
-          response.data &&
-          response.data.data &&
-          response.data.data.length > 0
-        ) {
-          const data = response.data.data[0];
-          setFormData((prevState) => ({
-            ...prevState,
-            ...data,
-          }));
-        }
-      } catch (error) {
-        console.error(
-          "Error fetching data:",
-          error.response ? error.response.data : error.message
-        );
-      }
-    };
-
-    fetchData();
-  }, [selectedMonth, selectedYear, strategyId]); // Added strategyId to dependency array
 
   const handleAddGroup = () => {
     setFormData((prevFormData) => {
@@ -468,31 +428,39 @@ const BrandStrategy = () => {
             </div>
             <div className="bg-white p-2">
               <h2 className="text-xs font-bold mb-4 uppercase">Platform</h2>
-              <div className="flex space-x-4">
-                {platforms.map((platform) => (
-                  <label
-                    key={platform._id}
-                    className="flex items-center space-x-2"
-                  >
-                    <input
-                      type="checkbox"
-                      onChange={(e) =>
-                        handlePlatformChange(
-                          platform._id,
-                          platform.platform_logo,
-                          platform.platform_name,
-                          e.target.checked
-                        )
-                      }
-                    />
-                    <img
-                      className="w-6 h-6"
-                      src={platform.platform_logo}
-                      alt=""
-                    />
-                    <span>{platform.platform_name}</span>
-                  </label>
-                ))}
+              <div className="flex space-x-4 overflow-x-auto no-scrollbar">
+                {platforms.map((platform) => {
+                  // Check if the platform is already selected
+                  const isChecked = formData.social_post.some(
+                    (item) => item.social_id === platform._id
+                  );
+
+                  return (
+                    <label
+                      key={platform._id}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked} // Controlled checkbox state
+                        onChange={(e) =>
+                          handlePlatformChange(
+                            platform._id,
+                            platform.platform_logo,
+                            platform.platform_name,
+                            e.target.checked
+                          )
+                        }
+                      />
+                      <img
+                        className="w-6 h-6"
+                        src={platform.platform_logo}
+                        alt=""
+                      />
+                      <span>{platform.platform_name}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -521,11 +489,24 @@ const BrandStrategy = () => {
                       }
                     >
                       <option value="">Select a focus</option>
-                      {focus.map((f) => (
-                        <option key={f._id} value={f._id}>
-                          {f.focus_name}
-                        </option>
-                      ))}
+                      {focus.map((f) => {
+                        // Disable the option if it's already selected in another group
+                        const isDisabled = formData.focus.some(
+                          (selectedGroup, selectedIndex) =>
+                            selectedGroup.focus_id === f._id &&
+                            selectedIndex !== index
+                        );
+
+                        return (
+                          <option
+                            key={f._id}
+                            value={f._id}
+                            disabled={isDisabled}
+                          >
+                            {f.focus_name}
+                          </option>
+                        );
+                      })}
                     </select>
                     {formData.focus.length > 1 && (
                       <MinusCircle
@@ -579,6 +560,7 @@ const BrandStrategy = () => {
                           )
                         }
                       >
+                        <option value="">--Select--</option>
                         <option value="Daily">Daily</option>
                         <option value="Weekly">Weekly</option>
                         <option value="Monthly">Monthly</option>
@@ -840,7 +822,11 @@ const BrandStrategy = () => {
                         <input
                           type="date"
                           className="border p-1 rounded bg-gray-50"
-                          value={date.date}
+                          value={
+                            date.date
+                              ? new Date(date.date).toISOString().split("T")[0]
+                              : ""
+                          }
                           onChange={(e) =>
                             handleDateChange(index, "date", e.target.value)
                           }
