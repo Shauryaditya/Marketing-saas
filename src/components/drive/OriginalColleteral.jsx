@@ -35,11 +35,15 @@ const OriginalCollateral = () => {
   const navigate = useNavigate();
   const { brandId } = useParams();
   const menuRef = useRef(null);
+  const [showMenu, setShowMenu] = useState(null);
   const [items, setItems] = useState([]);
   const [folders, setFolders] = useState([]);
   const [recycleBinItems, setRecycleBinItems] = useState([]);
   const [recycleBinFiles, setRecycleBinFiles] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({
+    files: [],
+    folders: [],
+  });
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -101,7 +105,6 @@ const OriginalCollateral = () => {
     setSelectedItems({ files: [], folders: [] });
   };
 
-  // Fetch folders and files for the recycle bin
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -124,26 +127,28 @@ const OriginalCollateral = () => {
   }, [brandId]);
 
   const toggleSelectItem = (item, type) => {
-    if (type === "folder") {
+    // Handle selecting items without redirecting
+    console.log(selectedItems);
+    {
       setSelectedItems((prev) => ({
         ...prev,
         folders: prev.folders.includes(item._id)
           ? prev.folders.filter((id) => id !== item._id)
-          : [...prev.folders, item._id], // Allow multiple selections
-      }));
-    } else if (type === "file") {
-      setSelectedItems((prev) => ({
-        ...prev,
-        files: prev.files.includes(item._id)
-          ? prev.files.filter((id) => id !== item._id)
-          : [...prev.files, item._id], // Allow multiple selections
+          : [...prev.folders, item._id],
       }));
     }
+    // {
+    //   setSelectedItems((prev) => ({
+    //     ...prev,
+    //     files: prev.files.includes(item._id)
+    //       ? prev.files.filter((id) => id !== item._id)
+    //       : [...prev.files, item._id],
+    //   }));
+    // }
   };
 
-  // Handle folder navigation on double-click
-  const handleFolderDoubleClick = (folderId) => {
-    navigate(`/item/${brandId}/${folderId}`);
+  const handleEllipsisClick = (e) => {
+    e.stopPropagation(); // Prevent the event from bubbling up and triggering folder navigation
   };
 
   const fetchRecycleBinItems = async () => {
@@ -373,7 +378,7 @@ const OriginalCollateral = () => {
                   key={item._id}
                   className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300"
                   onClick={() => toggleSelectItem(item, "folder")} // Select folder on click
-                  onDoubleClick={() => handleFolderDoubleClick(item._id)}
+                  // onDoubleClick={() => handleFolderDoubleClick(item._id)}
                 >
                   <Link
                     to={`/item/${brandId}/${item._id}`}
@@ -385,23 +390,24 @@ const OriginalCollateral = () => {
                       className="h-16 w-16 mb-4"
                     />
                     <h3 className="font-semibold">{item.name}</h3>
-                    <Popover>
-                      <PopoverTrigger>
-                        <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
-                      </PopoverTrigger>
-                      <PopoverContent className="w-36 text-xs" side="right">
-                        <DropdownMenu
-                          ref={menuRef}
-                          onRename={handleRename}
-                          onZip={handleZip}
-                          onDelete={handleDelete}
-                          // visible={showMenu === folder._id}
-                          folderId={item._id}
-                          type="folder" // Pass folder type
-                        />
-                      </PopoverContent>
-                    </Popover>
                   </Link>
+
+                  {/* Ellipsis and DropdownMenu */}
+                  <Popover>
+                    <PopoverTrigger onClick={handleEllipsisClick}>
+                      <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-36 text-xs" side="right">
+                      <DropdownMenu
+                        ref={menuRef}
+                        onRename={handleRename}
+                        onZip={handleZip}
+                        onDelete={handleDelete}
+                        folderId={item._id}
+                        type="folder" // Pass folder type
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               ))}
 
