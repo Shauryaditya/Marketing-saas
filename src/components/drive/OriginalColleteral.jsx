@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { FaTrash, FaFileAlt, FaFilePdf } from "react-icons/fa";
 import AddFolderButton from "./AddFolderButton";
-import AddCollateralButton from "./AddCollateralButton";
-
+import { FaEllipsisV } from "react-icons/fa";
+import DropdownMenu from "./DropDownMenu";
+import JSZip from "jszip";
+import "react-medium-image-zoom/dist/styles.css";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 const apiUrl = "https://api.21genx.com:5000/v1/collateral"; // Replace this with your API base URL
 
 const renderFilePreview = (file) => {
@@ -27,13 +34,72 @@ const renderFilePreview = (file) => {
 const OriginalCollateral = () => {
   const navigate = useNavigate();
   const { brandId } = useParams();
+  const menuRef = useRef(null);
   const [items, setItems] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [recycleBinItems, setRecycleBinItems] = useState([]);
   const [recycleBinFiles, setRecycleBinFiles] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handleRename = async () => {
+    try {
+      const newName = prompt("Enter the new name:");
+
+      if (selectedItems.folders.length > 0) {
+        const folderId = selectedItems.folders[0];
+        await axios.patch(`${apiUrl}/v1/collateral/folder/${folderId}`, {
+          name: newName,
+        });
+        setFolders((prev) =>
+          prev.map((folder) =>
+            folder._id === folderId ? { ...folder, name: newName } : folder
+          )
+        );
+      } else if (selectedItems.files.length > 0) {
+        const fileId = selectedItems.files[0];
+        await axios.patch(`${apiUrl}/v1/collateral/file/${fileId}`, {
+          name: newName,
+        });
+        setFiles((prev) =>
+          prev.map((file) =>
+            file._id === fileId ? { ...file, name: newName } : file
+          )
+        );
+      }
+
+      setSelectedItems({ files: [], folders: [] });
+    } catch (error) {
+      console.error("Error renaming items:", error);
+    }
+  };
+
+  const handleZip = async () => {
+    const zip = new JSZip();
+
+    for (const folderId of selectedItems.folders) {
+      const { files, folders } = await fetchFolderContents(folderId);
+      for (const file of files) {
+        try {
+          const response = await fetch(file.path);
+          if (response.ok) {
+            const blob = await response.blob();
+            zip.file(file.name, blob);
+          }
+        } catch (error) {
+          console.error("Error fetching file:", error);
+        }
+      }
+    }
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, "selected_folders.zip");
+    });
+
+    setSelectedItems({ files: [], folders: [] });
+  };
 
   // Fetch folders and files for the recycle bin
   useEffect(() => {
@@ -56,6 +122,29 @@ const OriginalCollateral = () => {
 
     fetchData();
   }, [brandId]);
+
+  const toggleSelectItem = (item, type) => {
+    if (type === "folder") {
+      setSelectedItems((prev) => ({
+        ...prev,
+        folders: prev.folders.includes(item._id)
+          ? prev.folders.filter((id) => id !== item._id)
+          : [...prev.folders, item._id], // Allow multiple selections
+      }));
+    } else if (type === "file") {
+      setSelectedItems((prev) => ({
+        ...prev,
+        files: prev.files.includes(item._id)
+          ? prev.files.filter((id) => id !== item._id)
+          : [...prev.files, item._id], // Allow multiple selections
+      }));
+    }
+  };
+
+  // Handle folder navigation on double-click
+  const handleFolderDoubleClick = (folderId) => {
+    navigate(`/item/${brandId}/${folderId}`);
+  };
 
   const fetchRecycleBinItems = async () => {
     try {
@@ -104,19 +193,54 @@ const OriginalCollateral = () => {
     );
   };
 
-  // Handle Restore API Call
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(null); // Close the menu when clicking outside
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleRestore = async () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${apiUrl}/bin/restore`, { folderIds: selectedItems });
-      setRecycleBinItems((prevItems) =>
-        prevItems.filter((item) => !selectedItems.includes(item._id))
-      );
-      setRecycleBinFiles((prevFiles) =>
-        prevFiles.filter((file) => !selectedItems.includes(file._id))
-      );
-      setSelectedItems([]); // Clear selection after restore
+      const accessToken = localStorage.getItem("access_token");
+
+      // Prepare an array of files for restoration
+      const fileRestoreData = recycleBinFiles
+        .filter((file) => selectedItems.includes(file._id))
+        .map((file) => ({
+          fileId: file._id,
+          status: true, // Restore the file by setting status to true
+          file_delete: false, // Assuming this flag indicates the file should not be deleted
+        }));
+
+      if (fileRestoreData.length > 0) {
+        await axios.post(
+          `${apiUrl}/bin/file`, // Update the API URL to the correct endpoint for restoring files
+          {
+            files: fileRestoreData, // Pass the constructed array
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Remove restored files from the recycle bin list
+        setRecycleBinFiles((prevFiles) =>
+          prevFiles.filter((file) => !selectedItems.includes(file._id))
+        );
+
+        setSelectedItems([]); // Clear selection after restore
+      }
     } catch (error) {
       setError("Failed to restore items.");
       console.error(error);
@@ -130,13 +254,61 @@ const OriginalCollateral = () => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${apiUrl}/bin/delete`, { folderIds: selectedItems });
-      setRecycleBinItems((prevItems) =>
-        prevItems.filter((item) => !selectedItems.includes(item._id))
-      );
-      setRecycleBinFiles((prevFiles) =>
-        prevFiles.filter((file) => !selectedItems.includes(file._id))
-      );
+      const accessToken = localStorage.getItem("access_token");
+
+      // Prepare separate arrays for folders and files
+      const folderIds = recycleBinItems
+        .filter((item) => selectedItems.includes(item._id))
+        .map((item) => item._id);
+
+      const fileIds = recycleBinFiles
+        .filter((file) => selectedItems.includes(file._id))
+        .map((file) => file._id);
+
+      // If there are folders to delete
+      if (folderIds.length > 0) {
+        const folderDeleteApiUrl =
+          "https://api.21genx.com:5000/v1/collateral/delete/folder";
+        await axios.post(
+          folderDeleteApiUrl,
+          {
+            folderIds: folderIds,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Update UI after folder delete
+        setRecycleBinItems((prevItems) =>
+          prevItems.filter((item) => !selectedItems.includes(item._id))
+        );
+      }
+
+      // If there are files to delete
+      if (fileIds.length > 0) {
+        const fileDeleteApiUrl =
+          "https://api.21genx.com:5000/v1/collateral/files/delete";
+        await axios.post(
+          fileDeleteApiUrl,
+          {
+            fileIds: fileIds,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // Update UI after file delete
+        setRecycleBinFiles((prevFiles) =>
+          prevFiles.filter((file) => !selectedItems.includes(file._id))
+        );
+      }
+
       setSelectedItems([]); // Clear selection after delete
     } catch (error) {
       setError("Failed to delete items.");
@@ -162,7 +334,6 @@ const OriginalCollateral = () => {
           <div className="flex items-center space-x-4">
             {!isRecycleBinOpen && (
               <>
-                <AddCollateralButton />
                 <AddFolderButton
                   parentFolderId={null}
                   brandId={brandId}
@@ -200,7 +371,9 @@ const OriginalCollateral = () => {
               items.map((item) => (
                 <div
                   key={item._id}
-                  className="flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                  className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300"
+                  onClick={() => toggleSelectItem(item, "folder")} // Select folder on click
+                  onDoubleClick={() => handleFolderDoubleClick(item._id)}
                 >
                   <Link
                     to={`/item/${brandId}/${item._id}`}
@@ -212,6 +385,22 @@ const OriginalCollateral = () => {
                       className="h-16 w-16 mb-4"
                     />
                     <h3 className="font-semibold">{item.name}</h3>
+                    <Popover>
+                      <PopoverTrigger>
+                        <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-36 text-xs" side="right">
+                        <DropdownMenu
+                          ref={menuRef}
+                          onRename={handleRename}
+                          onZip={handleZip}
+                          onDelete={handleDelete}
+                          // visible={showMenu === folder._id}
+                          folderId={item._id}
+                          type="folder" // Pass folder type
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </Link>
                 </div>
               ))}
@@ -240,7 +429,7 @@ const OriginalCollateral = () => {
                       className="absolute top-2 right-2"
                     />
                     <Link
-                      to={`/item/${brandId}/${item._id}`}
+                      // to={`/item/${brandId}/${item._id}`}
                       className="flex flex-col items-center justify-center"
                     >
                       <img

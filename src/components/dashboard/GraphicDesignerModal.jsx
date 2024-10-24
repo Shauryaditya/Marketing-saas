@@ -55,7 +55,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10">
-      <div className="w-2/5 bg-white rounded-lg  ">
+      <div className=" min-w-96 bg-white rounded-lg  ">
         {/* Header */}
         <div className="flex justify-between items-center border-b p-2 mb-4">
           <h2 className="text-sm font-semibold">
@@ -113,14 +113,16 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
             {/* Check if contentWriterData exists and map it */}
             {contentWriterData?.length > 0 ? (
               contentWriterData.map((item, index) => (
+
                 <p key={index} className="mb-2 text-start text-xs font-semibold text-gray-500">
                   {item.content_caption?.trim()
                     ? item.content_caption
                     : "No caption available"}
+
                 </p>
               ))
             ) : (
-              <p className="text-xs font-semibold text-gray-500">No captions available</p>
+              <p>No captions available</p>
             )}
           </div>
         </div>
@@ -130,8 +132,9 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
             Uploaded Images
           </h3>
           <div className="flex flex-wrap space-x-2">
-            {/* Check if images exist and map over them */}
+            {/* Check if contentWriterData exists and map it */}
             {taskData?.images?.length > 0 ? (
+
               taskData.images.every((item) => item.image_url) ? (
                 taskData.images.map((item, index) => (
                   <div key={index} className="mb-4">
@@ -147,6 +150,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
                   No images available
                 </p>
               )
+
             ) : (
               <p>No images available</p>
             )}
@@ -174,26 +178,16 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
         </div>
 
         <div className="mb-4 px-4">
+
           <h3 className="text-start text-gray-700 font-medium uppercase text-sm">#Tags</h3>
+
           <div className="flex flex-wrap gap-2 mt-2">
-            {/* Check if taskData and tags_data exist and if tags_data is not an empty array */}
-            {taskData?.tags_data && taskData.tags_data.length > 0 ? (
-              taskData.tags_data.map((item, index) =>
-                // Check if the tags field has a value
-                item.tags.length > 0 ? (
-                  <p key={index}>{item.tags}</p>
-                ) : (
-                  <p
-                    className="text-xs font-semibold text-gray-500"
-                    key={index}
-                  >
-                    No tags available
-                  </p>
-                )
-              )
-            ) : (
-              <p>No tags available</p>
-            )}
+            {/* Map over the platforms to create buttons dynamically */}
+            {taskData?.tags_data.map((item, index) => (
+              <p>
+                {item.tags}
+              </p>
+            ))}
           </div>
         </div>
 

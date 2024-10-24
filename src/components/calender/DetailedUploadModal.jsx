@@ -21,9 +21,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
     if (show && event) {
       const fetchData = async () => {
         try {
-          const response = await axios.get(
-            `https://api.21genx.com:5000/v1/task/get/submit/${event.id}`
-          );
+          const response = await axios.get(`/v1/task/get/submit/${event.id}`);
           setTaskData(response.data.data);
           setLoading(false);
         } catch (error) {
@@ -273,6 +271,9 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     <h5 className="text-sm font-medium text-gray-700">
                       Caption, Tags & Copywriting for {platform.platform_name}:
                     </h5>
+                    <span className=" flex justify-end text-gray-500 mt-4">
+                      Time Left: {taskData.content_writer_time_left}
+                    </span>
                     <textarea
                       className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
                       placeholder={`Write caption for ${platform.platform_name}...`}
@@ -284,6 +285,21 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                         }))
                       }
                     />
+
+                    <textarea
+                      className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
+                      placeholder={`Write copywriting for ${platform.platform_name}...`}
+                      value={platformCopywriting[platform.platform_id] || ""}
+                      onChange={(e) =>
+                        setPlatformCopywriting((prev) => ({
+                          ...prev,
+                          [platform.platform_id]: e.target.value,
+                        }))
+                      }
+                    />
+                    <span className=" flex justify-end text-gray-500 mt-4">
+                      Time Left: {taskData.tags_time_left}
+                    </span>
                     <input
                       type="text"
                       className="w-full border border-gray-300 p-3 rounded-md mt-2"
@@ -291,17 +307,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                       value={platformTags[platform.platform_id] || ""}
                       onChange={(e) =>
                         setPlatformTags((prev) => ({
-                          ...prev,
-                          [platform.platform_id]: e.target.value,
-                        }))
-                      }
-                    />
-                    <textarea
-                      className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
-                      placeholder={`Write copywriting for ${platform.platform_name}...`}
-                      value={platformCopywriting[platform.platform_id] || ""}
-                      onChange={(e) =>
-                        setPlatformCopywriting((prev) => ({
                           ...prev,
                           [platform.platform_id]: e.target.value,
                         }))
@@ -316,7 +321,12 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         </div>
 
         <div className="mt-4">
-          <h4 className="text-lg font-medium mb-2">Files to Upload:</h4>
+          <div className="flex justify-between">
+            <h4 className="text-lg font-medium mb-2">Files to Upload:</h4>
+            <span className="block text-gray-500 mt-4">
+              Time Left: {taskData.image_time_left}
+            </span>
+          </div>
           <div className="grid grid-cols-5 gap-4">
             {taskData.images.map((image) => {
               const currentFiles = files[image.platform_id] || [];
@@ -324,7 +334,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                 <div
                   key={image.platform_id}
                   {...getRootProps()} // Spread the dropzone props to the box
-                  className="flex flex-col items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer"
+                  className="flex flex-col bg-blue-100 items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer"
                 >
                   <input {...getInputProps()} />
                   <div className="text-gray-400">{image.content_type.type}</div>

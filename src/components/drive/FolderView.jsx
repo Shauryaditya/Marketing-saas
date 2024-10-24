@@ -8,6 +8,13 @@ import { saveAs } from "file-saver";
 import { FaFileAlt, FaFilePdf } from "react-icons/fa";
 import AddFolderButton from "./AddFolderButton";
 import AddCollateralButton from "./AddCollateralButton";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -24,9 +31,28 @@ const FolderView = () => {
     folders: [],
   });
 
-  const handleMenuClick = (item) => {
-    setSelectedItem(item);
-    setShowMenu(item._id); // Show menu for the clicked item
+  // Toggle selection of folders or files
+  const toggleSelectItem = (item, type) => {
+    if (type === "folder") {
+      setSelectedItems((prev) => ({
+        ...prev,
+        folders: prev.folders.includes(item._id)
+          ? prev.folders.filter((id) => id !== item._id)
+          : [...prev.folders, item._id], // Allow multiple selections
+      }));
+    } else if (type === "file") {
+      setSelectedItems((prev) => ({
+        ...prev,
+        files: prev.files.includes(item._id)
+          ? prev.files.filter((id) => id !== item._id)
+          : [...prev.files, item._id], // Allow multiple selections
+      }));
+    }
+  };
+
+  // Handle folder navigation on double-click
+  const handleFolderDoubleClick = (folderId) => {
+    navigate(`/item/${brandId}/${folderId}`);
   };
 
   const fetchFolders = async (parentId) => {
@@ -55,46 +81,9 @@ const FolderView = () => {
     }
   };
 
-  const fetchFolderContents = async (folderId) => {
-    try {
-      const response = await axios.get(
-        `${apiUrl}/v1/collateral/folder/get/${folderId}?page=1&limit=50`,
-        { params: { brand_id: brandId } }
-      );
-      const folderFolders = response.data.folders || [];
-      const folderFiles = await fetchFiles(folderId);
-
-      let allFiles = folderFiles;
-      for (const subFolder of folderFolders) {
-        const { files: subFolderFiles } = await fetchFolderContents(
-          subFolder._id
-        );
-        allFiles = [...allFiles, ...subFolderFiles];
-      }
-
-      return { folders: folderFolders, files: allFiles };
-    } catch (error) {
-      console.error("Error fetching folder contents:", error);
-      return { folders: [], files: [] };
-    }
-  };
-
-  const toggleSelectItem = (item, type) => {
-    if (type === "folder") {
-      setSelectedItems((prev) => ({
-        ...prev,
-        folders: prev.folders.includes(item._id)
-          ? prev.folders.filter((id) => id !== item._id)
-          : [...prev.folders, item._id], // Allow multiple selections
-      }));
-    } else if (type === "file") {
-      setSelectedItems((prev) => ({
-        ...prev,
-        files: prev.files.includes(item._id)
-          ? prev.files.filter((id) => id !== item._id)
-          : [...prev.files, item._id], // Allow multiple selections
-      }));
-    }
+  const handleMenuClick = (item) => {
+    setSelectedItem(item);
+    setShowMenu(item._id); // Show menu for the clicked item
   };
 
   const handleRename = async () => {
@@ -129,12 +118,15 @@ const FolderView = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (e, type) => {
+    e.stopPropagation();
+    console.log("selected folder", type);
     try {
       const folderIdsToDelete = selectedItems.folders;
       const fileIdsToDelete = selectedItems.files;
 
-      if (folderIdsToDelete.length > 0) {
+      if (type === "folder" && folderIdsToDelete.length > 0) {
+        // Delete multiple folders
         await axios.post(
           `${apiUrl}/v1/collateral/update/status`,
           {
@@ -145,35 +137,31 @@ const FolderView = () => {
             params: { brand_id: brandId },
           }
         );
-      }
-
-      if (fileIdsToDelete.length > 0) {
-        await Promise.all(
-          fileIdsToDelete.map((fileId) =>
-            axios.post(
-              `${apiUrl}/v1/collateral/bin/file/${fileId}`,
-              {
-                status: false,
-                file_delete: true,
-              },
-              {
-                params: { brand_id: brandId },
-              }
-            )
-          )
+        setFolders((prev) =>
+          prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
         );
       }
 
-      // Update the UI by removing the deleted items
-      setFolders((prev) =>
-        prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
-      );
-      setFiles((prev) =>
-        prev.filter((file) => !fileIdsToDelete.includes(file._id))
-      );
+      if (type === "file" && fileIdsToDelete.length > 0) {
+        // Prepare the request payload for multiple files
+        const filesToDelete = fileIdsToDelete.map((fileId) => ({
+          fileId: fileId,
+          status: false,
+          file_delete: true,
+        }));
 
-      // Clear the selected items
-      // setSelectedItems({ files: [], folders: [] });
+        // Send the deletion request for multiple files
+        await axios.post(
+          `${apiUrl}/v1/collateral/bin/file`,
+          { files: filesToDelete } // Wrap in the "files" object
+        );
+
+        setFiles((prev) =>
+          prev.filter((file) => !fileIdsToDelete.includes(file._id))
+        );
+      }
+
+      setSelectedItems({ files: [], folders: [] });
     } catch (error) {
       console.error("Error deleting items:", error);
     }
@@ -184,26 +172,17 @@ const FolderView = () => {
       const file = files.find((f) => f._id === fileId);
       if (file) {
         try {
-          console.log(`Fetching file: ${file.path}`);
           const response = await fetch(file.path, {});
-          // Check if the response is successful
           if (response.ok) {
             const blob = await response.blob();
-            // Create a link element
             const link = document.createElement("a");
-            // Create an object URL for the blob and set it as the href attribute
             const url = URL.createObjectURL(blob);
             link.href = url;
-            // Set the download attribute to trigger download
             link.download = file.path.split("/").pop(); // Use the filename from the path
-            // Append the link to the body (not visible to the user)
             document.body.appendChild(link);
-            // Programmatically click the link to trigger the download
             link.click();
-            // Clean up by removing the link and revoking the object URL
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            console.log("File downloaded successfully");
           }
         } catch (error) {
           console.error("Error downloading file:", error);
@@ -219,16 +198,10 @@ const FolderView = () => {
       const { files, folders } = await fetchFolderContents(folderId);
       for (const file of files) {
         try {
-          const response = await fetch(file.path, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-          });
+          const response = await fetch(file.path);
           if (response.ok) {
             const blob = await response.blob();
             zip.file(file.name, blob);
-          } else {
-            console.error("Failed to fetch file:", response.statusText);
           }
         } catch (error) {
           console.error("Error fetching file:", error);
@@ -266,20 +239,17 @@ const FolderView = () => {
     };
   }, []);
 
-  // Function to handle adding a new folder
-  const handleFolderAdded = (newFolder) => {
-    setFolders((prevFolders) => [...prevFolders, newFolder]);
-  };
-
   const renderFilePreview = (file) => {
     const extension = file.name.split(".").pop().toLowerCase();
     if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
       return (
-        <img
-          src={file.path}
-          alt={file.name}
-          className="h-16 w-16 mb-4 object-cover"
-        />
+        <Zoom>
+          <img
+            src={file.path}
+            alt={file.name}
+            className="h-16 w-16 mb-4 object-cover"
+          />
+        </Zoom>
       );
     } else if (extension === "pdf") {
       return <FaFilePdf className="h-16 w-16 mb-4 text-red-600" />;
@@ -304,7 +274,9 @@ const FolderView = () => {
             <AddFolderButton
               parentFolderId={parentId}
               brandId={brandId}
-              onFolderAdded={handleFolderAdded} // Pass the callback
+              onFolderAdded={(newFolder) =>
+                setFolders((prev) => [...prev, newFolder])
+              }
             />
           </div>
         </header>
@@ -314,62 +286,72 @@ const FolderView = () => {
             {folders.map((folder) => (
               <div
                 key={folder._id}
-                className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300"
+                className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
+                  selectedItems.folders.includes(folder._id)
+                    ? "border-2 border-blue-500"
+                    : ""
+                }`}
+                onClick={() => toggleSelectItem(folder, "folder")} // Select folder on click
+                onDoubleClick={() => handleFolderDoubleClick(folder._id)} // Navigate on double-click
               >
-                <Link
-                  to={`/item/${brandId}/${folder._id}`}
-                  className="flex flex-col items-center justify-center "
-                >
+                <div className="flex flex-col items-center justify-center cursor-pointer">
                   <img
                     src="https://i.redd.it/cglk1r8sbyf71.png"
                     alt={folder.name}
                     className="h-16 w-16 mb-4"
                   />
                   <h3 className="font-semibold">{folder.name}</h3>
-                </Link>
-                <FaEllipsisV
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent the click from bubbling up
-                    toggleSelectItem(folder, "folder");
-                    handleMenuClick(folder); // Show the menu for the folder
-                  }}
-                  className="absolute top-2 right-2 text-gray-500 cursor-pointer"
-                />
-                <DropdownMenu
-                  ref={menuRef}
-                  // onDownload={handleDownload}
-                  onRename={handleRename}
-                  onZip={handleZip}
-                  onDelete={handleDelete}
-                  visible={showMenu === folder._id}
-                  type="folder" // Pass folder type
-                />
+                </div>
+                <Popover>
+                  <PopoverTrigger>
+                    <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-36 text-xs" side="right">
+                    <DropdownMenu
+                      ref={menuRef}
+                      onRename={handleRename}
+                      onZip={handleZip}
+                      onDelete={handleDelete}
+                      // visible={showMenu === folder._id}
+                      folderId={folder._id}
+                      type="folder" // Pass folder type
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             ))}
 
             {files.map((file) => (
               <div
                 key={file._id}
-                className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300"
+                className={`w-full basis-full shrink-0 relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 ${
+                  selectedItems.files.includes(file._id)
+                    ? "border-2 border-blue-500"
+                    : ""
+                }`}
+                onClick={() => toggleSelectItem(file, "file")}
               >
-                <FaEllipsisV
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent the click from bubbling up
-                    toggleSelectItem(file, "file");
-                    handleMenuClick(file); // Show the menu for the file
-                  }}
-                  className="absolute top-2 right-2 text-gray-500 cursor-pointer"
-                />
-                <DropdownMenu
-                  ref={menuRef}
-                  onDownload={handleDownload}
-                  onRename={handleRename}
-                  // onZip={handleZip}
-                  onDelete={handleDelete}
-                  visible={showMenu === file._id}
-                  type="file" // Pass file type
-                />
-                {renderFilePreview(file)}
+                <div
+                  // Select file on click
+                  className="cursor-pointer"
+                >
+                  {renderFilePreview(file)}
+                </div>
+                <Popover>
+                  <PopoverTrigger>
+                    <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-36 text-xs" side="right">
+                    <DropdownMenu
+                      ref={menuRef}
+                      onDownload={handleDownload}
+                      onRename={handleRename}
+                      onDelete={handleDelete}
+                      fileId={file._id}
+                      type="file" // Pass file type
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             ))}
           </div>
