@@ -55,7 +55,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10">
-      <div className=" min-w-96 bg-white rounded-lg  ">
+      <div className=" w-2/5 bg-white rounded-lg  ">
         {/* Header */}
         <div className="flex justify-between items-center border-b p-2 mb-4">
           <h2 className="text-sm font-semibold">

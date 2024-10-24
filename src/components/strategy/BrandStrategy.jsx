@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Facebook, MinusCircle, PlusCircle } from "lucide-react";
+import { FaFilePdf, FaFileWord, FaFileExcel, FaFileAlt } from "react-icons/fa";
 import React, { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
@@ -107,7 +108,6 @@ const BrandStrategy = () => {
       fetchStrategy();
     }
   }, [strategyId]);
-
 
   const handleAddGroup = () => {
     setFormData((prevFormData) => {
@@ -258,6 +258,31 @@ const BrandStrategy = () => {
     }));
   };
 
+  const getFileExtension = (url) => {
+    return url.split(".").pop();
+  };
+
+  const isImage = (url) => {
+    const ext = getFileExtension(url).toLowerCase();
+    return (
+      ["jpeg", "jpg", "png", "gif"].includes(ext) ||
+      url.startsWith("data:image/")
+    );
+  };
+  const renderFileIcon = (extension) => {
+    switch (extension) {
+      case "pdf":
+        return <FaFilePdf className="text-red-500 text-3xl" />;
+      case "doc":
+      case "docx":
+        return <FaFileWord className="text-blue-500 text-3xl" />;
+      case "xls":
+      case "xlsx":
+        return <FaFileExcel className="text-green-500 text-3xl" />;
+      default:
+        return <FaFileAlt className="text-gray-500 text-3xl" />;
+    }
+  };
   // Function to handle changing date fields
   const handleDateChange = (index, field, value) => {
     const updatedDates = formData.important_date.map((date, i) =>
@@ -888,13 +913,13 @@ const BrandStrategy = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-10"
+                  className="size-10"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"
                   />
                 </svg>
@@ -907,36 +932,39 @@ const BrandStrategy = () => {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-x-4">
-                <h1 className="text-sm font-semibold">Preview :</h1>
+                <h1 className="text-sm font-semibold">Preview:</h1>
                 {formData.documents.length > 0
-                  ? formData.documents.map((file, index) => {
-                      const isImage = file; // You can add more logic to check if it's an image based on file type
+                  ? formData.documents.map((fileUrl, index) => {
+                      console.log("Preview File URL:", fileUrl); // Debug: Log the URL
+                      const isBase64 = fileUrl.startsWith("data:");
                       return (
                         <div
                           key={index}
                           className="mt-2 flex flex-col items-center"
                         >
-                          {isImage ? (
+                          {isImage(fileUrl) && isBase64 ? (
+                            <img
+                              src={fileUrl}
+                              alt={`file-${index}`}
+                              className="mt-1 max-h-32"
+                            />
+                          ) : isImage(fileUrl) ? (
                             <a
-                              href={file}
+                              href={fileUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                             >
                               <img
-                                src={file}
+                                src={fileUrl}
                                 alt={`file-${index}`}
                                 className="mt-1 max-h-32"
                               />
                             </a>
                           ) : (
-                            <a
-                              href={file}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 mt-1"
-                            >
-                              View File
-                            </a>
+                            <div className="text-center">
+                              {renderFileIcon(getFileExtension(fileUrl))}{" "}
+                              {/* Display the icon */}
+                            </div>
                           )}
                           {/* Remove button */}
                           <button
