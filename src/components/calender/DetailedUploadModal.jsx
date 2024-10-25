@@ -5,7 +5,7 @@ import axios from "axios";
 import { useDropzone } from "react-dropzone";
 
 const DetailedUploadModal = ({ show, onClose, event }) => {
-  const [taskData, setTaskData] = useState(null);
+  const [taskData, setTaskData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUploadPlatform, setSelectedUploadPlatform] = useState(null);
   const [platformCaptions, setPlatformCaptions] = useState({});
@@ -35,6 +35,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   }, [show, event]);
 
   const onDrop = (acceptedFiles, platformId) => {
+    console.log('drop file', platformId, acceptedFiles);
     setFiles((prevFiles) => ({
       ...prevFiles,
       [platformId]: acceptedFiles, // Store files for each platform
@@ -88,8 +89,8 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         tags: Array.isArray(platformTags[selectedUploadPlatform])
           ? platformTags[selectedUploadPlatform]
           : platformTags[selectedUploadPlatform]
-              .split(",")
-              .map((tag) => tag.trim()),
+            .split(",")
+            .map((tag) => tag.trim()),
       });
     }
 
@@ -143,12 +144,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         ); // Improved error logging
       });
   };
-
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles) => onDrop(acceptedFiles, selectedUploadPlatform), // Dropzone handler
-    multiple: true,
-    accept: "image/*,video/*,audio/*", // Accept images, videos, and GIFs
-  });
 
   if (!show) return null;
 
@@ -211,11 +206,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleUploadPlatformToggle("all")}
-              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                selectedUploadPlatform === "all"
-                  ? "bg-gray-300 text-white"
-                  : "bg-gray-100 text-gray-800"
-              }`}
+              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === "all"
+                ? "bg-gray-300 text-white"
+                : "bg-gray-100 text-gray-800"
+                }`}
             >
               <span>All</span>
             </button>
@@ -223,11 +217,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
               <button
                 key={platform.platform_id}
                 onClick={() => handleUploadPlatformToggle(platform.platform_id)}
-                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                  selectedUploadPlatform === platform.platform_id
-                    ? "bg-gray-300 text-white"
-                    : "bg-gray-100 text-gray-800"
-                }`}
+                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === platform.platform_id
+                  ? "bg-gray-300 text-white"
+                  : "bg-gray-100 text-gray-800"
+                  }`}
               >
                 <img
                   src={platform.platform_logo}
@@ -330,20 +323,12 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           <div className="grid grid-cols-5 gap-4">
             {taskData.images.map((image) => {
               const currentFiles = files[image.platform_id] || [];
+
               return (
-                <div
-                  key={image.platform_id}
-                  {...getRootProps()} // Spread the dropzone props to the box
-                  className="flex flex-col bg-blue-100 items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer"
-                >
-                  <input {...getInputProps()} />
+                <CustomDropzone key={image.platform_id} platformId={image.platform_id} onDrop={onDrop}>
                   <div className="text-gray-400">{image.content_type.type}</div>
-                  <div className="text-gray-600 mt-2">
-                    {image.platform_name}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Size: {image.content_type.size}
-                  </div>
+                  <div className="text-gray-600 mt-2">{image.platform_name}</div>
+                  <div className="text-sm text-gray-500">Size: {image.content_type.size}</div>
                   {currentFiles.length > 0 && (
                     <div className="text-sm text-gray-500 mt-2">
                       {currentFiles.length > 1
@@ -351,7 +336,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                         : `1 file: ${currentFiles[0].name}`}
                     </div>
                   )}
-                </div>
+                </CustomDropzone>
               );
             })}
           </div>
@@ -380,3 +365,18 @@ DetailedUploadModal.defaultProps = {
 };
 
 export default DetailedUploadModal;
+
+const CustomDropzone = ({ platformId, onDrop, children }) => {
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => onDrop(acceptedFiles, platformId), // Pass platformId to onDrop
+    multiple: true,
+    accept: "image/*,video/*,audio/*", // Accept images, videos, and GIFs
+  });
+
+  return (
+    <div {...getRootProps()} className="flex flex-col bg-blue-100 items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer">
+      <input {...getInputProps()} />
+      {children}
+    </div>
+  );
+}
