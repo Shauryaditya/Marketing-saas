@@ -342,12 +342,16 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           </div>
         </div>
 
-        <button
-          onClick={handleUpload}
-          className="mt-2 flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-        >
-          Upload
-        </button>
+        <div className="flex justify-center mt-4">
+  <button
+    onClick={handleUpload}
+    className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+  >
+    
+    Submit
+  </button>
+</div>
+
       </div>
     </div>
   );
