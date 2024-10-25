@@ -116,17 +116,15 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         `submitted_tasks[${index}][tags]`,
         JSON.stringify(task.tags)
       );
-
       if (files[task.platform_id]) {
         files[task.platform_id].forEach((file) => {
           console.log(
-            `Appending file: ${file.name} to platform: ${task.platform_id}`
+            `Appending file: ${file.name} to platform: ${task.platform_id}`, file
           ); // Debugging file appending
           formData.append(`submitted_tasks[${index}][files]`, file);
         });
       }
     });
-
     axios
       .post(`/v1/task/submit`, formData, {
         headers: {
@@ -321,41 +319,43 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </span>
           </div>
           <div className="grid grid-cols-5 gap-4">
-  {taskData.images.map((image) => {
-    const currentFiles = files[image.platform_id] || [];
+            {taskData.images.map((image) => {
+              const currentFiles = files[image.platform_id] || [];
 
-    return (
-      <CustomDropzone
-        key={image.platform_id}
-        platformId={image.platform_id}
-        onDrop={onDrop}
-        imageUrl={image.image_url}  // Pass image_url here
-      >
-        <div className="text-gray-400">{image.content_type.type}</div>
-        <div className="text-gray-600 mt-2">{image.platform_name}</div>
-        <div className="text-sm text-gray-500">Size: {image.content_type.size}</div>
-        {currentFiles.length > 0 && (
-          <div className="text-sm text-gray-500 mt-2">
-            {currentFiles.length > 1
-              ? `${currentFiles.length} files selected`
-              : `1 file: ${currentFiles[0].name}`}
+              return (
+                <CustomDropzone
+                  key={image.platform_id}
+                  platformId={image.platform_id}
+                  onDrop={onDrop}
+                  imageUrl={image.image_url}
+                  isfile={currentFiles.length}
+                // Pass image_url here
+                >
+                  <div className="text-gray-400">{image.content_type.type}</div>
+                  <div className="text-gray-600 mt-2">{image.platform_name}</div>
+                  <div className="text-sm text-gray-500">Size: {image.content_type.size}</div>
+                  {currentFiles.length > 0 && (
+                    <div className="text-sm text-gray-500 mt-2">
+                      {currentFiles.length > 1
+                        ? `${currentFiles.length} files selected`
+                        : `1 file: ${currentFiles[0].name}`}
+                    </div>
+                  )}
+                </CustomDropzone>
+              );
+            })}
           </div>
-        )}
-      </CustomDropzone>
-    );
-  })}
-</div>
         </div>
 
         <div className="flex justify-center mt-4">
-  <button
-    onClick={handleUpload}
-    className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-  >
-    
-    Submit
-  </button>
-</div>
+          <button
+            onClick={handleUpload}
+            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          >
+
+            Submit
+          </button>
+        </div>
 
       </div>
     </div>
@@ -374,7 +374,7 @@ DetailedUploadModal.defaultProps = {
 
 export default DetailedUploadModal;
 
-const CustomDropzone = ({ platformId, onDrop, imageUrl, children }) => {
+const CustomDropzone = ({ platformId, onDrop, imageUrl, children, isfile }) => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => onDrop(acceptedFiles, platformId), // Pass platformId to onDrop
     multiple: true,
@@ -387,7 +387,7 @@ const CustomDropzone = ({ platformId, onDrop, imageUrl, children }) => {
       className="flex flex-col bg-blue-100 items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer relative"
     >
       <input {...getInputProps()} />
-      {imageUrl ? (
+      {(imageUrl && !isfile) ? (
         <img
           src={imageUrl}
           alt="Uploaded preview"
