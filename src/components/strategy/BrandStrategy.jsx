@@ -897,7 +897,7 @@ const BrandStrategy = () => {
             </div>
           </div>
 
-          <div className="mb-6 flex flex-col  ">
+          <div className="mb-6 flex flex-col">
             <div className="flex justify-between">
               <label className="block text-xs uppercase font-medium text-gray-700">
                 Documents
@@ -932,56 +932,61 @@ const BrandStrategy = () => {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-x-4">
-                <h1 className="text-sm font-semibold">Preview:</h1>
-                {formData.documents.length > 0
-                  ? formData.documents.map((fileUrl, index) => {
-                      console.log("Preview File URL:", fileUrl); // Debug: Log the URL
-                      const isBase64 = fileUrl.startsWith("data:");
-                      return (
-                        <div
-                          key={index}
-                          className="mt-2 flex flex-col items-center"
-                        >
-                          {isImage(fileUrl) && isBase64 ? (
-                            <img
-                              src={fileUrl}
-                              alt={`file-${index}`}
-                              className="mt-1 max-h-32"
-                            />
-                          ) : isImage(fileUrl) ? (
-                            <a
-                              href={fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <img
-                                src={fileUrl}
-                                alt={`file-${index}`}
-                                className="mt-1 max-h-32"
-                              />
-                            </a>
-                          ) : (
-                            <div className="text-center">
-                              {renderFileIcon(getFileExtension(fileUrl))}{" "}
-                              {/* Display the icon */}
-                            </div>
-                          )}
-                          {/* Remove button */}
-                          <button
-                            onClick={() => handleRemoveFile(index)}
-                            className="mt-1 text-xs text-red-500 hover:underline"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      );
-                    })
-                  : null}
+  <h1 className="text-sm font-semibold">Preview:</h1>
+  {formData.documents.length > 0
+    ? formData.documents.map((fileUrl, index) => {
+        console.log("Preview File URL:", fileUrl); // Debug: Log the URL
+        const isBase64 = fileUrl.startsWith("data:image/");
+        const fileExtension = getFileExtension(fileUrl).toLowerCase();
+        const isPdfBase64 = fileUrl.startsWith("data:application/pdf");
+
+        return (
+          <div key={index} className="mt-2 flex flex-col items-center">
+            {/* Image Preview */}
+            {isImage(fileUrl) || isBase64 ? (
+              <img src={fileUrl} alt={`file-${index}`} className="mt-1 max-h-32" />
+            ) : isPdfBase64 ? (
+              /* PDF Preview for Base64 */
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                <FaFilePdf className="text-4xl text-red-600" />
+                <p className="text-xs">Open PDF</p>
+              </a>
+            ) : fileExtension === "pdf" ? (
+              /* PDF Preview for Direct URLs */
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                <FaFilePdf className="text-4xl text-red-600" />
+                <p className="text-xs">Open PDF</p>
+              </a>
+            ) : fileExtension === "xlsx" || fileExtension === "xls" ? (
+              /* Excel File Preview */
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                <FaFileExcel className="text-4xl text-green-600" />
+                <p className="text-xs">Download Excel</p>
+              </a>
+            ) : (
+              <div className="text-center">
+                {renderFileIcon(fileExtension)} {/* Display the icon */}
               </div>
+            )}
+            {/* Remove button */}
+            <button
+              onClick={() => handleRemoveFile(index)}
+              className="mt-1 text-xs text-red-500 hover:underline"
+            >
+              Remove
+            </button>
+          </div>
+        );
+      })
+    : null}
+</div>
+
             </div>
+
+            {/* Budget, Campaigns, and Remarks Sections */}
             <div className="mb-6">
               <div className="flex items-center gap-x-2 bg-white p-2 mt-2">
-                <label className="text-sm  uppercase font-semibold">
+                <label className="text-sm uppercase font-semibold">
                   Budget
                 </label>
                 <input
@@ -995,8 +1000,8 @@ const BrandStrategy = () => {
               </div>
             </div>
             <div className="mb-6">
-              <div className="flex flex-col  bg-white p-2 mt-2">
-                <label className="text-sm w-1/6 uppercase font-semibold">
+              <div className="flex flex-col bg-white p-2 mt-2">
+                <label className="text-sm uppercase font-semibold">
                   Campaigns
                 </label>
                 <textarea
@@ -1007,8 +1012,8 @@ const BrandStrategy = () => {
                   onChange={(e) => handleInputChange(e, "campaigns")}
                 />
               </div>
-              <div className="flex flex-col bg-white p-2 ">
-                <label className="text-sm w-1/6 uppercase font-semibold">
+              <div className="flex flex-col bg-white p-2">
+                <label className="text-sm uppercase font-semibold">
                   Remarks
                 </label>
                 <textarea

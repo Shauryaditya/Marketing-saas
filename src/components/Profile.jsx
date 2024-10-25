@@ -1,6 +1,7 @@
 import setupAxiosInterceptors from "../AxiosInterceptor";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import BrandTable from "./teams/BrandTable";
 
 const ProfileSection = () => {
   setupAxiosInterceptors();
@@ -59,7 +60,7 @@ const ProfileSection = () => {
 
     try {
       // Send the updated name and mobile fields to the API
-      const response = await axios.post(`/v1/auth/me`, requestBody);
+      const response = await axios.post(`/v1/auth/me/edit`, requestBody);
       console.log("Update successful:", response.data);
       // Handle success (e.g., show a success message or refresh the data)
     } catch (error) {
@@ -69,7 +70,7 @@ const ProfileSection = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-8 text-xs bg-gray-50">
+    <div className="max-w-5xl mx-auto p-6 text-xs bg-gray-50">
       {/* Profile and Info Section */}
       <div className="bg-white shadow-md p-3 rounded-lg flex flex-col items-start space-x-6">
         <div className="flex gap-x-2">
@@ -241,6 +242,7 @@ const ProfileSection = () => {
           </div>
         </form>
       </div>
+      <BrandTable />
     </div>
   );
 };
