@@ -346,7 +346,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           onClick={handleUpload}
           className="mt-2 flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
         >
-          <FaUpload className="mr-2" />
           Upload
         </button>
       </div>

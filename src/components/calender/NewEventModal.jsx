@@ -264,6 +264,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                 <label className="block text-gray-700">
                   Title
                   <input
+                  required
                     type="text"
                     name="title"
                     value={eventData.title}
@@ -283,6 +284,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                         <div key={post.social_id} className="space-y-2">
                           <div className="flex items-center">
                             <input
+                            required
                               type="checkbox"
                               id={`platform-${post.social_id}`}
                               name="platform"
@@ -315,6 +317,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                                   className="flex  items-center"
                                 >
                                   <input
+                                  required
                                     type="radio"
                                     id={`type-${type._id}`}
                                     name={`type-${post.social_id}`}
@@ -355,6 +358,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   <label className="block text-gray-700 flex-1">
                     Date
                     <input
+                    required
                       type="date"
                       name="date"
                       value={eventData.date}
@@ -365,6 +369,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   <label className="block text-gray-700">
                     Time
                     <input
+                    required
                       type="time"
                       name="time"
                       value={eventData.time}
