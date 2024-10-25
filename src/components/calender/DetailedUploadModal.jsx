@@ -160,7 +160,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-xl font-semibold text-gray-900">
-                Task: {taskData.title || "NOVIUM-202407290730"}
+                Task: {taskData.taskId}
               </h3>
               <p className="text-sm text-gray-500">
                 Date & Time: 24/08/2024, 15:35{" "}
