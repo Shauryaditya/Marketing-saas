@@ -70,7 +70,7 @@ const TaskList = ({ tasks }) => {
             className="flex justify-between items-center p-4 border-b"
           >
             <div>
-              <h3 className="text-sm font-semibold">{task.title}</h3>
+              <h3 className="text-sm font-semibold">{task.taskId}</h3>
               <p className="text-xs text-gray-500">
                 {formatDate(task.submitd_date)}
               </p>

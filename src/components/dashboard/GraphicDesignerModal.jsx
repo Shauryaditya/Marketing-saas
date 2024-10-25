@@ -51,11 +51,18 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
     }
   };
 
-  console.log("Task Data>>", taskData);
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long", // Use "short" for abbreviated month
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10">
-      <div className=" min-w-96 bg-white rounded-lg  ">
+      <div className=" w-2/5 bg-white rounded-lg h-[28rem] overflow-y-auto no-scrollbar ">
         {/* Header */}
         <div className="flex justify-between items-center border-b p-2 mb-4">
           <h2 className="text-sm font-semibold">
@@ -73,7 +80,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
               <p className="text-xs uppercase text-gray-200 font-semibold">
                 Date & Time
               </p>
-              <p className="text-xs">24/08/2024, 15:35</p>
+              <p className="text-xs">{formatDate(taskData?.submit_date)}</p>
             </div>
             <div>
               <p className="text-xs uppercase text-gray-200 font-semibold">
@@ -82,10 +89,20 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
               <p className="text-xs">{taskData?.title}</p>
             </div>
             <div>
-              <p className="text-xs uppercase text-gray-200 font-semibold">
-                Kind
-              </p>
-              <p className="text-xs">Photo</p>
+              <div>
+                <p className="text-xs uppercase text-gray-200 font-semibold">
+                  Kind
+                </p>
+                {taskData.images && taskData.images.length > 0 ? (
+                  taskData.images.map((image, index) => (
+                    <p key={index} className="text-xs">
+                      {image.content_type.type}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-xs">No content available</p>
+                )}
+              </div>
             </div>
             {/* <div>
               <p className="text-xs uppercase text-gray-200 font-semibold">
@@ -101,7 +118,9 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
           <h3 className="text-start text-gray-700 font-medium text-sm uppercase">
             Description
           </h3>
-          <p className="text-start text-gray-500 text-xs">{taskData?.description}</p>
+          <p className="text-start text-gray-500 text-xs font-semibold">
+            {taskData?.description}
+          </p>
         </div>
 
         {/* Captions */}
@@ -113,16 +132,30 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
             {/* Check if contentWriterData exists and map it */}
             {contentWriterData?.length > 0 ? (
               contentWriterData.map((item, index) => (
-
-                <p key={index} className="mb-2 text-start text-xs font-semibold text-gray-500">
-                  {item.content_caption?.trim()
-                    ? item.content_caption
-                    : "No caption available"}
-
-                </p>
+                <div className="">
+                  <p
+                    key={index}
+                    className="mb-2 text-start text-xs font-semibold text-gray-500"
+                  >
+                    {item.content_caption?.trim()
+                      ? item.content_caption
+                      : "No caption available"}
+                  </p>
+                  <p
+                    key={index}
+                    className="flex flex-col mb-2 text-start text-xs font-semibold text-gray-500"
+                  >
+                    <span className="text-sm text-black uppercase">Copy Writing </span>
+                    {item.copy_writing?.trim()
+                      ? item.copy_writing
+                      : "No copywriting available"}
+                  </p>
+                </div>
               ))
             ) : (
-              <p className="text-start text-xs font-semibold text-gray-500">No captions available</p>
+              <p className="text-start text-xs font-semibold text-gray-500">
+                No captions available
+              </p>
             )}
           </div>
         </div>
@@ -134,7 +167,6 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
           <div className="flex flex-wrap space-x-2">
             {/* Check if contentWriterData exists and map it */}
             {taskData?.images?.length > 0 ? (
-
               taskData.images.every((item) => item.image_url) ? (
                 taskData.images.map((item, index) => (
                   <div key={index} className="mb-4">
@@ -150,9 +182,10 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
                   No images available
                 </p>
               )
-
             ) : (
-              <p className="text-start text-xs font-semibold text-gray-500">No images available</p>
+              <p className="text-start text-xs font-semibold text-gray-500">
+                No images available
+              </p>
             )}
           </div>
         </div>
@@ -178,15 +211,14 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
         </div>
 
         <div className="mb-4 px-4">
-
-          <h3 className="text-start text-gray-700 font-medium uppercase text-sm">#Tags</h3>
+          <h3 className="text-start text-gray-700 font-medium uppercase text-sm">
+            #Tags
+          </h3>
 
           <div className="flex flex-wrap gap-2 mt-2">
             {/* Map over the platforms to create buttons dynamically */}
             {taskData?.tags_data.map((item, index) => (
-              <p>
-                {item.tags}
-              </p>
+              <p className="text-start text-xs font-semibold text-gray-500">{item.tags}</p>
             ))}
           </div>
         </div>

@@ -71,7 +71,7 @@ const Sidebar = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen h-full w-48 text-xs bg-white shadow-md sticky top-0 flex flex-col justify-between">
+    <div className="min-h-screen h-fit w-48 text-xs bg-white shadow-md sticky top-0 flex flex-col justify-between">
       <div>
         <a href="/dashboard">
           <div className="p-4 flex items-center justify-center gap-2">
