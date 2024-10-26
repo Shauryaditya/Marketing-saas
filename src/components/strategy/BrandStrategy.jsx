@@ -16,6 +16,9 @@ const BrandStrategy = () => {
   const [focus, setFocus] = useState([]);
   const token = localStorage.getItem("access_token");
   const [focusGroups, setFocusGroups] = useState([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [formData, setFormData] = useState({
     brand_id: id,
     month: "",
@@ -33,32 +36,92 @@ const BrandStrategy = () => {
     remark: "",
     documents: [],
   });
-  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [tags, setTags] = useState("");
   const [fileUri, setFileUri] = useState("");
   const [errorMessage, setErrorMessage] = useState();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (selectedMonth && selectedYear) {
-      const formattedMonth =
-        selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
+    const fetchData = async () => {
+      const formattedMonth = selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
       const formattedDate = `${selectedYear}-${formattedMonth}-01`;
-      setFormData((prevData) => ({
-        ...prevData,
-        month: formattedDate,
-      }));
-    }
-  }, [selectedMonth, selectedYear]);
-
-  const handleMonthChange = (e) => {
-    setSelectedMonth(e.target.value);
+  
+      console.log("Formatted Date:", formattedDate);
+      try {
+        const apiurl = `${url}/v1/Strategy/get/${id}/${formattedDate}`;
+        const response = await axios.get(apiurl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (response.data && response.data.data && response.data.data.length > 0) {
+          const data = response.data.data[0];
+          setFormData((prevState) => ({
+            ...prevState,
+            ...data,
+            month: formattedDate, // Update the month value here
+          }));
+        } else {
+          // If no data is returned, reset the form but preserve the month field
+          setFormData((prevState) => ({
+            ...initialFormData,  // Use initial structure to reset values
+            brand_id: id,
+            month: formattedDate, // Preserve month
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+        setFormData((prevState) => ({
+          ...initialFormData,
+          brand_id: id,
+          month: formattedDate, // Preserve month even if there's an error
+        }));
+      }
+    };
+  
+    fetchData();
+  }, [selectedMonth, selectedYear, strategyId]);
+  
+  // Define initialFormData outside the component
+  const initialFormData = {
+    brand_id: id,
+    month: "",
+    focus: [{ percent: "", focus_id: "" }],
+    productToFocus: "",
+    social_post: [],
+    blog_post: [{ time_interval: "Monthly", number: "0" }],
+    email_marketing: [{ time_interval: "Weekly", number: "0" }],
+    sms_marketing: [{ time_interval: "Daily", number: "0" }],
+    new_sletter: [{ time_interval: "Monthly", number: "0" }],
+    tags: "",
+    important_date: [{ date: "", name: "", description: "" }],
+    budget: "",
+    campaigns: "",
+    remark: "",
+    documents: [],
   };
+  
 
+  const updateMonthInFormData = (month, year) => {
+    const formattedMonth = month < 10 ? `0${month}` : month;
+    const formattedDate = `${year}-${formattedMonth}-01`;
+    setFormData((prevData) => ({
+      ...prevData,
+      month: formattedDate,
+    }));
+  };
+  
+  const handleMonthChange = (e) => {
+    const month = Number(e.target.value);
+    setSelectedMonth(month);
+    updateMonthInFormData(month, selectedYear);
+  };
+  
   const handleYearChange = (e) => {
-    setSelectedYear(e.target.value);
+    const year = Number(e.target.value);
+    setSelectedYear(year);
+    updateMonthInFormData(selectedMonth, year);
   };
 
   const [importantDates, setImportantDates] = useState([
@@ -108,6 +171,9 @@ const BrandStrategy = () => {
       fetchStrategy();
     }
   }, [strategyId]);
+
+
+  // Added strategyId to dependency array
 
   const handleAddGroup = () => {
     setFormData((prevFormData) => {
@@ -395,7 +461,7 @@ const BrandStrategy = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    console.log("formdata>>>???",formData)
     try {
       const response = await axios.post(`${url}/v1/Strategy/add`, formData, {
         headers: {
@@ -442,7 +508,7 @@ const BrandStrategy = () => {
                 >
                   {Array.from(
                     { length: 10 },
-                    (_, i) => new Date().getFullYear() - i
+                    (_, i) => new Date().getFullYear() + i
                   ).map((year) => (
                     <option key={year} value={year}>
                       {year}
@@ -932,55 +998,78 @@ const BrandStrategy = () => {
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-x-4">
-  <h1 className="text-sm font-semibold">Preview:</h1>
-  {formData.documents.length > 0
-    ? formData.documents.map((fileUrl, index) => {
-        console.log("Preview File URL:", fileUrl); // Debug: Log the URL
-        const isBase64 = fileUrl.startsWith("data:image/");
-        const fileExtension = getFileExtension(fileUrl).toLowerCase();
-        const isPdfBase64 = fileUrl.startsWith("data:application/pdf");
+                <h1 className="text-sm font-semibold">Preview:</h1>
+                {formData.documents.length > 0
+                  ? formData.documents.map((fileUrl, index) => {
+                      console.log("Preview File URL:", fileUrl); // Debug: Log the URL
+                      const isBase64 = fileUrl.startsWith("data:image/");
+                      const fileExtension =
+                        getFileExtension(fileUrl).toLowerCase();
+                      const isPdfBase64 = fileUrl.startsWith(
+                        "data:application/pdf"
+                      );
 
-        return (
-          <div key={index} className="mt-2 flex flex-col items-center">
-            {/* Image Preview */}
-            {isImage(fileUrl) || isBase64 ? (
-              <img src={fileUrl} alt={`file-${index}`} className="mt-1 max-h-32" />
-            ) : isPdfBase64 ? (
-              /* PDF Preview for Base64 */
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <FaFilePdf className="text-4xl text-red-600" />
-                <p className="text-xs">Open PDF</p>
-              </a>
-            ) : fileExtension === "pdf" ? (
-              /* PDF Preview for Direct URLs */
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <FaFilePdf className="text-4xl text-red-600" />
-                <p className="text-xs">Open PDF</p>
-              </a>
-            ) : fileExtension === "xlsx" || fileExtension === "xls" ? (
-              /* Excel File Preview */
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <FaFileExcel className="text-4xl text-green-600" />
-                <p className="text-xs">Download Excel</p>
-              </a>
-            ) : (
-              <div className="text-center">
-                {renderFileIcon(fileExtension)} {/* Display the icon */}
+                      return (
+                        <div
+                          key={index}
+                          className="mt-2 flex flex-col items-center"
+                        >
+                          {/* Image Preview */}
+                          {isImage(fileUrl) || isBase64 ? (
+                            <img
+                              src={fileUrl}
+                              alt={`file-${index}`}
+                              className="mt-1 max-h-32"
+                            />
+                          ) : isPdfBase64 ? (
+                            /* PDF Preview for Base64 */
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <FaFilePdf className="text-4xl text-red-600" />
+                              <p className="text-xs">Open PDF</p>
+                            </a>
+                          ) : fileExtension === "pdf" ? (
+                            /* PDF Preview for Direct URLs */
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <FaFilePdf className="text-4xl text-red-600" />
+                              <p className="text-xs">Open PDF</p>
+                            </a>
+                          ) : fileExtension === "xlsx" ||
+                            fileExtension === "xls" ? (
+                            /* Excel File Preview */
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <FaFileExcel className="text-4xl text-green-600" />
+                              <p className="text-xs">Download Excel</p>
+                            </a>
+                          ) : (
+                            <div className="text-center">
+                              {renderFileIcon(fileExtension)}{" "}
+                              {/* Display the icon */}
+                            </div>
+                          )}
+                          {/* Remove button */}
+                          <button
+                            onClick={() => handleRemoveFile(index)}
+                            className="mt-1 text-xs text-red-500 hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      );
+                    })
+                  : null}
               </div>
-            )}
-            {/* Remove button */}
-            <button
-              onClick={() => handleRemoveFile(index)}
-              className="mt-1 text-xs text-red-500 hover:underline"
-            >
-              Remove
-            </button>
-          </div>
-        );
-      })
-    : null}
-</div>
-
             </div>
 
             {/* Budget, Campaigns, and Remarks Sections */}
