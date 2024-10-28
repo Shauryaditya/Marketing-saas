@@ -301,6 +301,15 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     />
                   </svg>
                 </button>
+
+                <TagModal
+                  show={showTagModal}
+                  onClose={() => setShowTagModal(false)}
+                  month={taskData.month}
+                  year={taskData.year}
+                  brandId={taskData.brand_id}
+                  onSelectTags={handleSelectTags}
+                />
               </div>
             </>
           ) : (
