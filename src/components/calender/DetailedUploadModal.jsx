@@ -257,25 +257,51 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         <div className="mb-4">
           {selectedUploadPlatform === "all" ? (
             <>
+              <span className="flex justify-end text-gray-500 mt-4">
+                Time Left: {taskData.content_writer_time_left}
+              </span>
               <textarea
                 className="w-full border border-gray-300 p-3 rounded-md h-20"
                 placeholder="Write caption for all platforms..."
                 value={allCaption}
                 onChange={(e) => setAllCaption(e.target.value)}
               />
-              <input
-                type="text"
-                className="w-full border border-gray-300 p-3 rounded-md mt-2"
-                placeholder="Write #tags for all platforms"
-                value={allTags}
-                onChange={(e) => setAllTags(e.target.value)}
-              />
+
               <textarea
                 className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
                 placeholder="Write copywriting for all platforms..."
                 value={allCopywriting}
                 onChange={(e) => setAllCopywriting(e.target.value)}
               />
+              <span className="flex justify-end text-gray-500 mt-4">
+                Time Left: {taskData.tags_time_left}
+              </span>
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 p-3 rounded-md"
+                  placeholder="Write #tags for all platforms"
+                  value={allTags}
+                  onChange={(e) => setAllTags(e.target.value)}
+                />
+                <button
+                  onClick={() => setShowTagModal(true)}
+                  className="text-blue-500"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
             </>
           ) : (
             taskData.platforms.map((platform) => {
@@ -285,7 +311,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     <h5 className="text-sm font-medium text-gray-700">
                       Caption, Tags & Copywriting for {platform.platform_name}:
                     </h5>
-                    <span className=" flex justify-end text-gray-500 mt-4">
+                    <span className="flex justify-end text-gray-500 mt-4">
                       Time Left: {taskData.content_writer_time_left}
                     </span>
                     <textarea
@@ -311,21 +337,13 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                         }))
                       }
                     />
-                    <span className=" flex justify-end text-gray-500 mt-4">
+                    <span className="flex justify-end text-gray-500 mt-4">
                       Time Left: {taskData.tags_time_left}
                     </span>
-                    {selectedUploadPlatform === "all" ? (
+                    <div className="flex items-center gap-2 mt-2">
                       <input
                         type="text"
-                        className="w-full border border-gray-300 p-3 rounded-md mt-2"
-                        placeholder="Write #tags for all platforms"
-                        value={allTags}
-                        onChange={(e) => setAllTags(e.target.value)}
-                      />
-                    ) : (
-                      <input
-                        type="text"
-                        className="w-full border border-gray-300 p-3 rounded-md mt-2"
+                        className="w-full border border-gray-300 p-3 rounded-md"
                         placeholder={`Write #tags for ${
                           taskData.platforms.find(
                             (p) => p.platform_id === selectedUploadPlatform
@@ -339,31 +357,32 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                           }))
                         }
                       />
-                    )}
-                    <button
-                      onClick={() => setShowTagModal(true)}
-                      className="mt-2 text-blue-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="size-6"
+
+                      <button
+                        onClick={() => setShowTagModal(true)}
+                        className="text-blue-500"
                       >
-                        <path
-                          fill-rule="evenodd"
-                          d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
 
                     <TagModal
                       show={showTagModal}
                       onClose={() => setShowTagModal(false)}
-                      month={taskData.month} // Use extracted month
-                      year={taskData.year} // Use extracted year
-                      brandId={taskData.brand_id} // Brand ID from event
+                      month={taskData.month}
+                      year={taskData.year}
+                      brandId={taskData.brand_id}
                       onSelectTags={handleSelectTags}
                     />
                   </div>
