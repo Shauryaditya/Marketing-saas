@@ -43,10 +43,10 @@ const BrandStrategy = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const formattedMonth = selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
+      const formattedMonth =
+        selectedMonth < 10 ? `0${selectedMonth}` : selectedMonth;
       const formattedDate = `${selectedYear}-${formattedMonth}-01`;
-  
-      console.log("Formatted Date:", formattedDate);
+
       try {
         const apiurl = `${url}/v1/Strategy/get/${id}/${formattedDate}`;
         const response = await axios.get(apiurl, {
@@ -54,8 +54,12 @@ const BrandStrategy = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-  
-        if (response.data && response.data.data && response.data.data.length > 0) {
+
+        if (
+          response.data &&
+          response.data.data &&
+          response.data.data.length > 0
+        ) {
           const data = response.data.data[0];
           setFormData((prevState) => ({
             ...prevState,
@@ -65,7 +69,7 @@ const BrandStrategy = () => {
         } else {
           // If no data is returned, reset the form but preserve the month field
           setFormData((prevState) => ({
-            ...initialFormData,  // Use initial structure to reset values
+            ...initialFormData, // Use initial structure to reset values
             brand_id: id,
             month: formattedDate, // Preserve month
           }));
@@ -79,10 +83,10 @@ const BrandStrategy = () => {
         }));
       }
     };
-  
+
     fetchData();
   }, [selectedMonth, selectedYear, strategyId]);
-  
+
   // Define initialFormData outside the component
   const initialFormData = {
     brand_id: id,
@@ -101,7 +105,6 @@ const BrandStrategy = () => {
     remark: "",
     documents: [],
   };
-  
 
   const updateMonthInFormData = (month, year) => {
     const formattedMonth = month < 10 ? `0${month}` : month;
@@ -111,13 +114,13 @@ const BrandStrategy = () => {
       month: formattedDate,
     }));
   };
-  
+
   const handleMonthChange = (e) => {
     const month = Number(e.target.value);
     setSelectedMonth(month);
     updateMonthInFormData(month, selectedYear);
   };
-  
+
   const handleYearChange = (e) => {
     const year = Number(e.target.value);
     setSelectedYear(year);
@@ -171,7 +174,6 @@ const BrandStrategy = () => {
       fetchStrategy();
     }
   }, [strategyId]);
-
 
   // Added strategyId to dependency array
 
@@ -459,9 +461,62 @@ const BrandStrategy = () => {
     }));
   };
 
+  // Helper function to check if a value is empty
+  const isEmpty = (value) => {
+    return value === "" || value === null || value === undefined;
+  };
+  // Main validation function
+  const validateFormData = () => {
+    const errors = [];
+
+    // Check each field and add specific error messages as needed
+   
+    if (isEmpty(formData.productToFocus))
+      errors.push("Product focus is required.");
+    if (isEmpty(formData.budget)) errors.push("Budget field is required.");
+    if (isEmpty(formData.campaigns))
+      errors.push("Campaign details are required.");
+
+    formData.focus.forEach((item, index) => {
+      if (isEmpty(item.percent)) {
+        errors.push(`Focus group ${index + 1}: Percentage is required.`);
+      }
+      if (isEmpty(item.focus_id)) {
+        errors.push(`Focus group ${index + 1}: Please select a focus.`);
+      }
+    });
+
+    formData.social_post.forEach((post, index) => {
+      if (isEmpty(post.time_interval)) {
+        errors.push(`Social post ${index + 1}: Time interval is required.`);
+      }
+      if (isEmpty(post.number)) {
+        errors.push(`Social post ${index + 1}: Number of posts is required.`);
+      }
+    });
+
+    formData.important_date.forEach((date, index) => {
+      if (isEmpty(date.date))
+        errors.push(`Important date ${index + 1}: Date is required.`);
+      if (isEmpty(date.name))
+        errors.push(`Important date ${index + 1}: Name is required.`);
+    });
+
+    return errors;
+  };
+  // Update handleSubmit to include toast notifications for errors
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("formdata>>>???",formData)
+
+    const validationErrors = validateFormData();
+
+    if (validationErrors.length > 0) {
+      validationErrors.forEach((error) => {
+        toast.error(error); // Display each error message in a toast
+      });
+      return; // Stop submission if there are validation errors
+    }
+
     try {
       const response = await axios.post(`${url}/v1/Strategy/add`, formData, {
         headers: {
@@ -470,15 +525,12 @@ const BrandStrategy = () => {
         },
       });
       console.log(response.data);
-      const data = response.data;
-      toast.success(data.message);
-      // Handle successful submission
+      toast.success(response.data.message);
     } catch (error) {
       toast.error(error.response.data.message);
       console.error("Error submitting form:", error);
     }
   };
-
   return (
     <div className="text-xs">
       <BackButton />
@@ -1001,7 +1053,7 @@ const BrandStrategy = () => {
                 <h1 className="text-sm font-semibold">Preview:</h1>
                 {formData.documents.length > 0
                   ? formData.documents.map((fileUrl, index) => {
-                      console.log("Preview File URL:", fileUrl); // Debug: Log the URL
+                     
                       const isBase64 = fileUrl.startsWith("data:image/");
                       const fileExtension =
                         getFileExtension(fileUrl).toLowerCase();
