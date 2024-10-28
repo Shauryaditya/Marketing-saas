@@ -36,12 +36,13 @@ const CalendarComponent = () => {
     setView,
     setShowNewEventModal,
     showNewEventModal,
+    setBrandName,
+    brandName
   } = useCalenderContext();
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { id: brandId } = useParams();
-  const [brandName, setBrandName] = useState("");
 
   const fetchEvents = async () => {
     try {
@@ -51,11 +52,11 @@ const CalendarComponent = () => {
         `/v1/task/currect/month?brand_id=${brandId}&year=${year}&month=${month}`
       );
 
-       // Extract brand_name from the response data
-    const { brand_name } = response.data;
-    
-    // Set brand name state
-    setBrandName(brand_name);
+      // Extract brand_name from the response data
+      const { brand_name } = response.data;
+
+      // Set brand name state
+      setBrandName(brand_name);
       const apiEvents = response.data.data.map((event) => ({
         id: event._id,
         title: event.title,
@@ -154,7 +155,6 @@ const CalendarComponent = () => {
       <div className="flex h-screen">
         <Sidebar />
         <div className="flex-1 p-4">
-        <h2 className="text-xl capitalize text-semibold text-blue-700 mb-1">{brandName}</h2>
           <div style={{ height: "calc(100vh - 2rem)" }}>
             <BigCalendar
               localizer={localizer}
