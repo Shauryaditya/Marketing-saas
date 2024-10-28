@@ -126,9 +126,14 @@ const Sidebar = () => {
                   key={brand._id}
                   className="flex items-center p-1 hover:bg-gray-200 rounded"
                 >
-                  <Link to={`/brand/${brand._id}`} className="capitalize">
+                  <a
+                    href={`/brand/${brand._id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="capitalize"
+                  >
                     {brand.brand_name}
-                  </Link>
+                  </a>
                 </div>
               ))}
             </div>
