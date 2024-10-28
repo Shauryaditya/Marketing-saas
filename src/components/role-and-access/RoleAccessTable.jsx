@@ -45,9 +45,9 @@ const RoleAccessTable = () => {
   console.log("People>>??", people);
   return (
     <div>
-      <div className="relative px-4 pt-2">
+      <div className="relative px-4 pt-2 overflow-x-auto">
         <h1 className="text-base font-semibold py-4">Role & Access</h1>
-        <table className="w-full text-left text-xs">
+        <table className="w-full text-left text-xs  ">
           <thead className="bg-gray-200 text-xs font-normal rounded-xl">
             <tr>
               <th

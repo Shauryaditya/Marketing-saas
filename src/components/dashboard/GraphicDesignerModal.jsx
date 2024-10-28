@@ -62,7 +62,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-10">
-      <div className=" w-2/5 bg-white rounded-lg h-[28rem] overflow-y-auto no-scrollbar ">
+      <div className=" w-1/2 bg-white rounded-lg h-[28rem] overflow-y-auto no-scrollbar ">
         {/* Header */}
         <div className="flex justify-between items-center border-b p-2 mb-4">
           <h2 className="text-sm font-semibold">
@@ -93,15 +93,19 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
                 <p className="text-xs uppercase text-gray-200 font-semibold">
                   Kind
                 </p>
-                {taskData.images && taskData.images.length > 0 ? (
-                  taskData.images.map((image, index) => (
+                <div className="flex gap-x-1">
+                {taskData?.images && taskData?.images.length > 0 ? (
+                  taskData?.images.map((image, index) => (
+                   
                     <p key={index} className="text-xs">
-                      {image.content_type.type}
+                      {image?.content_type.type},
                     </p>
+                    
                   ))
                 ) : (
                   <p className="text-xs">No content available</p>
                 )}
+                </div>
               </div>
             </div>
             {/* <div>
