@@ -170,9 +170,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
     if (!selectedPlatformIds.length) {
       return toast.error("At least one platform must be selected.");
     }
-    if (!eventData.bullets || eventData.bullets.length === 0) {
-      return toast.error("At least one bullet point is required.");
-    }
+
     if (eventData.repeat === "Custom" && !recurrenceData) {
       return toast.error(
         "Recurrence details are required for custom recurring events."
