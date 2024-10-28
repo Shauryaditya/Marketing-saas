@@ -22,7 +22,7 @@ const ProfileSection = () => {
       try {
         const response = await axios.get(`/v1/auth/me`);
         const userData = response.data.data;
-        console.log("Userdata>>??", userData);
+
         setFormData({
           name: userData.name,
           emp_id: userData.emp_id,
