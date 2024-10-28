@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { FaTimes, FaUpload } from "react-icons/fa";
 import axios from "axios";
 import { useDropzone } from "react-dropzone";
+import TagModal from "./TagModal";
 
 const DetailedUploadModal = ({ show, onClose, event }) => {
   const [taskData, setTaskData] = useState([]);
@@ -15,14 +16,21 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   const [allTags, setAllTags] = useState();
   const [allCopywriting, setAllCopywriting] = useState("");
   const [files, setFiles] = useState({}); // Object to store files per platform
-
+  const [showTagModal, setShowTagModal] = useState(false);
   // Check if event is null and handle appropriately
   useEffect(() => {
     if (show && event) {
       const fetchData = async () => {
         try {
           const response = await axios.get(`/v1/task/get/submit/${event.id}`);
-          setTaskData(response.data.data);
+
+          const data = response.data.data;
+
+          // Parse submit_date to extract year and month
+          const submitDate = new Date(data.submit_date);
+          const year = submitDate.getFullYear();
+          const month = submitDate.getMonth() + 1;
+          setTaskData({ ...data, year, month });
           setLoading(false);
         } catch (error) {
           console.error("Error fetching task data:", error);
@@ -35,7 +43,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   }, [show, event]);
 
   const onDrop = (acceptedFiles, platformId) => {
-    console.log('drop file', platformId, acceptedFiles);
+    console.log("drop file", platformId, acceptedFiles);
     setFiles((prevFiles) => ({
       ...prevFiles,
       [platformId]: acceptedFiles, // Store files for each platform
@@ -89,8 +97,8 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         tags: Array.isArray(platformTags[selectedUploadPlatform])
           ? platformTags[selectedUploadPlatform]
           : platformTags[selectedUploadPlatform]
-            .split(",")
-            .map((tag) => tag.trim()),
+              .split(",")
+              .map((tag) => tag.trim()),
       });
     }
 
@@ -119,7 +127,8 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       if (files[task.platform_id]) {
         files[task.platform_id].forEach((file) => {
           console.log(
-            `Appending file: ${file.name} to platform: ${task.platform_id}`, file
+            `Appending file: ${file.name} to platform: ${task.platform_id}`,
+            file
           ); // Debugging file appending
           formData.append(`submitted_tasks[${index}][files]`, file);
         });
@@ -141,6 +150,18 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           error.response ? error.response.data : error.message
         ); // Improved error logging
       });
+  };
+
+  const handleSelectTags = (tags) => {
+    // Update tags in the relevant input fields
+    if (selectedUploadPlatform === "all") {
+      setAllTags(tags);
+    } else if (selectedUploadPlatform) {
+      setPlatformTags((prev) => ({
+        ...prev,
+        [selectedUploadPlatform]: tags,
+      }));
+    }
   };
 
   if (!show) return null;
@@ -204,10 +225,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleUploadPlatformToggle("all")}
-              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === "all"
-                ? "bg-gray-300 text-white"
-                : "bg-gray-100 text-gray-800"
-                }`}
+              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                selectedUploadPlatform === "all"
+                  ? "bg-gray-300 text-white"
+                  : "bg-gray-100 text-gray-800"
+              }`}
             >
               <span>All</span>
             </button>
@@ -215,10 +237,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
               <button
                 key={platform.platform_id}
                 onClick={() => handleUploadPlatformToggle(platform.platform_id)}
-                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === platform.platform_id
-                  ? "bg-gray-300 text-white"
-                  : "bg-gray-100 text-gray-800"
-                  }`}
+                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                  selectedUploadPlatform === platform.platform_id
+                    ? "bg-gray-300 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
               >
                 <img
                   src={platform.platform_logo}
@@ -291,17 +314,57 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     <span className=" flex justify-end text-gray-500 mt-4">
                       Time Left: {taskData.tags_time_left}
                     </span>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 p-3 rounded-md mt-2"
-                      placeholder={`Write #tags for ${platform.platform_name}`}
-                      value={platformTags[platform.platform_id] || ""}
-                      onChange={(e) =>
-                        setPlatformTags((prev) => ({
-                          ...prev,
-                          [platform.platform_id]: e.target.value,
-                        }))
-                      }
+                    {selectedUploadPlatform === "all" ? (
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 p-3 rounded-md mt-2"
+                        placeholder="Write #tags for all platforms"
+                        value={allTags}
+                        onChange={(e) => setAllTags(e.target.value)}
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 p-3 rounded-md mt-2"
+                        placeholder={`Write #tags for ${
+                          taskData.platforms.find(
+                            (p) => p.platform_id === selectedUploadPlatform
+                          )?.platform_name
+                        }`}
+                        value={platformTags[selectedUploadPlatform] || ""}
+                        onChange={(e) =>
+                          setPlatformTags((prev) => ({
+                            ...prev,
+                            [selectedUploadPlatform]: e.target.value,
+                          }))
+                        }
+                      />
+                    )}
+                    <button
+                      onClick={() => setShowTagModal(true)}
+                      className="mt-2 text-blue-500"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="size-6"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
+                    <TagModal
+                      show={showTagModal}
+                      onClose={() => setShowTagModal(false)}
+                      month={taskData.month} // Use extracted month
+                      year={taskData.year} // Use extracted year
+                      brandId={taskData.brand_id} // Brand ID from event
+                      onSelectTags={handleSelectTags}
                     />
                   </div>
                 );
@@ -329,11 +392,15 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                   onDrop={onDrop}
                   imageUrl={image.image_url}
                   isfile={currentFiles.length}
-                // Pass image_url here
+                  // Pass image_url here
                 >
                   <div className="text-gray-400">{image.content_type.type}</div>
-                  <div className="text-gray-600 mt-2">{image.platform_name}</div>
-                  <div className="text-sm text-gray-500">Size: {image.content_type.size}</div>
+                  <div className="text-gray-600 mt-2">
+                    {image.platform_name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Size: {image.content_type.size}
+                  </div>
                   {currentFiles.length > 0 && (
                     <div className="text-sm text-gray-500 mt-2">
                       {currentFiles.length > 1
@@ -352,11 +419,9 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             onClick={handleUpload}
             className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
           >
-
             Submit
           </button>
         </div>
-
       </div>
     </div>
   );
@@ -387,7 +452,7 @@ const CustomDropzone = ({ platformId, onDrop, imageUrl, children, isfile }) => {
       className="flex flex-col bg-blue-100 items-center justify-center border border-gray-300 rounded-md h-28 cursor-pointer relative"
     >
       <input {...getInputProps()} />
-      {(imageUrl && !isfile) ? (
+      {imageUrl && !isfile ? (
         <img
           src={imageUrl}
           alt="Uploaded preview"
