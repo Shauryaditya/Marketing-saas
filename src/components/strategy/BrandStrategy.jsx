@@ -293,8 +293,6 @@ const BrandStrategy = () => {
           (item) => item.social_id !== platformId
         );
       }
-
-      console.log("Updated Social Post Array:", updatedSocialPosts);
       return {
         ...prevFormData,
         social_post: updatedSocialPosts,
