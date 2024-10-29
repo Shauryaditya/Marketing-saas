@@ -285,27 +285,20 @@ const OriginalCollateral = () => {
 
   const handleDel = async (e, type) => {
     e.stopPropagation();
-    console.log("selected folder", type);
     try {
       const folderIdsToDelete = selectedItem.folders;
-    
 
+      console.log("folder", folderIdsToDelete);
       {
         // Delete multiple folders
-        await axios.post(
-          `${apiUrl}/update/status`,
-          {
-            folderIds: folderIdsToDelete,
-            status: false,
-          },
-         
-        );
+        await axios.post(`${apiUrl}/update/status`, {
+          folderIds: folderIdsToDelete,
+          status: false,
+        });
         setFolders((prev) =>
           prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
         );
       }
-
-   
 
       setSelectedItem({ files: [], folders: [] });
     } catch (error) {
@@ -350,8 +343,6 @@ const OriginalCollateral = () => {
           prevItems.filter((item) => !selectedItem.includes(item._id))
         );
       }
-
-      
 
       // If there are files to delete
       if (fileIds.length > 0) {
