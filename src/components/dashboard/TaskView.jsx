@@ -114,13 +114,7 @@ const TaskView = () => {
                       >
                         Preview
                       </button>
-                      {showModal && (
-                        <GraphicDesignerModal
-                          show={showModal}
-                          taskId={selectedTaskId} // Pass the selected task ID to the modal
-                          onClose={() => setShowModal(false)}
-                        />
-                      )}
+
                     </div>
                   </div>
                 ))}
@@ -181,13 +175,6 @@ const TaskView = () => {
                       >
                         Preview
                       </button>
-                      {showModal && (
-                        <GraphicDesignerModal
-                          show={showModal}
-                          taskId={selectedTaskId} // Pass the selected task ID to the modal
-                          onClose={() => setShowModal(false)}
-                        />
-                      )}
                     </div>
                   </div>
                 ))}
@@ -250,13 +237,7 @@ const TaskView = () => {
                       >
                         Preview
                       </button>
-                      {showModal && (
-                        <GraphicDesignerModal
-                          show={showModal}
-                          taskId={selectedTaskId} // Pass the selected task ID to the modal
-                          onClose={() => setShowModal(false)}
-                        />
-                      )}
+
                     </div>
                   </div>
                 ))}
@@ -265,6 +246,13 @@ const TaskView = () => {
               <p className="text-gray-500 p-2">No approved tasks.</p>
             )}
           </div>
+          {showModal && (
+            <GraphicDesignerModal
+              show={showModal}
+              taskId={selectedTaskId} // Pass the selected task ID to the modal
+              onClose={() => setShowModal(false)}
+            />
+          )}
         </div>
       </div>
     </div>

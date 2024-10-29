@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { useCalenderContext } from '../../contexts/CalenderContext';
 function CustomToolbar() {
-  const { handleTodayClick, handleNavigationClick, currentDate, view, setView, setShowNewEventModal } = useCalenderContext()
+  const { handleTodayClick, handleNavigationClick, currentDate, view, setView, setShowNewEventModal, brandName } = useCalenderContext()
   return (
     <div className="flex justify-between items-center mb-3 ">
       <div className='text-2xl flex items-center'>
@@ -34,6 +34,9 @@ function CustomToolbar() {
         <button className={`${view === 'day' ? 'bg-gray-100' : 'bg-white'} py-1 px-4  border rounded text-xs `} onClick={() => setView('day')}>
           Day
         </button>
+      </div>
+      <div className='text-[#265985] text-xl font-semibold capitalize'>
+        {brandName}
       </div>
       <div className='flex justify-center items-end space-x-1'>
         <button
