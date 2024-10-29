@@ -35,11 +35,16 @@ const OriginalCollateral = () => {
   const navigate = useNavigate();
   const { brandId } = useParams();
   const menuRef = useRef(null);
+  const [showMenu, setShowMenu] = useState(null);
   const [items, setItems] = useState([]);
   const [folders, setFolders] = useState([]);
   const [recycleBinItems, setRecycleBinItems] = useState([]);
   const [recycleBinFiles, setRecycleBinFiles] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState({
+    files: [],
+    folders: [],
+  });
+  const [selectedItem, setSelectedItem] = useState([]);
   const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -101,7 +106,6 @@ const OriginalCollateral = () => {
     setSelectedItems({ files: [], folders: [] });
   };
 
-  // Fetch folders and files for the recycle bin
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -115,6 +119,7 @@ const OriginalCollateral = () => {
           }
         );
         setItems(response.data);
+        console.log("data", response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -124,26 +129,28 @@ const OriginalCollateral = () => {
   }, [brandId]);
 
   const toggleSelectItem = (item, type) => {
-    if (type === "folder") {
+    // Handle selecting items without redirecting
+    console.log(selectedItems);
+    {
       setSelectedItems((prev) => ({
         ...prev,
         folders: prev.folders.includes(item._id)
           ? prev.folders.filter((id) => id !== item._id)
-          : [...prev.folders, item._id], // Allow multiple selections
-      }));
-    } else if (type === "file") {
-      setSelectedItems((prev) => ({
-        ...prev,
-        files: prev.files.includes(item._id)
-          ? prev.files.filter((id) => id !== item._id)
-          : [...prev.files, item._id], // Allow multiple selections
+          : [...prev.folders, item._id],
       }));
     }
+    // {
+    //   setSelectedItems((prev) => ({
+    //     ...prev,
+    //     files: prev.files.includes(item._id)
+    //       ? prev.files.filter((id) => id !== item._id)
+    //       : [...prev.files, item._id],
+    //   }));
+    // }
   };
 
-  // Handle folder navigation on double-click
-  const handleFolderDoubleClick = (folderId) => {
-    navigate(`/item/${brandId}/${folderId}`);
+  const handleEllipsisClick = (e) => {
+    e.stopPropagation(); // Prevent the event from bubbling up and triggering folder navigation
   };
 
   const fetchRecycleBinItems = async () => {
@@ -186,7 +193,7 @@ const OriginalCollateral = () => {
 
   // Select or deselect folder or file
   const handleSelection = (id) => {
-    setSelectedItems((prevSelected) =>
+    setSelectedItem((prevSelected) =>
       prevSelected.includes(id)
         ? prevSelected.filter((itemId) => itemId !== id)
         : [...prevSelected, id]
@@ -212,20 +219,25 @@ const OriginalCollateral = () => {
     try {
       const accessToken = localStorage.getItem("access_token");
 
-      // Prepare an array of files for restoration
+      // Prepare data for restoration
       const fileRestoreData = recycleBinFiles
-        .filter((file) => selectedItems.includes(file._id))
+        .filter((file) => selectedItem.includes(file._id))
         .map((file) => ({
           fileId: file._id,
           status: true, // Restore the file by setting status to true
-          file_delete: false, // Assuming this flag indicates the file should not be deleted
+          file_delete: false, // Indicate the file should not be deleted
         }));
 
+      const folderIds = recycleBinItems
+        .filter((item) => selectedItem.includes(item._id))
+        .map((item) => item._id);
+
+      // Restore files if any
       if (fileRestoreData.length > 0) {
         await axios.post(
-          `${apiUrl}/bin/file`, // Update the API URL to the correct endpoint for restoring files
+          `${apiUrl}/bin/file`, // Endpoint for restoring files
           {
-            files: fileRestoreData, // Pass the constructed array
+            files: fileRestoreData,
           },
           {
             headers: {
@@ -236,16 +248,61 @@ const OriginalCollateral = () => {
 
         // Remove restored files from the recycle bin list
         setRecycleBinFiles((prevFiles) =>
-          prevFiles.filter((file) => !selectedItems.includes(file._id))
+          prevFiles.filter((file) => !selectedItem.includes(file._id))
+        );
+      }
+
+      // Restore folders if any
+      if (folderIds.length > 0) {
+        await axios.post(
+          `${apiUrl}/update/status`, // Endpoint for restoring folders
+          {
+            folderIds: folderIds,
+            status: true, // Restore the folder by setting status to true
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
 
-        setSelectedItems([]); // Clear selection after restore
+        // Remove restored folders from the recycle bin list
+        setRecycleBinItems((prevItems) =>
+          prevItems.filter((item) => !selectedItem.includes(item._id))
+        );
       }
+
+      // Clear selection after restore
+      setSelectedItem([]);
     } catch (error) {
       setError("Failed to restore items.");
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDel = async (e, type) => {
+    e.stopPropagation();
+    try {
+      const folderIdsToDelete = selectedItem.folders;
+
+      console.log("folder", folderIdsToDelete);
+      {
+        // Delete multiple folders
+        await axios.post(`${apiUrl}/update/status`, {
+          folderIds: folderIdsToDelete,
+          status: false,
+        });
+        setFolders((prev) =>
+          prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
+        );
+      }
+
+      setSelectedItem({ files: [], folders: [] });
+    } catch (error) {
+      console.error("Error deleting items:", error);
     }
   };
 
@@ -258,11 +315,11 @@ const OriginalCollateral = () => {
 
       // Prepare separate arrays for folders and files
       const folderIds = recycleBinItems
-        .filter((item) => selectedItems.includes(item._id))
+        .filter((item) => selectedItem.includes(item._id))
         .map((item) => item._id);
 
       const fileIds = recycleBinFiles
-        .filter((file) => selectedItems.includes(file._id))
+        .filter((file) => selectedItem.includes(file._id))
         .map((file) => file._id);
 
       // If there are folders to delete
@@ -283,7 +340,7 @@ const OriginalCollateral = () => {
 
         // Update UI after folder delete
         setRecycleBinItems((prevItems) =>
-          prevItems.filter((item) => !selectedItems.includes(item._id))
+          prevItems.filter((item) => !selectedItem.includes(item._id))
         );
       }
 
@@ -305,11 +362,11 @@ const OriginalCollateral = () => {
 
         // Update UI after file delete
         setRecycleBinFiles((prevFiles) =>
-          prevFiles.filter((file) => !selectedItems.includes(file._id))
+          prevFiles.filter((file) => !selectedItem.includes(file._id))
         );
       }
 
-      setSelectedItems([]); // Clear selection after delete
+      setSelectedItem([]); // Clear selection after delete
     } catch (error) {
       setError("Failed to delete items.");
       console.error(error);
@@ -328,8 +385,8 @@ const OriginalCollateral = () => {
           ← Back
         </button>
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-xl text-left text-blue-400 font-semibold mb-6">
-            {isRecycleBinOpen ? "Recycle Bin" : "Original Collateral"}
+          <h1 className="text-xl text-left font-semibold mb-6">
+            {isRecycleBinOpen ? "Recycle Bin" : ``}
           </h1>
           <div className="flex items-center space-x-4">
             {!isRecycleBinOpen && (
@@ -346,14 +403,14 @@ const OriginalCollateral = () => {
                 <button
                   onClick={handleRestore}
                   className="bg-green-100 text-green-500 hover:bg-green-200 px-2 py-1 text-xs rounded-md border border-green-200"
-                  disabled={selectedItems.length === 0 || loading}
+                  disabled={selectedItem.length === 0 || loading}
                 >
                   Restore
                 </button>
                 <button
                   onClick={handleDelete}
                   className="bg-red-100 text-red-500 hover:bg-red-200 px-2 py-1 text-xs rounded-md border border-red-200"
-                  disabled={selectedItems.length === 0 || loading}
+                  disabled={selectedItem.length === 0 || loading}
                 >
                   Delete
                 </button>
@@ -373,7 +430,7 @@ const OriginalCollateral = () => {
                   key={item._id}
                   className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300"
                   onClick={() => toggleSelectItem(item, "folder")} // Select folder on click
-                  onDoubleClick={() => handleFolderDoubleClick(item._id)}
+                  // onDoubleClick={() => handleFolderDoubleClick(item._id)}
                 >
                   <Link
                     to={`/item/${brandId}/${item._id}`}
@@ -385,23 +442,24 @@ const OriginalCollateral = () => {
                       className="h-16 w-16 mb-4"
                     />
                     <h3 className="font-semibold">{item.name}</h3>
-                    <Popover>
-                      <PopoverTrigger>
-                        <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
-                      </PopoverTrigger>
-                      <PopoverContent className="w-36 text-xs" side="right">
-                        <DropdownMenu
-                          ref={menuRef}
-                          onRename={handleRename}
-                          onZip={handleZip}
-                          onDelete={handleDelete}
-                          // visible={showMenu === folder._id}
-                          folderId={item._id}
-                          type="folder" // Pass folder type
-                        />
-                      </PopoverContent>
-                    </Popover>
                   </Link>
+
+                  {/* Ellipsis and DropdownMenu */}
+                  <Popover>
+                    <PopoverTrigger onClick={handleEllipsisClick}>
+                      <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-36 text-xs" side="right">
+                      <DropdownMenu
+                        ref={menuRef}
+                        onRename={handleRename}
+                        onZip={handleZip}
+                        onDelete={handleDel}
+                        folderId={item._id}
+                        type="folder" // Pass folder type
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               ))}
 
@@ -424,7 +482,7 @@ const OriginalCollateral = () => {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(item._id)}
+                      checked={selectedItem.includes(item._id)}
                       onChange={() => handleSelection(item._id)}
                       className="absolute top-2 right-2"
                     />
@@ -449,7 +507,7 @@ const OriginalCollateral = () => {
                   >
                     <input
                       type="checkbox"
-                      checked={selectedItems.includes(file._id)}
+                      checked={selectedItem.includes(file._id)}
                       onChange={() => handleSelection(file._id)}
                       className="absolute top-2 right-2"
                     />

@@ -107,7 +107,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       setEventData({
         title: "",
         date: format(dateObject, "yyyy-MM-dd"),
-        time: "00:00",
+        time: "12:00",
         description: "",
         repeat: "Does not repeat",
         color: colorOptions[0], // Default color
@@ -157,28 +157,37 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
   };
 
   const handleSave = async () => {
-    if (eventData.repeat == "custom" && !recurrenceData) {
+    // Validation for mandatory fields
+    if (!eventData.title.trim()) {
+      return toast.error("Title is required.");
+    }
+    if (!eventData.date) {
+      return toast.error("Date is required.");
+    }
+    if (!eventData.time) {
+      return toast.error("Time is required.");
+    }
+    if (!selectedPlatformIds.length) {
+      return toast.error("At least one platform must be selected.");
+    }
+
+    if (eventData.repeat === "Custom" && !recurrenceData) {
       return toast.error(
-        "Recurrence details are required for recurring events"
+        "Recurrence details are required for custom recurring events."
       );
     }
 
-    if (!selectedPlatformIds.length) {
-      return toast.error("Platform and social is required for event");
-    }
     const startDatetime = new Date(`${eventData.date}T${eventData.time}`);
     const endDatetime = recurrenceData?.endDate
       ? new Date(recurrenceData.endDate)
       : null;
 
     var eventType = "";
-    if (eventData.repeat == "Does not repeat") {
+    if (eventData.repeat === "Does not repeat") {
       eventType = "all_day";
-    }
-    if (eventData.repeat === "Custom") {
+    } else if (eventData.repeat === "Custom") {
       eventType = "recurring";
-    }
-    if (eventData.repeat === "daily") {
+    } else if (eventData.repeat === "daily") {
       eventType = "daily";
     }
 
@@ -199,26 +208,18 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
 
     try {
       let response;
-      if (type == "add") {
+      if (type === "add") {
         response = await axios.post(`${apiUrl}/v1/task/add`, requestBody);
-      }
-
-      if (type == "edit") {
-        if (editScope == "all" && event?.eventId) {
-          response = await axios.put(
-            `${apiUrl}/v1/task/edit/${event?.eventId}`,
-            requestBody
-          );
-        } else {
-          response = await axios.put(
-            `${apiUrl}/v1/task/single/edit/${event.id}`,
-            requestBody
-          );
-        }
+      } else if (type === "edit") {
+        response = await axios.put(
+          `${apiUrl}/v1/task/${editScope === "all" ? "edit" : "single/edit"}/${
+            event.id
+          }`,
+          requestBody
+        );
       }
       if (response.data.message) {
         console.log("msg", response.data.message);
-        // onSave(response.data.data); // Callback to pass the saved event data
         onClose(); // Close the modal after successful save
       } else {
         console.error("Failed to save the event:", response.data.message);
@@ -264,6 +265,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                 <label className="block text-gray-700">
                   Title
                   <input
+                    required
                     type="text"
                     name="title"
                     value={eventData.title}
@@ -283,6 +285,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                         <div key={post.social_id} className="space-y-2">
                           <div className="flex items-center">
                             <input
+                              required
                               type="checkbox"
                               id={`platform-${post.social_id}`}
                               name="platform"
@@ -315,6 +318,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                                   className="flex  items-center"
                                 >
                                   <input
+                                    required
                                     type="radio"
                                     id={`type-${type._id}`}
                                     name={`type-${post.social_id}`}
@@ -355,6 +359,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   <label className="block text-gray-700 flex-1">
                     Date
                     <input
+                      required
                       type="date"
                       name="date"
                       value={eventData.date}
@@ -365,6 +370,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                   <label className="block text-gray-700">
                     Time
                     <input
+                      required
                       type="time"
                       name="time"
                       value={eventData.time}

@@ -36,6 +36,8 @@ const CalendarComponent = () => {
     setView,
     setShowNewEventModal,
     showNewEventModal,
+    setBrandName,
+    brandName
   } = useCalenderContext();
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
@@ -49,6 +51,12 @@ const CalendarComponent = () => {
       const response = await axios.get(
         `/v1/task/currect/month?brand_id=${brandId}&year=${year}&month=${month}`
       );
+
+      // Extract brand_name from the response data
+      const { brand_name } = response.data;
+
+      // Set brand name state
+      setBrandName(brand_name);
       const apiEvents = response.data.data.map((event) => ({
         id: event._id,
         title: event.title,

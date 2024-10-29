@@ -15,6 +15,7 @@ import {
 export const CalenderContext = createContext();
 
 export const CalenderProvider = ({ children }) => {
+    const [brandName, setBrandName] = useState(null)
     const [currentDate, setCurrentDate] = useState(startOfToday());
     const [view, setView] = useState("month");
     const [showNewEventModal, setShowNewEventModal] = useState(false);
@@ -50,7 +51,7 @@ export const CalenderProvider = ({ children }) => {
     };
 
     // Extract values from context outside of useMemo
-    const contextValue = { currentDate, setCurrentDate, handleDateClick, handleTodayClick, handleNavigationClick, view, setView, setShowNewEventModal, showNewEventModal };
+    const contextValue = { currentDate, setCurrentDate, handleDateClick, handleTodayClick, handleNavigationClick, view, setView, setShowNewEventModal, showNewEventModal,setBrandName,brandName };
 
     // Memoize the context value to prevent unnecessary re-renders of consumers
     const memoizedValue = useMemo(() => contextValue, [contextValue]);

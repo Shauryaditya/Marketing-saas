@@ -35,9 +35,6 @@ function BrandDetail() {
 
   return (
     <div className="min-h-screen min-w-screen text-sm pl-8 pt-4">
-      {/* <button onClick={() => navigate("/")} className="text-blue-500 mb-4">
-        ← Back
-      </button> */}
       <h1 className="text-2xl font-semibold mb-6">{brand.brand_name}</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 border rounded-lg">
@@ -50,25 +47,21 @@ function BrandDetail() {
         </div>
         <div
           className="bg-white p-4 border rounded-lg cursor-pointer"
-          onClick={() => navigate(`/add-strategy/${id}`)}
+          onClick={() => window.open(`/add-strategy/${id}`, "_blank")}
         >
           <h2 className="text-xs font-medium mb-2">Strategy</h2>
-          {/* Display Strategy Data */}
         </div>
         <div
           className="bg-white p-4 border rounded-lg cursor-pointer"
-          onClick={() => navigate(`/originalcollateral/${id}`)}
+          onClick={() => window.open(`/originalcollateral/${id}`, "_blank")}
         >
           <h2 className="text-xs font-medium mb-2">Marketing Collateral</h2>
-          {/* Display Marketing Collateral Data */}
         </div>
         <div
-          className="bg-white p-4 border rounded-lg"
-          onClick={() => navigate(`/calendar/${id}`)}
+          className="bg-white p-4 border rounded-lg cursor-pointer"
+          onClick={() => window.open(`/calendar/${id}`, "_blank")}
         >
-          {" "}
-          <h2 className="text-xs font-medium mb-2">Calendar</h2>{" "}
-          {/* Display Calendar Data */}
+          <h2 className="text-xs font-medium mb-2">Calendar</h2>
         </div>
       </div>
     </div>
