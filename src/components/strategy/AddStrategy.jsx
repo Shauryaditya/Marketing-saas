@@ -45,7 +45,6 @@ const AddStrategy = () => {
           className="absolute top-3 right-4 px-2 py-1 bg-gray-100 text-gray-800 rounded-md text-xs"
           onClick={() => navigate(`/strategy/${brandid}`)}
         >
-
           + Add Strategy
         </button>
         <div className="flex flex-col gap-1 absolute top-16 left-0 w-full px-4 ">
@@ -100,7 +99,9 @@ const AddStrategy = () => {
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500">No Strategy available.</div>
+            <div className="text-center text-gray-500">
+              No Strategy available.
+            </div>
           )}
         </div>
       </div>
