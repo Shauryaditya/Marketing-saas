@@ -32,13 +32,11 @@ const AddMemberModal = ({ onClose, team }) => {
       try {
         const response = await axios.get(`/v1/team/members/get/${_id}`);
         const existingTeam = response.data;
-        console.log("Existing Team>>??",existingTeam.members)
         if (existingTeam.manager) {
           setManager(existingTeam.manager._id); // Assuming manager has an _id field
         }
 
         const existingMembers = existingTeam.members.map((member) => ({
-          
           member_id: member.member._id, // Assuming each member has an _id
           reporting_id: member.reporting._id, // Assuming each member has a reporting_id
         }));
@@ -57,6 +55,10 @@ const AddMemberModal = ({ onClose, team }) => {
     setPersons([...persons, { member_id: "", reporting_id: "" }]);
   };
 
+  const handleRemovePerson = (index) => {
+    setPersons(persons.filter((_, i) => i !== index));
+  };
+
   const handlePersonChange = (index, field, value) => {
     const updatedPersons = [...persons];
     updatedPersons[index][field] = value;
@@ -66,12 +68,10 @@ const AddMemberModal = ({ onClose, team }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const teamMembers = persons.map((person) => {
-      return {
-        member_id: person.member_id,
-        reporting_id: person.reporting_id,
-      };
-    });
+    const teamMembers = persons.map((person) => ({
+      member_id: person.member_id,
+      reporting_id: person.reporting_id,
+    }));
 
     const requestBody = {
       team_id: _id,
@@ -81,12 +81,11 @@ const AddMemberModal = ({ onClose, team }) => {
 
     try {
       const response = await axios.post(`/v1/team/members/add`, requestBody);
-      console.log("Response:", response.data);
       toast.success(response.data.message);
-      onClose(); // Close the modal on success
+      onClose();
     } catch (error) {
-      console.error("Error submitting data:", error);
-      toast.error("Failed to add members");
+      const errorMessage = error.response?.data?.message || "Failed to add members";
+      toast.error(errorMessage);
     }
   };
 
@@ -143,16 +142,11 @@ const AddMemberModal = ({ onClose, team }) => {
               </label>
             </div>
             {persons.map((person, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center gap-2"
-              >
+              <div key={index} className="flex justify-between items-center gap-2">
                 <div className="flex flex-col w-1/2">
                   <select
                     value={person.member_id}
-                    onChange={(e) =>
-                      handlePersonChange(index, "member_id", e.target.value)
-                    }
+                    onChange={(e) => handlePersonChange(index, "member_id", e.target.value)}
                     className="mt-1 p-2 bg-gray-50 block w-full border-none rounded-md shadow-sm focus:ring-0"
                   >
                     <option value="">Select Person</option>
@@ -166,44 +160,63 @@ const AddMemberModal = ({ onClose, team }) => {
                 <div className="flex flex-col w-1/2">
                   <select
                     value={person.reporting_id}
-                    onChange={(e) =>
-                      handlePersonChange(index, "reporting_id", e.target.value)
-                    }
+                    onChange={(e) => handlePersonChange(index, "reporting_id", e.target.value)}
                     className="mt-1 p-2 bg-gray-50 block w-full border-none rounded-md shadow-sm focus:ring-0"
                   >
                     <option value="">Select Reporting Person</option>
                     {people.map((reportingOption) => (
-                      <option
-                        key={reportingOption._id}
-                        value={reportingOption._id}
-                      >
+                      <option key={reportingOption._id} value={reportingOption._id}>
                         {reportingOption.name}
                       </option>
                     ))}
                   </select>
                 </div>
-                {index === persons.length - 1 && (
-                  <button
-                    type="button"
-                    onClick={handleAddPerson}
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                <div className="flex items-center">
+                  {index === persons.length - 1 && (
+                    <button
+                      type="button"
+                      onClick={handleAddPerson}
+                      className="text-gray-600 hover:text-gray-900 mr-1"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                  </button>
-                )}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                  {persons.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePerson(index)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M18 6L6 18M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
