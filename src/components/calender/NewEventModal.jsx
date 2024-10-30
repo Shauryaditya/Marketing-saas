@@ -171,12 +171,21 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
       return toast.error("At least one platform must be selected.");
     }
 
+    // Ensure a type is selected for each selected platform
+    const missingTypes = selectedPlatformIds.some(
+      (platformId) => !selectedTypes[platformId]
+    );
+    if (missingTypes) {
+      return toast.error("Please select a type for each selected platform.");
+    }
+
     if (eventData.repeat === "Custom" && !recurrenceData) {
       return toast.error(
         "Recurrence details are required for custom recurring events."
       );
     }
 
+    // Continue with event creation logic if all validations pass
     const startDatetime = new Date(`${eventData.date}T${eventData.time}`);
     const endDatetime = recurrenceData?.endDate
       ? new Date(recurrenceData.endDate)
