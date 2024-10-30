@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import logo from "../../public/logo.svg";
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -13,8 +13,10 @@ const Sidebar = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(""); // State for active sub-tab
 
-  const navigate = useNavigate(); // Initialize the navigate hook
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleAccount = () => {
     setIsAccountOpen(!isAccountOpen);
@@ -63,9 +65,14 @@ const Sidebar = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token"); // Remove access token from local storage
-    navigate("/sign-in"); // Redirect to login page or any other page
+    localStorage.removeItem("access_token");
+    navigate("/sign-in");
   };
+
+  useEffect(() => {
+    // Set active tab based on current location on load
+    setActiveTab(location.pathname);
+  }, [location]);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -88,25 +95,13 @@ const Sidebar = () => {
             aria-controls="account-menu"
           >
             <span className="flex gap-1 items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-4 fill-black"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
-                />
-              </svg>
+              {/* Icon */}
               <Link to="/admin">Account</Link>
             </span>
+            {/* Toggle Icon */}
             <svg
               className={`h-5 w-5 transition-transform transform ${
-                isAccountOpen ? "rotate-180" : ""
+                isTeamOpen ? "rotate-180" : ""
               }`}
               fill="currentColor"
               viewBox="0 0 20 20"
@@ -124,16 +119,19 @@ const Sidebar = () => {
               {brands.map((brand) => (
                 <div
                   key={brand._id}
-                  className="flex items-center p-1 hover:bg-gray-200 rounded"
+                  className={`flex items-center p-1 hover:bg-gray-200 rounded ${
+                    activeTab === `/brand/${brand._id}`
+                      ? "bg-gray-200 text-blue-500" // Selected tab color
+                      : ""
+                  }`}
                 >
-                  <a
-                    href={`/brand/${brand._id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    to={`/brand/${brand._id}`}
+                    onClick={() => setActiveTab(`/brand/${brand._id}`)}
                     className="capitalize"
                   >
                     {brand.brand_name}
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -146,22 +144,10 @@ const Sidebar = () => {
             aria-controls="team-menu"
           >
             <span className="flex gap-1 items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-4 fill-black"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-                />
-              </svg>
+              {/* Icon */}
               Manage Team
             </span>
+            {/* Toggle Icon */}
             <svg
               className={`h-5 w-5 transition-transform transform ${
                 isTeamOpen ? "rotate-180" : ""
@@ -181,19 +167,28 @@ const Sidebar = () => {
             <div id="team-menu" className="pl-8 mt-2">
               <Link
                 to="/team/teams"
-                className="block p-2 hover:bg-gray-200 rounded"
+                onClick={() => setActiveTab("/team/teams")}
+                className={`block p-2 hover:bg-gray-200 rounded ${
+                  activeTab === "/team/teams" ? "bg-gray-200 text-blue-500" : ""
+                }`}
               >
                 Teams
               </Link>
               <Link
                 to="/team/people"
-                className="block p-2 hover:bg-gray-200 rounded"
+                onClick={() => setActiveTab("/team/people")}
+                className={`block p-2 hover:bg-gray-200 rounded ${
+                  activeTab === "/team/people" ? "bg-gray-200 text-blue-500" : ""
+                }`}
               >
                 People
               </Link>
               <Link
                 to="/team/role-access"
-                className="block p-2 hover:bg-gray-200 rounded"
+                onClick={() => setActiveTab("/team/role-access")}
+                className={`block p-2 hover:bg-gray-200 rounded ${
+                  activeTab === "/team/role-access" ? "bg-gray-200 text-blue-500" : ""
+                }`}
               >
                 Role and access
               </Link>
@@ -208,20 +203,7 @@ const Sidebar = () => {
           onClick={handleLogout}
           className="flex items-center gap-2 w-full p-2 rounded bg-gray-400 text-white hover:bg-red-400"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-9a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 4.5 21h9a2.25 2.25 0 0 0 2.25-2.25V15M9 12h11.25m0 0-3-3m3 3-3 3"
-            />
-          </svg>
+          {/* Logout Icon */}
           Logout
         </button>
       </div>
