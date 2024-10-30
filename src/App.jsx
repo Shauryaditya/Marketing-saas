@@ -70,7 +70,7 @@ function App() {
             <ProtectedRoute
               element={
                 <Layout>
-                  <HomePage />
+                  <Dashboard />
                 </Layout>
               }
             />
