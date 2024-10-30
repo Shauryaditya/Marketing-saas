@@ -222,10 +222,21 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
         console.log("msg", response.data.message);
         onClose(); // Close the modal after successful save
       } else {
-        console.error("Failed to save the event:", response.data.message);
+        toast.error("Failed to save the event:", response.message);
       }
     } catch (error) {
       console.error("Error saving the event:", error);
+
+      // Check if the error is a 400 with the specific message
+      if (
+        error.response &&
+        error.response.status === 400 &&
+        error.response.data.message === "Cannot create events for past dates"
+      ) {
+        toast.error("Cannot create events for past dates");
+      } else {
+        toast.error("An error occurred while saving the event.");
+      }
     }
   };
 
@@ -350,9 +361,7 @@ const NewEventModal = ({ show, onClose, onSave, event, editScope, type }) => {
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-xs">
-                    No platforms available.
-                  </p>
+                  <p className="text-gray-500 text-xs">No Strategy found</p>
                 )}
 
                 <div className="flex items-center space-x-4">
