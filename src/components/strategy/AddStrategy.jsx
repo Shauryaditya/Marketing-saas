@@ -35,7 +35,7 @@ const AddStrategy = () => {
   };
 
   return (
-    <div className="w-72 h-72 bg-white text-xs rounded-xl overflow-hidden border border-gray-300 relative">
+    <div className="w-72 h-72 bg-white text-xs rounded-xl overflow-hidden border border-gray-300 relative overflow-y-scroll no-scrollbar">
       <div className="relative h-full">
         <div className="absolute top-0 w-full h-15 bg-white rounded-t-xl border-b border-gray-300"></div>
         <div className="absolute top-4 left-4 font-semibold text-sm text-gray-800">
@@ -47,7 +47,7 @@ const AddStrategy = () => {
         >
           + Add Strategy
         </button>
-        <div className="flex flex-col gap-1 absolute top-16 left-0 w-full px-4">
+        <div className="flex flex-col gap-1 absolute top-16 left-0 w-full px-4 ">
           {contentTypes.length > 0 ? (
             contentTypes.map((type) => (
               <div
@@ -99,7 +99,9 @@ const AddStrategy = () => {
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500">No Strategy available.</div>
+            <div className="text-center text-gray-500">
+              No Strategy available.
+            </div>
           )}
         </div>
       </div>

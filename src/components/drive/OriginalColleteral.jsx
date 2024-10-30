@@ -12,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import toast from "react-hot-toast";
 const apiUrl = "https://api.21genx.com:5000/v1/collateral"; // Replace this with your API base URL
 
 const renderFilePreview = (file) => {
@@ -128,25 +129,20 @@ const OriginalCollateral = () => {
     fetchData();
   }, [brandId]);
 
-  const toggleSelectItem = (item, type) => {
-    // Handle selecting items without redirecting
-    console.log(selectedItems);
-    {
-      setSelectedItems((prev) => ({
-        ...prev,
-        folders: prev.folders.includes(item._id)
-          ? prev.folders.filter((id) => id !== item._id)
-          : [...prev.folders, item._id],
-      }));
-    }
-    // {
-    //   setSelectedItems((prev) => ({
-    //     ...prev,
-    //     files: prev.files.includes(item._id)
-    //       ? prev.files.filter((id) => id !== item._id)
-    //       : [...prev.files, item._id],
-    //   }));
-    // }
+  // Single click to select, double-click to enter folder
+  const handleFolderDoubleClick = (folderId) => {
+    // Navigate on double-click
+    navigate(`/item/${brandId}/${folderId}`);
+  };
+
+  // Updated toggleSelectItem function for selecting folders
+  const toggleSelectItem = (item) => {
+    setSelectedItems((prev) => ({
+      ...prev,
+      folders: prev.folders.includes(item._id)
+        ? prev.folders.filter((id) => id !== item._id)
+        : [...prev.folders, item._id],
+    }));
   };
 
   const handleEllipsisClick = (e) => {
@@ -283,28 +279,34 @@ const OriginalCollateral = () => {
     }
   };
 
-  const handleDel = async (e, type) => {
+  const handleDel = async (e, type, folderId, fileId) => {
     e.stopPropagation();
     try {
-      const folderIdsToDelete = selectedItem.folders;
-
-      console.log("folder", folderIdsToDelete);
-      {
-        // Delete multiple folders
-        await axios.post(`${apiUrl}/update/status`, {
-          folderIds: folderIdsToDelete,
-          status: false,
-        });
-        setFolders((prev) =>
-          prev.filter((folder) => !folderIdsToDelete.includes(folder._id))
-        );
-      }
-
+      const folderIdsToDelete = selectedItems.folders;
+  
+      const response = await axios.post(`${apiUrl}/update/status`, {
+        folderIds: folderIdsToDelete,
+        status: false,
+      });
+  
+      // Show success message
+      toast.success(response.data.message || "Folders moved to Recycle Bin.");
+  
+      // Update `items` by filtering out deleted folders
+      setItems((prevItems) =>
+        prevItems.filter((item) => !folderIdsToDelete.includes(item._id))
+      );
+  
+      // Clear selected items
       setSelectedItem({ files: [], folders: [] });
+  
     } catch (error) {
       console.error("Error deleting items:", error);
+      toast.error("Failed to delete items.");
     }
   };
+  
+  
 
   // Handle Delete API Call
   const handleDelete = async () => {
@@ -428,21 +430,21 @@ const OriginalCollateral = () => {
               items.map((item) => (
                 <div
                   key={item._id}
-                  className="relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300"
-                  onClick={() => toggleSelectItem(item, "folder")} // Select folder on click
-                  // onDoubleClick={() => handleFolderDoubleClick(item._id)}
+                  className={`relative flex flex-col items-center justify-center rounded-lg bg-white hover:shadow-md transition-shadow duration-300 
+                  ${
+                    selectedItems.folders.includes(item._id)
+                      ? "border-2 border-blue-500"
+                      : ""
+                  }`}
+                  onClick={() => toggleSelectItem(item)} // Select folder on single click
+                  onDoubleClick={() => handleFolderDoubleClick(item._id)} // Navigate on double click
                 >
-                  <Link
-                    to={`/item/${brandId}/${item._id}`}
-                    className="flex flex-col items-center justify-center"
-                  >
-                    <img
-                      src="https://i.redd.it/cglk1r8sbyf71.png"
-                      alt={item.name}
-                      className="h-16 w-16 mb-4"
-                    />
-                    <h3 className="font-semibold">{item.name}</h3>
-                  </Link>
+                  <img
+                    src="https://i.redd.it/cglk1r8sbyf71.png"
+                    alt={item.name}
+                    className="h-16 w-16 mb-4"
+                  />
+                  <h3 className="font-semibold">{item.name}</h3>
 
                   {/* Ellipsis and DropdownMenu */}
                   <Popover>

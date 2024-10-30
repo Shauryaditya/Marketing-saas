@@ -3,7 +3,7 @@ import { FaDownload, FaEdit, FaFileArchive, FaTrash } from "react-icons/fa";
 
 const DropdownMenu = forwardRef(
   ({ onDownload, onRename, onZip, onDelete, visible, type, fileId, folderId }, ref) => {
-    console.log('type fileId folderId', type, fileId, folderId);
+
     return (
       <div
         ref={ref}
