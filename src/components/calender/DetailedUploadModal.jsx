@@ -545,7 +545,7 @@ const CustomDropzone = ({ platformId, onDrop, imageUrl, children, isfile }) => {
           />
         </Zoom>
       ) : (
-        <Zoom>children</Zoom>
+        children
       )}
     </div>
   );
