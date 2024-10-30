@@ -5,6 +5,8 @@ import axios from "axios";
 import { useDropzone } from "react-dropzone";
 import TagModal from "./TagModal";
 import { add } from "date-fns";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 const DetailedUploadModal = ({ show, onClose, event }) => {
   const [taskData, setTaskData] = useState([]);
@@ -175,6 +177,20 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           error.response ? error.response.data : error.message
         ); // Improved error logging
       });
+  };
+  const handleDownloadImage = (imageUrl) => {
+    // Create a new anchor element
+    const link = document.createElement("a");
+    // Set the href to the image URL
+    link.href = imageUrl;
+    // Set the download attribute to suggest a filename
+    link.setAttribute("download", imageUrl.split("/").pop());
+    // Append the link to the body (it won't be visible)
+    document.body.appendChild(link);
+    // Programmatically click the link to trigger the download
+    link.click();
+    // Remove the link from the document
+    document.body.removeChild(link);
   };
 
   const handleSelectTags = (tags) => {
@@ -464,6 +480,14 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                       </div>
                     )}
                   </CustomDropzone>
+                  <button
+                    onClick={() =>
+                      handleDownloadImage(taskData.images[0].image_url)
+                    }
+                    className="px-2 py-1 mt-1 bg-blue-500 text-white rounded-md"
+                  >
+                    Download
+                  </button>
                   <div className="text-gray-600 mt-2 text-center">
                     {image.platform_name} - Size: {image.content_type.size}
                   </div>
@@ -512,13 +536,16 @@ const CustomDropzone = ({ platformId, onDrop, imageUrl, children, isfile }) => {
     >
       <input {...getInputProps()} />
       {imageUrl && !isfile ? (
-        <img
-          src={imageUrl}
-          alt="Uploaded preview"
-          className="absolute inset-0 object-cover w-full h-full rounded-md"
-        />
+        <Zoom>
+          {" "}
+          <img
+            src={imageUrl}
+            alt="Uploaded preview"
+            className="absolute inset-0 object-cover w-full h-full rounded-md"
+          />
+        </Zoom>
       ) : (
-        children
+        <Zoom>children</Zoom>
       )}
     </div>
   );
