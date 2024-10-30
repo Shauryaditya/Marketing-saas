@@ -439,29 +439,35 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
               const currentFiles = files[image.platform_id] || [];
 
               return (
-                <CustomDropzone
-                  key={image.platform_id}
-                  platformId={image.platform_id}
-                  onDrop={onDrop}
-                  imageUrl={image.image_url}
-                  isfile={currentFiles.length}
-                  // Pass image_url here
-                >
-                  <div className="text-gray-400">{image.content_type.type}</div>
-                  <div className="text-gray-600 mt-2">
-                    {image.platform_name}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Size: {image.content_type.size}
-                  </div>
-                  {currentFiles.length > 0 && (
-                    <div className="text-sm text-gray-500 mt-2">
-                      {currentFiles.length > 1
-                        ? `${currentFiles.length} files selected`
-                        : `1 file: ${currentFiles[0].name}`}
+                <div className="flex flex-col">
+                  <CustomDropzone
+                    key={image.platform_id}
+                    platformId={image.platform_id}
+                    onDrop={onDrop}
+                    imageUrl={image.image_url}
+                    isfile={currentFiles.length}
+                  >
+                    <div className="text-gray-400 text-center">
+                      {image.content_type.type}
                     </div>
-                  )}
-                </CustomDropzone>
+                    <div className="text-gray-600 mt-2 text-center">
+                      {image.platform_name}
+                    </div>
+                    <div className="text-sm text-gray-500 text-center">
+                      Size: {image.content_type.size}
+                    </div>
+                    {currentFiles.length > 0 && (
+                      <div className="text-sm text-gray-500 mt-2 text-center">
+                        {currentFiles.length > 1
+                          ? `${currentFiles.length} files selected`
+                          : `1 file: ${currentFiles[0].name}`}
+                      </div>
+                    )}
+                  </CustomDropzone>
+                  <div className="text-gray-600 mt-2 text-center">
+                    {image.platform_name} - Size: {image.content_type.size}
+                  </div>
+                </div>
               );
             })}
           </div>
