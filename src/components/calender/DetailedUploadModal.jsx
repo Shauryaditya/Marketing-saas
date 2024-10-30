@@ -4,7 +4,6 @@ import { FaTimes, FaUpload } from "react-icons/fa";
 import axios from "axios";
 import { useDropzone } from "react-dropzone";
 import TagModal from "./TagModal";
-import { add } from "date-fns";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 
@@ -71,7 +70,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   }, [show, event]);
 
   const onDrop = (acceptedFiles, platformId) => {
-    console.log("drop file", platformId, acceptedFiles);
     setFiles((prevFiles) => ({
       ...prevFiles,
       [platformId]: acceptedFiles, // Store files for each platform
@@ -87,8 +85,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       );
     }
   };
-  console.log("task data", taskData);
-  console.log("tags", platformTags);
+
   const handleUpload = () => {
     if (!event || !event.id) {
       console.error("Event or event.id is not defined");
@@ -118,10 +115,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         (p) => p.platform_id === selectedUploadPlatform
       );
 
-      const tags = platformTags[selectedUploadPlatform]
-        ? platformTags[selectedUploadPlatform]
-        : platformTags[selectedUploadPlatform].split(" "); // Adjust the delimiter as necessary
-
+      const tags = platformTags[selectedUploadPlatform];
       uploadData.submitted_tasks.push({
         platform_id: platform.platform_id,
         content_caption: platformCaptions[selectedUploadPlatform],
@@ -149,7 +143,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       );
       formData.append(
         `submitted_tasks[${index}][tags]`,
-        JSON.stringify(task.tags)
+        task.tags
       );
       if (files[task.platform_id]) {
         files[task.platform_id].forEach((file) => {
@@ -266,11 +260,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleUploadPlatformToggle("all")}
-              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                selectedUploadPlatform === "all"
-                  ? "bg-gray-300 text-white"
-                  : "bg-gray-100 text-gray-800"
-              }`}
+              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === "all"
+                ? "bg-gray-300 text-white"
+                : "bg-gray-100 text-gray-800"
+                }`}
             >
               <span>All</span>
             </button>
@@ -278,11 +271,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
               <button
                 key={platform.platform_id}
                 onClick={() => handleUploadPlatformToggle(platform.platform_id)}
-                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
-                  selectedUploadPlatform === platform.platform_id
-                    ? "bg-gray-300 text-white"
-                    : "bg-gray-100 text-gray-800"
-                }`}
+                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === platform.platform_id
+                  ? "bg-gray-300 text-white"
+                  : "bg-gray-100 text-gray-800"
+                  }`}
               >
                 <img
                   src={platform.platform_logo}
@@ -394,11 +386,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                       <input
                         type="text"
                         className="w-full border border-gray-300 p-3 rounded-md"
-                        placeholder={`Write #tags for ${
-                          taskData.platforms.find(
-                            (p) => p.platform_id === selectedUploadPlatform
-                          )?.platform_name
-                        }`}
+                        placeholder={`Write #tags for ${taskData.platforms.find(
+                          (p) => p.platform_id === selectedUploadPlatform
+                        )?.platform_name
+                          }`}
                         value={platformTags[selectedUploadPlatform] || ""}
                         onChange={(e) =>
                           setPlatformTags((prev) => ({
