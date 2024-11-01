@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover";
 import toast from "react-hot-toast";
 const apiUrl = "https://api.21genx.com:5000/v1/collateral"; // Replace this with your API base URL
-
+import RenameModal from "./RenameModal";
 const renderFilePreview = (file) => {
   const extension = file.name.split(".").pop().toLowerCase();
   if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
@@ -50,38 +50,41 @@ const OriginalCollateral = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleRename = async () => {
-    try {
-      const newName = prompt("Enter the new name:");
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [renameItem, setRenameItem] = useState({ type: "", id: "", name: "" });
 
-      if (selectedItems.folders.length > 0) {
-        const folderId = selectedItems.folders[0];
-        await axios.post(`${apiUrl}/v1/collateral/folder/rename/${folderId}`, {
-          newName: newName,
-          brand_id: brandId, // Include brand_id in the body
+  const openRenameModal = (type, id, currentName) => {
+    setRenameItem({ type, id, name: currentName });
+    setRenameModalOpen(true);
+  };
+
+  const handleRename = async (newName) => {
+    try {
+      const { type, id } = renameItem;
+      if (type === "folder") {
+        await axios.post(`${apiUrl}/folder/rename/${id}`, {
+          newName,
+          brand_id: brandId,
         });
         setFolders((prev) =>
           prev.map((folder) =>
-            folder._id === folderId ? { ...folder, name: newName } : folder
+            folder._id === id ? { ...folder, name: newName } : folder
           )
         );
-      } else if (selectedItems.files.length > 0) {
-        const fileId = selectedItems.files[0];
-        await axios.post(`${apiUrl}/v1/collateral/remname/file/${fileId}`, {
-          newName: newName,
-          // brand_id: brandId, // Include brand_id in the body
-          // folder_id: parentId, // Include folder_id in the body
+      } else if (type === "file") {
+        await axios.post(`${apiUrl}/rename/file/${id}`, {
+          newName,
+          brand_id: brandId,
         });
         setFiles((prev) =>
           prev.map((file) =>
-            file._id === fileId ? { ...file, name: newName } : file
+            file._id === id ? { ...file, name: newName } : file
           )
         );
       }
-
       setSelectedItems({ files: [], folders: [] });
     } catch (error) {
-      console.error("Error renaming items:", error);
+      console.error("Error renaming item:", error);
     }
   };
 
@@ -454,7 +457,9 @@ const OriginalCollateral = () => {
                     <PopoverContent className="w-36 text-xs" side="right">
                       <DropdownMenu
                         ref={menuRef}
-                        onRename={handleRename}
+                        onRename={() =>
+                          openRenameModal("folder", item._id, item.name)
+                        }
                         onZip={handleZip}
                         onDelete={handleDel}
                         folderId={item._id}
@@ -464,7 +469,12 @@ const OriginalCollateral = () => {
                   </Popover>
                 </div>
               ))}
-
+            <RenameModal
+              isOpen={renameModalOpen}
+              onClose={() => setRenameModalOpen(false)}
+              onRename={handleRename}
+              currentName={renameItem.name}
+            />
             {!isRecycleBinOpen && (
               <div
                 onClick={handleOpenRecycleBin}
