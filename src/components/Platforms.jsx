@@ -120,6 +120,18 @@ const Platforms = () => {
   };
 
   const handleContentTypeChange = (index, field, value) => {
+    if (
+      field === "type" &&
+      platformContentTypes.some(
+        (contentType, i) => contentType.type === value && i !== index
+      )
+    ) {
+      alert(
+        "This content type has already been added. Please select a different type."
+      );
+      return;
+    }
+
     const newContentTypes = [...platformContentTypes];
     newContentTypes[index][field] = value;
     setPlatformContentTypes(newContentTypes);
@@ -130,6 +142,10 @@ const Platforms = () => {
       ...platformContentTypes,
       { type: "", length: "", width: "" },
     ]);
+  };
+  const handleRemoveContentType = (index) => {
+    const newContentTypes = platformContentTypes.filter((_, i) => i !== index);
+    setPlatformContentTypes(newContentTypes);
   };
 
   const handleFileUpload = (files) => {
@@ -209,8 +225,8 @@ const Platforms = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg w-1/3 max-w-lg">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto no-scrollbar">
+          <div className="bg-white p-6 rounded-lg w-1/3 max-w-lg ">
             <h2 className="text-lg font-semibold mb-4">
               {editMode ? "Edit Platform" : "Add New Platform"}
             </h2>
@@ -222,7 +238,7 @@ const Platforms = () => {
                 type="text"
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
-                className="w-full border border-gray-300 p-1 rounded"
+                className="w-full border border-gray-300 p-1 rounded text-xs"
               />
             </div>
             <div className="mb-4">
@@ -233,7 +249,7 @@ const Platforms = () => {
                 type="text"
                 value={platformLink}
                 onChange={(e) => setPlatformLink(e.target.value)}
-                className="w-full border border-gray-300 p-1 rounded"
+                className="w-full border border-gray-300 p-1 rounded text-xs"
               />
             </div>
             <div className="mb-4">
@@ -266,26 +282,34 @@ const Platforms = () => {
             {platformContentTypes.map((contentType, index) => (
               <div key={index} className="flex items-center mb-4">
                 <select
-                  className="w-full border border-gray-300 p-1 rounded mr-2"
+                  className="w-full border border-gray-300 p-1 rounded mr-2 text-xs"
                   value={contentType.type}
                   onChange={(e) =>
                     handleContentTypeChange(index, "type", e.target.value)
                   }
                 >
-                  <option value="">Select type</option>
+                  <option className="text-xs" value="">Select type</option>
                   {contentTypes.map((type) => (
-                    <option key={type._id} value={type._id}>
+                    <option
+                      key={type._id}
+                      value={type._id}
+                      className="text-xs"
+                      disabled={platformContentTypes.some(
+                        (content) => content.type === type._id
+                      )}
+                    >
                       {type.content_type}
                     </option>
                   ))}
                 </select>
+
                 <input
                   type="text"
                   value={contentType.length}
                   onChange={(e) =>
                     handleContentTypeChange(index, "length", e.target.value)
                   }
-                  className="w-full border border-gray-300 p-1 rounded"
+                  className="w-full border border-gray-300 p-1 rounded text-xs"
                   placeholder="Length"
                 />
                 <span className="mx-1">x</span>
@@ -295,9 +319,15 @@ const Platforms = () => {
                   onChange={(e) =>
                     handleContentTypeChange(index, "width", e.target.value)
                   }
-                  className="w-full border border-gray-300 p-1 rounded"
+                  className="w-full border border-gray-300 p-1 rounded text-xs"
                   placeholder="Width"
                 />
+                <button
+                  onClick={() => handleRemoveContentType(index)}
+                  className="text-red-500 text-sm ml-2"
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <div className="flex justify-end">
