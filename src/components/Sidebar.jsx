@@ -117,23 +117,23 @@ const Sidebar = () => {
           {isAccountOpen && (
             <div id="account-menu" className="pl-8 mt-1">
               {brands.map((brand) => (
-                <div
-                  key={brand._id}
-                  className={`flex items-center p-1 hover:bg-gray-200 rounded ${
-                    activeTab === `/brand/${brand._id}`
-                      ? "bg-gray-200 text-blue-500" // Selected tab color
-                      : ""
-                  }`}
+                <Link
+                  to={`/brand/${brand._id}`}
+                  onClick={() => setActiveTab(`/brand/${brand._id}`)}
+                  target="_blank"
+                  className="capitalize"
                 >
-                  <Link
-                    to={`/brand/${brand._id}`}
-                    onClick={() => setActiveTab(`/brand/${brand._id}`)}
-                    target="_blank"
-                    className="capitalize"
+                  <div
+                    key={brand._id}
+                    className={`flex items-center p-1 hover:bg-gray-200 rounded space-y-1 ${
+                      activeTab === `/brand/${brand._id}`
+                        ? "bg-gray-200 text-blue-500" // Selected tab color
+                        : ""
+                    }`}
                   >
                     {brand.brand_name}
-                  </Link>
-                </div>
+                  </div>
+                </Link>
               ))}
             </div>
           )}
@@ -179,7 +179,9 @@ const Sidebar = () => {
                 to="/team/people"
                 onClick={() => setActiveTab("/team/people")}
                 className={`block p-2 hover:bg-gray-200 rounded ${
-                  activeTab === "/team/people" ? "bg-gray-200 text-blue-500" : ""
+                  activeTab === "/team/people"
+                    ? "bg-gray-200 text-blue-500"
+                    : ""
                 }`}
               >
                 People
@@ -188,7 +190,9 @@ const Sidebar = () => {
                 to="/team/role-access"
                 onClick={() => setActiveTab("/team/role-access")}
                 className={`block p-2 hover:bg-gray-200 rounded ${
-                  activeTab === "/team/role-access" ? "bg-gray-200 text-blue-500" : ""
+                  activeTab === "/team/role-access"
+                    ? "bg-gray-200 text-blue-500"
+                    : ""
                 }`}
               >
                 Role and access
