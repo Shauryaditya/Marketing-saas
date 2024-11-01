@@ -101,7 +101,7 @@ const Sidebar = () => {
             {/* Toggle Icon */}
             <svg
               className={`h-5 w-5 transition-transform transform ${
-                isTeamOpen ? "rotate-180" : ""
+                isAccountOpen ? "rotate-180" : ""
               }`}
               fill="currentColor"
               viewBox="0 0 20 20"
