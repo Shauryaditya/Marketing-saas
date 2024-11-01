@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import RenameModal from "./RenameModal";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -30,6 +31,14 @@ const FolderView = () => {
     files: [],
     folders: [],
   });
+
+  const [renameModalOpen, setRenameModalOpen] = useState(false);
+  const [renameItem, setRenameItem] = useState({ type: "", id: "", name: "" });
+
+  const openRenameModal = (type, id, currentName) => {
+    setRenameItem({ type, id, name: currentName });
+    setRenameModalOpen(true);
+  };
 
   // Toggle selection of folders or files
   const toggleSelectItem = (item, type) => {
@@ -86,35 +95,33 @@ const FolderView = () => {
     setShowMenu(item._id); // Show menu for the clicked item
   };
 
-  const handleRename = async () => {
+  const handleRename = async (newName) => {
     try {
-      const newName = prompt("Enter the new name:");
-
-      if (selectedItems.folders.length > 0) {
-        const folderId = selectedItems.folders[0];
-        await axios.patch(`${apiUrl}/v1/collateral/folder/${folderId}`, {
-          name: newName,
+      const { type, id } = renameItem;
+      if (type === "folder") {
+        await axios.post(`${apiUrl}/v1/collateral/folder/rename/${id}`, {
+          newName,
+          brand_id: brandId,
         });
         setFolders((prev) =>
           prev.map((folder) =>
-            folder._id === folderId ? { ...folder, name: newName } : folder
+            folder._id === id ? { ...folder, name: newName } : folder
           )
         );
-      } else if (selectedItems.files.length > 0) {
-        const fileId = selectedItems.files[0];
-        await axios.patch(`${apiUrl}/v1/collateral/file/${fileId}`, {
-          name: newName,
+      } else if (type === "file") {
+        await axios.post(`${apiUrl}/v1/collateral/rename/file/${id}`, {
+          newName,
+          brand_id: brandId,
         });
         setFiles((prev) =>
           prev.map((file) =>
-            file._id === fileId ? { ...file, name: newName } : file
+            file._id === id ? { ...file, name: newName } : file
           )
         );
       }
-
       setSelectedItems({ files: [], folders: [] });
     } catch (error) {
-      console.error("Error renaming items:", error);
+      console.error("Error renaming item:", error);
     }
   };
 
@@ -309,7 +316,9 @@ const FolderView = () => {
                   <PopoverContent className="w-36 text-xs" side="right">
                     <DropdownMenu
                       ref={menuRef}
-                      onRename={handleRename}
+                      onRename={() =>
+                        openRenameModal("folder", folder._id, folder.name)
+                      }
                       onZip={handleZip}
                       onDelete={handleDelete}
                       // visible={showMenu === folder._id}
@@ -340,7 +349,9 @@ const FolderView = () => {
                     <DropdownMenu
                       ref={menuRef}
                       onDownload={handleDownload}
-                      onRename={handleRename}
+                      onRename={() =>
+                        openRenameModal("file", file._id, file.name)
+                      }
                       onDelete={handleDelete}
                       fileId={file._id}
                       type="file" // Pass file type
@@ -349,6 +360,13 @@ const FolderView = () => {
                 </Popover>
               </div>
             ))}
+
+            <RenameModal
+              isOpen={renameModalOpen}
+              onClose={() => setRenameModalOpen(false)}
+              onRename={handleRename}
+              currentName={renameItem.name}
+            />
           </div>
         </div>
       </div>

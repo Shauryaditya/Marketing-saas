@@ -56,8 +56,9 @@ const OriginalCollateral = () => {
 
       if (selectedItems.folders.length > 0) {
         const folderId = selectedItems.folders[0];
-        await axios.patch(`${apiUrl}/v1/collateral/folder/${folderId}`, {
-          name: newName,
+        await axios.post(`${apiUrl}/v1/collateral/folder/rename/${folderId}`, {
+          newName: newName,
+          brand_id: brandId, // Include brand_id in the body
         });
         setFolders((prev) =>
           prev.map((folder) =>
@@ -66,8 +67,10 @@ const OriginalCollateral = () => {
         );
       } else if (selectedItems.files.length > 0) {
         const fileId = selectedItems.files[0];
-        await axios.patch(`${apiUrl}/v1/collateral/file/${fileId}`, {
-          name: newName,
+        await axios.post(`${apiUrl}/v1/collateral/remname/file/${fileId}`, {
+          newName: newName,
+          // brand_id: brandId, // Include brand_id in the body
+          // folder_id: parentId, // Include folder_id in the body
         });
         setFiles((prev) =>
           prev.map((file) =>
@@ -283,30 +286,27 @@ const OriginalCollateral = () => {
     e.stopPropagation();
     try {
       const folderIdsToDelete = selectedItems.folders;
-  
+
       const response = await axios.post(`${apiUrl}/update/status`, {
         folderIds: folderIdsToDelete,
         status: false,
       });
-  
+
       // Show success message
       toast.success(response.data.message || "Folders moved to Recycle Bin.");
-  
+
       // Update `items` by filtering out deleted folders
       setItems((prevItems) =>
         prevItems.filter((item) => !folderIdsToDelete.includes(item._id))
       );
-  
+
       // Clear selected items
       setSelectedItem({ files: [], folders: [] });
-  
     } catch (error) {
       console.error("Error deleting items:", error);
       toast.error("Failed to delete items.");
     }
   };
-  
-  
 
   // Handle Delete API Call
   const handleDelete = async () => {
