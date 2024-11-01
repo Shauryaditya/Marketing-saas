@@ -117,7 +117,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         content_caption: platformCaptions[platform.platform_id],
         copy_writing: platformCopywriting[platform.platform_id],
         files: "", // Placeholder for the files, will be updated below
-        tags: platformTags[platform.platform_id]
+        tags: platformTags[platform.platform_id],
       }));
     }
 
@@ -137,10 +137,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         `submitted_tasks[${index}][copy_writing]`,
         task.copy_writing
       );
-      formData.append(
-        `submitted_tasks[${index}][tags]`,
-        task.tags
-      );
+      formData.append(`submitted_tasks[${index}][tags]`, task.tags);
       if (files[task.platform_id]) {
         files[task.platform_id].forEach((file) => {
           console.log(
@@ -199,7 +196,8 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                 Task: {taskData.taskId}
               </h3>
               <p className="text-sm text-gray-500">
-                Date & Time: {format(taskData.submit_date, "dd-MM-yyyy HH:mm:ss")}
+                Date & Time:{" "}
+                {format(taskData.submit_date, "dd-MM-yyyy HH:mm:ss")}
               </p>
             </div>
             <button
@@ -242,10 +240,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handleUploadPlatformToggle("all")}
-              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === "all"
-                ? "bg-gray-300 text-white"
-                : "bg-gray-100 text-gray-800"
-                }`}
+              className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                selectedUploadPlatform === "all"
+                  ? "bg-gray-300 text-white"
+                  : "bg-gray-100 text-gray-800"
+              }`}
             >
               <span>All</span>
             </button>
@@ -253,10 +252,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
               <button
                 key={platform.platform_id}
                 onClick={() => handleUploadPlatformToggle(platform.platform_id)}
-                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${selectedUploadPlatform === platform.platform_id
-                  ? "bg-gray-300 text-white"
-                  : "bg-gray-100 text-gray-800"
-                  }`}
+                className={`px-3 py-2 rounded-md shadow flex items-center space-x-2 ${
+                  selectedUploadPlatform === platform.platform_id
+                    ? "bg-gray-300 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
               >
                 <img
                   src={platform.platform_logo}
@@ -368,10 +368,11 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                       <input
                         type="text"
                         className="w-full border border-gray-300 p-3 rounded-md"
-                        placeholder={`Write #tags for ${taskData.platforms.find(
-                          (p) => p.platform_id === selectedUploadPlatform
-                        )?.platform_name
-                          }`}
+                        placeholder={`Write #tags for ${
+                          taskData.platforms.find(
+                            (p) => p.platform_id === selectedUploadPlatform
+                          )?.platform_name
+                        }`}
                         value={platformTags[selectedUploadPlatform] || ""}
                         onChange={(e) =>
                           setPlatformTags((prev) => ({
@@ -383,7 +384,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
 
                       <button
                         onClick={() => setShowTagModal(true)}
-                        className="text-blue-500"
+                        className="text-gray-500"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -453,45 +454,48 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     )}
                   </CustomDropzone>
 
-                  {
-                    taskData.images[0].image_url && (
-                      <>
-                        <div className="grid grid-cols-2 space-x-2">
-                          <a
-                            target="_blank"
-                            href={taskData.images[0].image_url}
-                            className="w-full flex justify-center px-2 py-1 mt-1 bg-blue-500 text-white rounded-md"
+                  {taskData.images[0].image_url && (
+                    <>
+                      <div className="grid grid-cols-2 space-x-2">
+                        <a
+                          target="_blank"
+                          href={taskData.images[0].image_url}
+                          className="w-full flex justify-center px-2 py-1 mt-1 bg-gray-600 text-white rounded-md"
+                        >
+                          Preview
+                        </a>
+                        <div>
+                          <button
+                            onClick={() =>
+                              handleDownloadImage(
+                                taskData.images[0].image_url,
+                                taskData.brand_name,
+                                image.platform_name,
+                                image.content_type.type,
+                                taskData.submit_date
+                              )
+                            }
+                            className="w-full px-2 py-1 mt-1 bg-gray-600 text-white rounded-md"
                           >
-                            Preview
-                          </a>
-                          <div>
-                            <button
-                              onClick={() =>
-                                handleDownloadImage(taskData.images[0].image_url, taskData.brand_name, image.platform_name, image.content_type.type, taskData.submit_date)
-                              }
-                              className="w-full px-2 py-1 mt-1 bg-blue-500 text-white rounded-md"
-                            >
-                              Download
-                            </button>
-
-                          </div>
+                            Download
+                          </button>
                         </div>
-                        <div className="text-gray-600 mt-2 text-center">
-                          {image.platform_name} - Size: {image.content_type.size}
-                        </div>
-                      </>
-                    )
-                  }
+                      </div>
+                      <div className="text-gray-600 mt-2 text-center">
+                        {image.platform_name} - Size: {image.content_type.size}
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-end mt-4">
           <button
             onClick={handleUpload}
-            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            className="flex items-center px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-green-600"
           >
             Submit
           </button>

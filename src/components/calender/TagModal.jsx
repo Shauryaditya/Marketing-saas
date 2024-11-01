@@ -53,7 +53,7 @@ const TagModal = ({ show, onClose, month, year, brandId, onSelectTags }) => {
               <h4 className="font-semibold text-lg">#TAG</h4>
               <button
                 onClick={handleUseTags}
-                className="px-4 py-1 bg-blue-500 text-white rounded-full"
+                className="px-4 py-1 bg-gray-700 text-white rounded-full"
               >
                 Use
               </button>
