@@ -331,12 +331,7 @@ const FolderView = () => {
                 }`}
                 onClick={() => toggleSelectItem(file, "file")}
               >
-                <div
-                  // Select file on click
-                  className="cursor-pointer"
-                >
-                  {renderFilePreview(file)}
-                </div>
+                <div className="cursor-pointer">{renderFilePreview(file)}</div>
                 <Popover>
                   <PopoverTrigger>
                     <FaEllipsisV className="absolute top-2 right-2 text-gray-500 cursor-pointer" />
