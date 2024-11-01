@@ -6,7 +6,8 @@ import { useDropzone } from "react-dropzone";
 import TagModal from "./TagModal";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
-
+import { handleDownloadImage } from "./index";
+import { format } from "date-fns";
 const DetailedUploadModal = ({ show, onClose, event }) => {
   const [taskData, setTaskData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,18 +112,13 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         tags: allTags.split(",").map((tag) => tag.trim()),
       }));
     } else {
-      const platform = taskData.platforms.find(
-        (p) => p.platform_id === selectedUploadPlatform
-      );
-
-      const tags = platformTags[selectedUploadPlatform];
-      uploadData.submitted_tasks.push({
+      uploadData.submitted_tasks = taskData.platforms.map((platform) => ({
         platform_id: platform.platform_id,
-        content_caption: platformCaptions[selectedUploadPlatform],
-        copy_writing: platformCopywriting[selectedUploadPlatform],
+        content_caption: platformCaptions[platform.platform_id],
+        copy_writing: platformCopywriting[platform.platform_id],
         files: "", // Placeholder for the files, will be updated below
-        tags: tags,
-      });
+        tags: platformTags[platform.platform_id]
+      }));
     }
 
     const formData = new FormData();
@@ -172,20 +168,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         ); // Improved error logging
       });
   };
-  const handleDownloadImage = (imageUrl) => {
-    // Create a new anchor element
-    const link = document.createElement("a");
-    // Set the href to the image URL
-    link.href = imageUrl;
-    // Set the download attribute to suggest a filename
-    link.setAttribute("download", imageUrl.split("/").pop());
-    // Append the link to the body (it won't be visible)
-    document.body.appendChild(link);
-    // Programmatically click the link to trigger the download
-    link.click();
-    // Remove the link from the document
-    document.body.removeChild(link);
-  };
 
   const handleSelectTags = (tags) => {
     // Update tags in the relevant input fields
@@ -217,7 +199,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                 Task: {taskData.taskId}
               </h3>
               <p className="text-sm text-gray-500">
-                Date & Time: 24/08/2024, 15:35{" "}
+                Date & Time: {format(taskData.submit_date, "dd-MM-yyyy HH:mm:ss")}
               </p>
             </div>
             <button
@@ -446,9 +428,8 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
               const currentFiles = files[image.platform_id] || [];
 
               return (
-                <div className="flex flex-col">
+                <div key={image.platform_id} className="flex flex-col">
                   <CustomDropzone
-                    key={image.platform_id}
                     platformId={image.platform_id}
                     onDrop={onDrop}
                     imageUrl={image.image_url}
@@ -471,17 +452,36 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                       </div>
                     )}
                   </CustomDropzone>
-                  <button
-                    onClick={() =>
-                      handleDownloadImage(taskData.images[0].image_url)
-                    }
-                    className="px-2 py-1 mt-1 bg-blue-500 text-white rounded-md"
-                  >
-                    Download
-                  </button>
-                  <div className="text-gray-600 mt-2 text-center">
-                    {image.platform_name} - Size: {image.content_type.size}
-                  </div>
+
+                  {
+                    taskData.images[0].image_url && (
+                      <>
+                        <div className="grid grid-cols-2 space-x-2">
+                          <a
+                            target="_blank"
+                            href={taskData.images[0].image_url}
+                            className="w-full flex justify-center px-2 py-1 mt-1 bg-blue-500 text-white rounded-md"
+                          >
+                            Preview
+                          </a>
+                          <div>
+                            <button
+                              onClick={() =>
+                                handleDownloadImage(taskData.images[0].image_url, taskData.brand_name, image.platform_name, image.content_type.type, taskData.submit_date)
+                              }
+                              className="w-full px-2 py-1 mt-1 bg-blue-500 text-white rounded-md"
+                            >
+                              Download
+                            </button>
+
+                          </div>
+                        </div>
+                        <div className="text-gray-600 mt-2 text-center">
+                          {image.platform_name} - Size: {image.content_type.size}
+                        </div>
+                      </>
+                    )
+                  }
                 </div>
               );
             })}
@@ -527,14 +527,11 @@ const CustomDropzone = ({ platformId, onDrop, imageUrl, children, isfile }) => {
     >
       <input {...getInputProps()} />
       {imageUrl && !isfile ? (
-        <Zoom>
-          {" "}
-          <img
-            src={imageUrl}
-            alt="Uploaded preview"
-            className="absolute inset-0 object-cover w-full h-full rounded-md"
-          />
-        </Zoom>
+        <img
+          src={imageUrl}
+          alt="Uploaded preview"
+          className="absolute inset-0 object-cover w-full h-full rounded-md"
+        />
       ) : (
         children
       )}
