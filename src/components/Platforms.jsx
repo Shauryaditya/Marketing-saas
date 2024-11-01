@@ -226,7 +226,7 @@ const Platforms = () => {
 
       {showModal && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto no-scrollbar">
-          <div className="bg-white p-6 rounded-lg w-1/3 max-w-lg ">
+          <div className="bg-white p-6 rounded-lg w-1/3 max-w-lg">
             <h2 className="text-lg font-semibold mb-4">
               {editMode ? "Edit Platform" : "Add New Platform"}
             </h2>
