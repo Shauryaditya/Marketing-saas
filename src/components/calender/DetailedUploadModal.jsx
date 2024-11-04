@@ -454,32 +454,32 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     )}
                   </CustomDropzone>
 
-                  {taskData.images[0].image_url && (
+                  {/* Ensure the preview and download buttons use the current image */}
+                  {image.image_url && (
                     <>
-                      <div className="grid grid-cols-2 space-x-2">
+                      <div className="grid grid-cols-2 gap-2 mt-2">
                         <a
                           target="_blank"
-                          href={taskData.images[0].image_url}
-                          className="w-full flex justify-center px-2 py-1 mt-1 bg-gray-600 text-white rounded-md"
+                          rel="noopener noreferrer"
+                          href={image.image_url} // Use the current image's URL
+                          className="w-full flex justify-center px-2 py-1 bg-gray-600 text-white rounded-md"
                         >
                           Preview
                         </a>
-                        <div>
-                          <button
-                            onClick={() =>
-                              handleDownloadImage(
-                                taskData.images[0].image_url,
-                                taskData.brand_name,
-                                image.platform_name,
-                                image.content_type.type,
-                                taskData.submit_date
-                              )
-                            }
-                            className="w-full px-2 py-1 mt-1 bg-gray-600 text-white rounded-md"
-                          >
-                            Download
-                          </button>
-                        </div>
+                        <button
+                          onClick={() =>
+                            handleDownloadImage(
+                              image.image_url, // Use the current image's URL
+                              taskData.brand_name,
+                              image.platform_name,
+                              image.content_type.type,
+                              taskData.submit_date
+                            )
+                          }
+                          className="w-full px-2 py-1 bg-gray-600 text-white rounded-md"
+                        >
+                          Download
+                        </button>
                       </div>
                       <div className="text-gray-600 mt-2 text-center">
                         {image.platform_name} - Size: {image.content_type.size}
