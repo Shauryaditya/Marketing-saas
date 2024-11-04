@@ -45,7 +45,7 @@ const RoleAccessTable = () => {
   console.log("People>>??", people);
   return (
     <div>
-      <div className="relative px-4 pt-2 overflow-x-auto">
+      <div className="px-4 pt-2 overflow-x-auto">
         <h1 className="text-base font-semibold py-4">Role & Access</h1>
         <table className="w-full text-left text-xs  ">
           <thead className="bg-gray-200 text-xs font-normal rounded-xl">
@@ -56,33 +56,33 @@ const RoleAccessTable = () => {
               >
                 Sl No
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap">
+              <th scope="col" className="px-2 py-3 ">
                 Employee's Name
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap">
+              <th scope="col" className="px-2 py-3 ">
                 Employee ID
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap">
+              <th scope="col" className="px-2 py-3 ">
                 Department
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap">
+              <th scope="col" className="px-2 py-3 ">
                 Sub Department
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap">
+              <th scope="col" className="px-2 py-3 ">
                 Designation
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap">
+              <th scope="col" className="px-2 py-3 ">
                 Email
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap ">
+              <th scope="col" className="px-2 py-3  ">
                 Mobile Number
               </th>
-              <th scope="col" className="px-2 py-3 whitespace-nowrap ">
+              <th scope="col" className="px-2 py-3  ">
                 Login Access
               </th>
               <th
                 scope="col"
-                className="px-2 py-3 whitespace-nowrap rounded-tr-xl"
+                className="px-2 py-3  rounded-tr-xl"
               >
                 Status
               </th>
