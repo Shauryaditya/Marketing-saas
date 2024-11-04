@@ -177,7 +177,7 @@ const GraphicDesignerModal = ({ show, onClose, taskId }) => {
                     <img
                       src={item.image_url}
                       alt={item.content_caption || "Image"}
-                      className="w-24 h-24 object-cover rounded-lg"
+                      className="w-48 h-32 object-cover rounded-lg"
                     />
                   </div>
                 ))

@@ -233,6 +233,11 @@ const BrandStrategy = () => {
   };
 
   const handleFocus = (index, name, value) => {
+    if (name === "percent" && value < 0) {
+      setErrorMessage("Percentage cannot be negative");
+      return;
+    }
+
     setFormData((prevFormData) => {
       const updatedFocus = prevFormData.focus.map((item, i) =>
         i === index ? { ...item, [name]: value } : item
@@ -468,7 +473,7 @@ const BrandStrategy = () => {
     const errors = [];
 
     // Check each field and add specific error messages as needed
-   
+
     if (isEmpty(formData.productToFocus))
       errors.push("Product focus is required.");
     if (isEmpty(formData.budget)) errors.push("Budget field is required.");
@@ -614,6 +619,7 @@ const BrandStrategy = () => {
                   <div key={index} className="flex items-center space-x-2 mb-2">
                     <input
                       type="number"
+                      min="0"
                       className="border w-12 p-1 rounded bg-gray-50"
                       placeholder="Percentage"
                       value={group.percent}
@@ -1051,7 +1057,6 @@ const BrandStrategy = () => {
                 <h1 className="text-sm font-semibold">Preview:</h1>
                 {formData.documents.length > 0
                   ? formData.documents.map((fileUrl, index) => {
-                     
                       const isBase64 = fileUrl.startsWith("data:image/");
                       const fileExtension =
                         getFileExtension(fileUrl).toLowerCase();
