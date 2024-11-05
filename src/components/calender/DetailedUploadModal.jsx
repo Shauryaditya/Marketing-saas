@@ -143,10 +143,6 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
       formData.append(`submitted_tasks[${index}][tags]`, task.tags);
       if (files[task.platform_id]) {
         files[task.platform_id].forEach((file) => {
-          console.log(
-            `Appending file: ${file.name} to platform: ${task.platform_id}`,
-            file
-          ); // Debugging file appending
           formData.append(`submitted_tasks[${index}][files]`, file.file);
         });
       }
