@@ -153,6 +153,7 @@ const AddPeopleModal = ({ emp_id, modal_name, onClose }) => {
       onClose();
       navigate(0);
     } catch (error) {
+      toast.error(error?.response?.data?.message)
       console.error(`Error ${modal_name === "edit" ? "updating" : "adding"} person:`, error);
     }
   };
