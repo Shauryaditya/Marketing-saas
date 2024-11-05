@@ -73,7 +73,10 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
   const onDrop = (acceptedFiles, platformId) => {
     setFiles((prevFiles) => ({
       ...prevFiles,
-      [platformId]: acceptedFiles, // Store files for each platform
+      [platformId]: acceptedFiles.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file), // Create a preview URL for each file
+      })),
     }));
   };
 
@@ -436,21 +439,29 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
                     imageUrl={image.image_url}
                     isfile={currentFiles.length}
                   >
-                    <div className="text-gray-400 text-center">
-                      {image.content_type.type}
-                    </div>
-                    <div className="text-gray-600 mt-2 text-center">
-                      {image.platform_name}
-                    </div>
-                    <div className="text-sm text-gray-500 text-center">
-                      Size: {image.content_type.size}
-                    </div>
-                    {currentFiles.length > 0 && (
-                      <div className="text-sm text-gray-500 mt-2 text-center">
-                        {currentFiles.length > 1
-                          ? `${currentFiles.length} files selected`
-                          : `1 file: ${currentFiles[0].name}`}
-                      </div>
+                    {currentFiles.length > 0 ? (
+                      // First block: only show this if there are current files
+                      currentFiles.map((fileObj, index) => (
+                        <img
+                          key={index}
+                          src={fileObj.preview}
+                          alt={`Preview ${index + 1}`}
+                          className=" w-full h-full object-cover rounded"
+                        />
+                      ))
+                    ) : (
+                      // Second block: only show this if there are no current files
+                      <>
+                        <div className="text-gray-400 text-center">
+                          {image.content_type.type}
+                        </div>
+                        <div className="text-gray-600 mt-2 text-center">
+                          {image.platform_name}
+                        </div>
+                        <div className="text-sm text-gray-500 text-center">
+                          Size: {image.content_type.size}
+                        </div>
+                      </>
                     )}
                   </CustomDropzone>
 
