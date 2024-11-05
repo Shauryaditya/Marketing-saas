@@ -147,7 +147,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             `Appending file: ${file.name} to platform: ${task.platform_id}`,
             file
           ); // Debugging file appending
-          formData.append(`submitted_tasks[${index}][files]`, file);
+          formData.append(`submitted_tasks[${index}][files]`, file.file);
         });
       }
     });
