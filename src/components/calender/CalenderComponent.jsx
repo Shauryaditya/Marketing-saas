@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, add } from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./CalenderComponent.css";
@@ -37,11 +37,12 @@ const CalendarComponent = () => {
     setShowNewEventModal,
     showNewEventModal,
     setBrandName,
-    brandName
+    brandName,
   } = useCalenderContext();
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [modalType, setModalType] = useState("add"); // Track if modal is "add" or "edit"
   const { id: brandId } = useParams();
 
   const fetchEvents = async () => {
@@ -81,7 +82,6 @@ const CalendarComponent = () => {
       const response = await axios.get(`/v1/task/get/${event.id}`);
       const eventData = response.data;
 
-      // Set selected event with necessary properties including the _id
       setSelectedEvent({
         id: eventData._id,
         title: eventData.title,
@@ -102,8 +102,36 @@ const CalendarComponent = () => {
     }
   };
 
+  // Right-click event handler to open the NewEventModal in "edit" mode
+  const handleEventRightClick = async (event, e) => {
+    e.preventDefault(); // Prevent the default context menu
+
+    try {
+      // Fetch the selected event details for editing
+      const response = await axios.get(`/v1/task/get/${event.id}`);
+      const eventData = response.data;
+
+      setSelectedEvent({
+        id: eventData._id,
+        title: eventData.title,
+        start: new Date(eventData.start_date),
+        end: new Date(eventData.end_date),
+        color: eventData.color,
+        description: eventData.description,
+        event_type: eventData.event_type,
+        status: eventData.status,
+        recurrence: eventData.recurrence,
+        platforms_data: eventData.platforms_data,
+      });
+
+      setModalType("edit"); // Set modal type to "edit"
+      setShowNewEventModal(true); // Show the modal
+    } catch (error) {
+      console.error("Error fetching event details:", error.message);
+    }
+  };
+
   const handleSelectSlot = ({ start, end }) => {
-    // Open NewEventModal on slot select
     setSelectedEvent({
       id: null,
       title: "",
@@ -111,6 +139,7 @@ const CalendarComponent = () => {
       end,
       color: "#FFEBCC", // Default color for new events
     });
+    setModalType("add"); // Set modal type to "add"
     setShowNewEventModal(true);
   };
 
@@ -139,7 +168,8 @@ const CalendarComponent = () => {
               border: "none",
               outline: "none",
             }}
-            onClick={() => handleEventClick(props.event)}
+            onClick={() => handleEventClick(props.event)} // Left-click
+            onContextMenu={(e) => handleEventRightClick(props.event, e)} // Right-click
           >
             {props.event.title}
           </div>
@@ -184,7 +214,7 @@ const CalendarComponent = () => {
         show={showNewEventModal} // Control visibility
         onClose={handleModalClose} // Close modal function
         event={selectedEvent} // Pass the selected event to the modal
-        type="add"
+        type={modalType} // Dynamically set type to "add" or "edit"
       />
 
       {/* Detailed Event Modal */}
