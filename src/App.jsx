@@ -33,6 +33,7 @@ import RoleAccess from "./components/role-and-access/RoleAccess";
 import Bin from "./components/drive/Bin";
 import Dashboard from "./components/dashboard/Dashboard";
 import TaskView from "./components/dashboard/TaskView";
+import Administrator from "./components/administrator/Administrator";
 
 function App() {
   return (
@@ -88,7 +89,7 @@ function App() {
             />
           }
         />
-       <Route
+        <Route
           path="/tasks"
           element={
             <ProtectedRoute
@@ -192,6 +193,18 @@ function App() {
               element={
                 <Layout>
                   <Profile />
+                </Layout>
+              }
+            />
+          }
+        />
+        <Route
+          path="/administrator"
+          element={
+            <ProtectedRoute
+              element={
+                <Layout>
+                  <Administrator />
                 </Layout>
               }
             />
