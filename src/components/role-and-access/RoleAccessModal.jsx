@@ -49,7 +49,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10">
-      <div className="max-w-xl w-full h-4/5 bg-white rounded-lg p-6 text-xs">
+      <div className="max-w-xl w-full h-4/5 bg-white rounded-lg p-3 text-xs">
         <div className="flex justify-between border-b p-2 mb-4">
           <p className="text-base font-semibold">Edit</p>
           <button
