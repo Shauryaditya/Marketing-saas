@@ -1,8 +1,9 @@
 import axios from "axios";
 import setupAxiosInterceptors from "../../AxiosInterceptor";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import Select from "react-select";
 
 const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
   setupAxiosInterceptors();
@@ -12,10 +13,44 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { mobile, email, _id: user_id, name, designation, department } = people;
+  const {
+    mobile,
+    email,
+    _id: user_id,
+    name,
+    designation_name,
+    department_name,
+    sub_department_name,
+  } = people;
 
   if (!isOpen) return null;
 
+  const [roles, setRoles] = useState([]);
+  const [selectedRoleId, setSelectedRoleId] = useState(null);
+  const [taskModules, setTaskModules] = useState([]);
+
+  const fetchRole = async () => {
+    try {
+      const response = await axios.get(`/v1/rbac/get-all-roles`);
+      setRoles(response.data.roles || []);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRole();
+  }, []);
+
+  const taskModuleOptions = [
+    { value: "SM", label: "Social Media" },
+    { value: "GD", label: "Graphics Designer" },
+    { value: "CW", label: "Content Writer" },
+  ];
+
+  const handleTaskModuleChange = (selectedOptions) => {
+    setTaskModules(selectedOptions.map((option) => option.value));
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -24,8 +59,17 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
       return;
     }
 
-    const data = { name, email, user_id, emp_id, mobile, password };
-
+    const data = {
+      name,
+      email,
+      user_id,
+      emp_id,
+      mobile,
+      password,
+      role_id: selectedRoleId ,
+      task_modules: taskModules,
+    };
+    	console.log("Response Body>>???",data)
     try {
       const response = await axios.post(`/v1/auth/register`, data, {
         headers: {
@@ -35,10 +79,10 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
 
       if (response.status >= 200 && response.status < 300) {
         toast.success("Login Credentials Created");
-        onClose();
-        navigate(0);
+        // onClose();
+        // navigate(0);
       } else {
-        toast.error(`Something went wrong!`);
+        toast.error("Something went wrong!");
       }
     } catch (error) {
       toast.error(
@@ -47,6 +91,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
     }
   };
 
+  console.log("People>>>???", people);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10">
       <div className="max-w-xl w-full max-h-4/5 bg-white rounded-lg p-3 text-xs">
@@ -91,7 +136,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
               </label>
               <input
                 type="text"
-                value={department}
+                value={department_name}
                 disabled
                 className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
@@ -103,7 +148,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
               </label>
               <input
                 type="text"
-                value={designation}
+                value={designation_name}
                 disabled
                 className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
@@ -137,8 +182,18 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
               <label className="block text-xs font-medium text-gray-700">
                 Role
               </label>
-              <select className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs">
-                <option>Select Role</option>
+              <select
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                value={selectedRoleId || ""}
+                onChange={(e) => setSelectedRoleId(e.target.value)}
+                required
+              >
+                <option value="">Select Role</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role._id}>
+                    {role.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -146,9 +201,12 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
               <label className="block text-xs font-medium text-gray-700">
                 Task Module
               </label>
-              <select className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs">
-                <option>Select Task Module</option>
-              </select>
+              <Select
+                closeMenuOnSelect={false}
+                isMulti
+                options={taskModuleOptions}
+                onChange={handleTaskModuleChange}
+              />
             </div>
           </div>
 

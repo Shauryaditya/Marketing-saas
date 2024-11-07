@@ -25,6 +25,7 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
       if (roleId) {
         try {
           const response = await axios.get(`/v1/rbac/get-role?id=${roleId}`);
+          console.log("response",response);
           setRoleName(response.data.role.name || "");
           setPermissions(response.data.role.permissions || []);
         } catch (error) {
@@ -32,6 +33,7 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
           toast.error("Failed to fetch role details.");
         }
       } else {
+        console.log("Inside else::::");
         setRoleName("");
         setPermissions([]);
       }
@@ -122,6 +124,7 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
               <PermissionsComponent
                 onPermissionsChange={handlePermissionsChange}
                 permissions={permissions}
+                roleId={roleId}
               />
             </div>
           </div>

@@ -2,39 +2,49 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Switch } from '../ui/switch';
 
-const PermissionsComponent = ({ onPermissionsChange, permissions = [] }) => {
+const PermissionsComponent = ({ onPermissionsChange, permissions, roleId }) => {
   const [selectedSection, setSelectedSection] = useState(0); // Initially select the first section
   const [sections, setSections] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState({});
-
+console.log("Permissions>>>L:::",permissions)
   // Fetch permissions from the API only once on mount
   const fetchPermissions = async () => {
     try {
+      console.log("call this function:::",permissions,roleId)
       const response = await axios.get('/v1/rbac/get-all-permission');
-      setSections(response.data.data || []);
+      const allPermissions = response.data.data || [];
+      setSections(allPermissions);
 
-      // Initialize selectedPermissions, merging with the permissions prop
-      const initialPermissions = response.data.data.reduce((acc, section) => {
+      // Initialize selectedPermissions based on the permissions prop
+      const initialPermissions = allPermissions.reduce((acc, section) => {
         acc[section.section] = section.permissions
           .filter(permission => permissions.includes(permission.permissionKey))
           .map(permission => permission.permissionKey);
         return acc;
       }, {});
+
+      console.log("initialPermissions######",initialPermissions);
+
       setSelectedPermissions(initialPermissions);
-      onPermissionsChange(Object.values(initialPermissions).flat());
     } catch (error) {
       console.error('Error fetching permissions:', error);
     }
   };
 
-  // Remove permissions from the dependency array to prevent infinite calls
   useEffect(() => {
     fetchPermissions();
-  }, []); // Empty dependency array to ensure it only runs on mount
+  }, [roleId,permissions]); 
 
   const togglePermission = (section, permissionKey) => {
+
+    console.log("section",section,permissionKey)
     setSelectedPermissions(prev => {
       const updatedPermissions = { ...prev };
+
+      // Ensure section array exists in case it's undefined
+      updatedPermissions[section] = updatedPermissions[section] || [];
+
+      // Toggle the permission key in the section array
       if (updatedPermissions[section].includes(permissionKey)) {
         updatedPermissions[section] = updatedPermissions[section].filter(
           key => key !== permissionKey
@@ -42,9 +52,12 @@ const PermissionsComponent = ({ onPermissionsChange, permissions = [] }) => {
       } else {
         updatedPermissions[section].push(permissionKey);
       }
-      onPermissionsChange(
-        Object.values(updatedPermissions).flat() // Flatten the selected permissions array for easier API consumption
-      );
+
+      // Pass flattened permissions to onPermissionsChange only when the permissions change
+      const flattenedPermissions = Object.values(updatedPermissions).flat();
+
+      onPermissionsChange(flattenedPermissions);
+
       return updatedPermissions;
     });
   };
@@ -76,9 +89,11 @@ const PermissionsComponent = ({ onPermissionsChange, permissions = [] }) => {
                 <label key={permission.permissionKey} className="flex items-center space-x-2">
                   <Switch
                     id={permission.permissionKey}
-                    checked={selectedPermissions[sections[selectedSection].section]?.includes(
-                      permission.permissionKey
-                    )}
+                    checked={
+                      selectedPermissions[sections[selectedSection].section]?.includes(
+                        permission.permissionKey
+                      )
+                    }
                     onCheckedChange={() =>
                       togglePermission(sections[selectedSection].section, permission.permissionKey)
                     }
