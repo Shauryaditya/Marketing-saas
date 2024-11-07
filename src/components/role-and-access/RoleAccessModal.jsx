@@ -19,7 +19,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
+    if (showConfirmPassword && password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
@@ -49,9 +49,9 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-      <div className="max-w-3xl w-full bg-white shadow-lg rounded-lg p-3 text-xs">
-        <div className="flex justify-between border-b p-2">
-          <p className="text-sm font-semibold">Edit</p>
+      <div className="max-w-xl w-full h-4/5 bg-white rounded-lg p-6 text-xs">
+        <div className="flex justify-between border-b p-2 mb-4">
+          <p className="text-base font-semibold">Edit</p>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -59,8 +59,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
             &#10005;
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-2">
-          {/* Grid Layout for fields */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-700">
@@ -70,7 +69,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 type="text"
                 value={name}
                 disabled
-                className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
             </div>
 
@@ -82,7 +81,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 type="text"
                 value={emp_id}
                 disabled
-                className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
             </div>
 
@@ -94,7 +93,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 type="text"
                 value={department}
                 disabled
-                className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
             </div>
 
@@ -106,7 +105,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 type="text"
                 value={designation}
                 disabled
-                className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
             </div>
 
@@ -118,7 +117,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 type="email"
                 value={email}
                 disabled
-                className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
             </div>
 
@@ -130,7 +129,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 type="text"
                 value={mobile}
                 disabled
-                className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
               />
             </div>
 
@@ -138,7 +137,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
               <label className="block text-xs font-medium text-gray-700">
                 Role
               </label>
-              <select className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs">
+              <select className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs">
                 <option>Select Role</option>
               </select>
             </div>
@@ -147,14 +146,14 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
               <label className="block text-xs font-medium text-gray-700">
                 Task Module
               </label>
-              <select className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs">
+              <select className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs">
                 <option>Select Task Module</option>
               </select>
             </div>
           </div>
 
-          {/* Password fields with consistent width */}
-          <div className="mt-4 grid grid-cols-2 gap-4">
+          {/* Password fields */}
+          <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <label className="block text-xs font-medium text-gray-700">
                 Password
@@ -164,7 +163,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
+                  className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
                   required
                 />
                 <button
@@ -172,37 +171,7 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700"
                 >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M15 12h.01M19.5 12c0-2.5-2-4.5-4.5-4.5-1.1 0-2.2.4-3 1-1.8-1.3-3.5-3-5.5-3C5.5 5.5 3 7.9 3 10.5c0 1.3.5 2.5 1.5 3.5 1.1-1.2 2.5-2.1 4-2.5.5-.8 1.2-1.3 2-1.6C13.7 10.4 14.9 12 15 12z"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M17.293 6.707a9.95 9.95 0 011.32 2.93c.03.3.046.604.046.91 0 2.25-1.39 4.17-3.41 5.16a7.054 7.054 0 01-1.946 1.048 8.965 8.965 0 01-.391.08c-.247.05-.493.1-.744.15a4.984 4.984 0 01-2.654-.485 6.004 6.004 0 01-2.257-2.349c-.1-.167-.19-.339-.273-.51l-.328-.436-5.462 3.733 3.213 4.459a4.993 4.993 0 01-2.551.561 7.06 7.06 0 01-3.42-1.907C3.9 13.836 2.5 11.964 2.5 10.5c0-.558.042-1.105.124-1.64A9.96 9.96 0 015.512 7a7.954 7.954 0 011.493-.9c.501-.139 1.02-.233 1.542-.233a7.986 7.986 0 016.063 2.615c.74-.32 1.543-.488 2.378-.48.77 0 1.507.124 2.226.345z"
-                      />
-                    </svg>
-                  )}
+                  👁️
                 </button>
               </div>
             </div>
@@ -212,13 +181,22 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
                 <label className="block text-xs font-medium text-gray-700">
                   Confirm Password
                 </label>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-xs"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="mt-1 block w-full px-3 py-1 border border-gray-300 rounded-md sm:text-xs" // Removed 'shadow-sm'
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700"
+                  >
+                    👁️
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -233,11 +211,11 @@ const RoleAccessModal = ({ isOpen, onClose, emp_id, people }) => {
             </p>
           )}
 
-          {/* Submit button with small width */}
+          {/* Submit button */}
           <div className="text-center mt-4">
             <button
               type="submit"
-              className="py-1 px-3 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+              className="py-1 px-4 border border-transparent rounded-md  text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
             >
               Submit
             </button>
