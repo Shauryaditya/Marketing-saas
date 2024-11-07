@@ -10,7 +10,7 @@ const Navbar = () => {
 
   return (
     <div>
-      <header className=" flex bg-white justify-between border-b pb-1 items-center px-4 z-50">
+      <header className="fixed top-0 left-48 pt-1 right-0 flex bg-white justify-between border-b pb-1 items-center px-4 z-50">
         <div className="relative">
           <input
             type="text"
