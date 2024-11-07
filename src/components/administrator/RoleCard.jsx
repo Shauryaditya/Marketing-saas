@@ -1,28 +1,24 @@
 import React from "react";
-import { FiEdit2 } from "react-icons/fi";
+import AddRoleModal from "./AddRoleModal";
+import { DeleteDialogue } from "./DeleteAlertDialogue";
 
-const RoleCard = ({ roleName, accounts,roleId }) => (
-  <div className="flex flex-col items-start p-2 border rounded-lg shadow-sm w-40 bg-white shrink-0">
-    <div className="flex justify-between items-center w-full mb-2">
+const RoleCard = ({ roleName, accounts, roleId, onClick,onDeleteSuccess }) => (
+  <div
+    className="flex flex-col items-start p-2 border rounded-lg shadow-sm w-40 bg-white shrink-0"
+    onClick={() => onClick(roleId)}
+  >
+    <div className="flex items-center space-x-8">
       <span className="text-xs text-gray-500">{accounts} ACCOUNTS</span>
-      <button className="cursor-pointer">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="w-4 h-4 text-blue-400"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-        />
-      </svg>
-      </button>
+      <div className="flex items-center space-x-2">
+        <AddRoleModal roleId={roleId} initialRoleName={roleName} />
+        <DeleteDialogue roleId={roleId}  onDeleteSuccess={onDeleteSuccess}/>
+      </div>
     </div>
+
     <p className="text-sm font-semibold text-gray-800 mb-1">{roleName}</p>
+    <div className="">
+      
+    </div>
   </div>
 );
 

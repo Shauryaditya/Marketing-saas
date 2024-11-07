@@ -2,30 +2,35 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Switch } from '../ui/switch';
 
-const PermissionsComponent = ({ onPermissionsChange }) => {
+const PermissionsComponent = ({ onPermissionsChange, permissions = [] }) => {
   const [selectedSection, setSelectedSection] = useState(0); // Initially select the first section
   const [sections, setSections] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState({});
 
-  // Fetch permissions from the API
+  // Fetch permissions from the API only once on mount
   const fetchPermissions = async () => {
     try {
       const response = await axios.get('/v1/rbac/get-all-permission');
       setSections(response.data.data || []);
-      // Initialize selectedPermissions with empty arrays for each section
+
+      // Initialize selectedPermissions, merging with the permissions prop
       const initialPermissions = response.data.data.reduce((acc, section) => {
-        acc[section.section] = [];
+        acc[section.section] = section.permissions
+          .filter(permission => permissions.includes(permission.permissionKey))
+          .map(permission => permission.permissionKey);
         return acc;
       }, {});
       setSelectedPermissions(initialPermissions);
+      onPermissionsChange(Object.values(initialPermissions).flat());
     } catch (error) {
       console.error('Error fetching permissions:', error);
     }
   };
 
+  // Remove permissions from the dependency array to prevent infinite calls
   useEffect(() => {
     fetchPermissions();
-  }, []);
+  }, []); // Empty dependency array to ensure it only runs on mount
 
   const togglePermission = (section, permissionKey) => {
     setSelectedPermissions(prev => {
@@ -43,11 +48,11 @@ const PermissionsComponent = ({ onPermissionsChange }) => {
       return updatedPermissions;
     });
   };
-  console.log("Selected permissions>>?",selectedPermissions)
+
   return (
-    <div className="flex rounded-lg shadow-md max-w-xl mx-auto">
+    <div className="flex rounded-lg shadow-md max-w-xl mx-auto mt-4 h-80">
       {/* Sidebar */}
-      <div className="w-1/3 bg-gray-100">
+      <div className="w-1/3 bg-gray-100 overflow-y-auto no-scrollbar">
         {sections.map((section, index) => (
           <div
             key={index}

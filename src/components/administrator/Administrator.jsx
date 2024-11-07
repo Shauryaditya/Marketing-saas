@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import AddRoleModal from './AddRoleModal';
 import RoleCard from './RoleCard';
-import setupAxiosInterceptors from '../../AxiosInterceptor';
 import axios from 'axios';
 
 const Administrator = () => {
-  setupAxiosInterceptors();
   const [roles, setRoles] = useState([]);
-  const [selectedRoleId, setSelectedRoleId] = useState(null); // State to track selected role ID
+  const [selectedRoleId, setSelectedRoleId] = useState(null);
 
   const fetchRole = async () => {
     try {
       const response = await axios.get(`/v1/rbac/get-all-roles`);
-      const fetchedRoles = response.data.roles; // Accessing roles directly
-      setRoles(Array.isArray(fetchedRoles) ? fetchedRoles : []);
+      setRoles(response.data.roles || []);
     } catch (error) {
       console.error("Error fetching roles:", error);
-      setRoles([]); // Set to an empty array in case of error to avoid further issues
     }
   };
 
@@ -24,23 +20,26 @@ const Administrator = () => {
     fetchRole();
   }, []);
 
-  // Function to handle role card clicks and set selected role ID
-  const handleRoleClick = (roleId) => {
-    setSelectedRoleId(roleId);
-    console.log("Selected Role ID:", roleId); // Log the selected role ID
+  const onDeleteSuccess = (deletedRoleId) => {
+    // Option 1: Refetch roles from API
+    fetchRole();
+
+    // Option 2: Update state locally
+    // setRoles(prevRoles => prevRoles.filter(role => role._id !== deletedRoleId));
   };
 
-  console.log("Roles:", roles);
-  console.log("Selected Role ID:", selectedRoleId);
+  const handleRoleClick = (roleId) => {
+    setSelectedRoleId(roleId); // Set selected role ID for editing
+  };
 
   return (
     <div className="bg-gray-50 p-2">
       <div className="flex justify-between">
         <h1>Administrator</h1>
-        <AddRoleModal />
+        <AddRoleModal /> {/* For adding a new role */}
       </div>
       <div className="bg-white p-4 rounded-lg max-w-5xl mx-auto mt-4">
-        <h2 className="text-sm font-semibold text-gray-800 mb-1">
+      <h2 className="text-sm font-semibold text-gray-800 mb-1">
           Administrator roles available
         </h2>
         <p className="text-xs text-gray-600 mb-4">
@@ -54,8 +53,8 @@ const Administrator = () => {
                 roleName={role.name}
                 accounts={role.userCount}
                 roleId={role._id}
-
-                onClick={handleRoleClick} // Pass the handler to RoleCard
+                onClick={handleRoleClick}
+                onDeleteSuccess={onDeleteSuccess}
               />
             ))
           ) : (
