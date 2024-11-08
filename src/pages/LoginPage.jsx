@@ -33,6 +33,7 @@ const LoginPage = () => {
   useEffect(() => {
     console.log("Effect running...");
     if (!isLoading && token && currentUser) {
+      // Only navigate when the token and currentUser are both available
       navigate("/admin");
     }
   }, [isLoading, token, currentUser, navigate]);

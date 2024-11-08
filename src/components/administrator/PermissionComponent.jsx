@@ -2,38 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Switch } from '../ui/switch';
 
-const PermissionsComponent = ({ onPermissionsChange, permissions, roleId }) => {
+const PermissionsComponent = ({ onPermissionsChange, permissions, roleId, setSections,sections,setSelectedPermissions,selectedPermissions }) => {
   const [selectedSection, setSelectedSection] = useState(0); // Initially select the first section
-  const [sections, setSections] = useState([]);
-  const [selectedPermissions, setSelectedPermissions] = useState({});
+
 console.log("Permissions>>>L:::",permissions)
   // Fetch permissions from the API only once on mount
-  const fetchPermissions = async () => {
-    try {
-      console.log("call this function:::",permissions,roleId)
-      const response = await axios.get('/v1/rbac/get-all-permission');
-      const allPermissions = response.data.data || [];
-      setSections(allPermissions);
 
-      // Initialize selectedPermissions based on the permissions prop
-      const initialPermissions = allPermissions.reduce((acc, section) => {
-        acc[section.section] = section.permissions
-          .filter(permission => permissions.includes(permission.permissionKey))
-          .map(permission => permission.permissionKey);
-        return acc;
-      }, {});
-
-      console.log("initialPermissions######",initialPermissions);
-
-      setSelectedPermissions(initialPermissions);
-    } catch (error) {
-      console.error('Error fetching permissions:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPermissions();
-  }, [roleId,permissions]); 
 
   const togglePermission = (section, permissionKey) => {
 

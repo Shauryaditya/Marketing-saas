@@ -7,7 +7,9 @@ export const login = createAsyncThunk(
         try {
             const res = await loginRequest(payload);
             const access_token = res.data.access_token;
-            return access_token;
+            const user_permissions = res.data.user_permissions;
+            const task_module = res.data.task_module;
+            return {access_token,user_permissions,task_module};
         } catch (err) {
             return rejectWithValue(err.response.data.message);
         }

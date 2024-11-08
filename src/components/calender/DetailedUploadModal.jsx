@@ -9,6 +9,9 @@ import "react-medium-image-zoom/dist/styles.css";
 import { handleDownloadImage } from "./index";
 import { format } from "date-fns";
 const DetailedUploadModal = ({ show, onClose, event }) => {
+  const task_module = localStorage.getItem("task_module");
+  const user_permissions = localStorage.getItem("user_permissions");
+  console.log("Task module??>>", task_module, user_permissions);
   const [taskData, setTaskData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUploadPlatform, setSelectedUploadPlatform] = useState();
@@ -187,9 +190,9 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         className="absolute inset-0 bg-gray-800 opacity-75"
         onClick={onClose}
       />
-      <div className="bg-white p-6 rounded-lg no-scrollbar shadow-lg w-full max-w-6xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
+      <div className="bg-white  rounded-lg no-scrollbar shadow-lg w-full max-w-6xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
         <div className="border-b pb-3 mb-4">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center border-b p-4">
             <div>
               <h3 className="text-xl font-semibold text-gray-900">
                 Task: {taskData.taskId}
@@ -207,7 +210,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </button>
           </div>
 
-          <div className="mt-3 grid grid-cols-3 gap-4">
+          <div className="mt-3 grid grid-cols-3 gap-4 px-4">
             <div>
               <span className="block font-medium text-gray-700">Work</span>
               <span className="block text-gray-500">
@@ -223,7 +226,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-4 px-4">
             <span className="block font-medium text-gray-700">Description</span>
             <p className="text-gray-500">
               {taskData.description ||
@@ -232,7 +235,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
           </div>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 px-4">
           <h4 className="text-lg font-medium mb-2">
             Select Platform to Upload:
           </h4>
@@ -267,239 +270,248 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
             ))}
           </div>
         </div>
-
-        <div className="mb-4">
-          {selectedUploadPlatform === "all" ? (
-            <>
-              <span className="flex justify-end text-gray-500 mt-4">
-                Time Left: {taskData.content_writer_time_left}
-              </span>
-              <textarea
-                className="w-full border border-gray-300 p-3 rounded-md h-20"
-                placeholder="Write caption for all platforms..."
-                value={allCaption}
-                onChange={(e) => setAllCaption(e.target.value)}
-              />
-
-              <textarea
-                className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
-                placeholder="Write copywriting for all platforms..."
-                value={allCopywriting}
-                onChange={(e) => setAllCopywriting(e.target.value)}
-              />
-              <span className="flex justify-end text-gray-500 mt-4">
-                Time Left: {taskData.tags_time_left}
-              </span>
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 p-3 rounded-md"
-                  placeholder="Write #tags for all platforms"
-                  value={allTags}
-                  onChange={(e) => setAllTags(e.target.value)}
+        {task_module.includes("CW") || task_module.includes("SM") ? (
+          <div className="mb-2 px-4">
+            {selectedUploadPlatform === "all" ? (
+              <>
+                <span className="flex justify-end text-gray-500 ">
+                  Time Left: {taskData.content_writer_time_left}
+                </span>
+                <textarea
+                  className="w-full border border-gray-300 p-3 rounded-md h-20"
+                  placeholder="Write caption for all platforms..."
+                  value={allCaption}
+                  onChange={(e) => setAllCaption(e.target.value)}
                 />
-                <button
-                  onClick={() => setShowTagModal(true)}
-                  className="text-blue-500"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-6 h-6"
+
+                <textarea
+                  className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
+                  placeholder="Write copywriting for all platforms..."
+                  value={allCopywriting}
+                  onChange={(e) => setAllCopywriting(e.target.value)}
+                />
+                <span className="flex justify-end text-gray-500 mt-4">
+                  Time Left: {taskData.tags_time_left}
+                </span>
+                {/* <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 p-3 rounded-md"
+                    placeholder="Write #tags for all platforms"
+                    value={allTags}
+                    onChange={(e) => setAllTags(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setShowTagModal(true)}
+                    className="text-blue-500"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
 
-                <TagModal
-                  show={showTagModal}
-                  onClose={() => setShowTagModal(false)}
-                  month={taskData.month}
-                  year={taskData.year}
-                  brandId={taskData.brand_id}
-                  onSelectTags={handleSelectTags}
-                />
-              </div>
-            </>
-          ) : (
-            taskData.platforms.map((platform) => {
-              if (platform.platform_id === selectedUploadPlatform) {
-                return (
-                  <div key={platform.platform_id} className="mt-4">
-                    <h5 className="text-sm font-medium text-gray-700">
-                      Caption, Tags & Copywriting for {platform.platform_name}:
-                    </h5>
-                    <span className="flex justify-end text-gray-500 mt-4">
-                      Time Left: {taskData.content_writer_time_left}
-                    </span>
-                    <textarea
-                      className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
-                      placeholder={`Write caption for ${platform.platform_name}...`}
-                      value={platformCaptions[platform.platform_id] || ""}
-                      onChange={(e) =>
-                        setPlatformCaptions((prev) => ({
-                          ...prev,
-                          [platform.platform_id]: e.target.value,
-                        }))
-                      }
-                    />
-
-                    <textarea
-                      className="w-full border border-gray-300 p-3 rounded-md h-20 mt-2"
-                      placeholder={`Write copywriting for ${platform.platform_name}...`}
-                      value={platformCopywriting[platform.platform_id] || ""}
-                      onChange={(e) =>
-                        setPlatformCopywriting((prev) => ({
-                          ...prev,
-                          [platform.platform_id]: e.target.value,
-                        }))
-                      }
-                    />
-                    <span className="flex justify-end text-gray-500 mt-4">
-                      Time Left: {taskData.tags_time_left}
-                    </span>
-                    <div className="flex items-center gap-2 mt-2">
-                      <input
-                        type="text"
-                        className="w-full border border-gray-300 p-3 rounded-md"
-                        placeholder={`Write #tags for ${
-                          taskData.platforms.find(
-                            (p) => p.platform_id === selectedUploadPlatform
-                          )?.platform_name
-                        }`}
-                        value={platformTags[selectedUploadPlatform] || ""}
+                  <TagModal
+                    show={showTagModal}
+                    onClose={() => setShowTagModal(false)}
+                    month={taskData.month}
+                    year={taskData.year}
+                    brandId={taskData.brand_id}
+                    onSelectTags={handleSelectTags}
+                  />
+                </div> */}
+              </>
+            ) : (
+              taskData.platforms.map((platform) => {
+                if (platform.platform_id === selectedUploadPlatform) {
+                  return (
+                    <div key={platform.platform_id} className="mt-4">
+                      <h5 className="text-sm font-medium text-gray-700 uppercase">
+                        Caption, Tags & Copywriting for {platform.platform_name}
+                        :
+                      </h5>
+                      <span className="flex justify-end text-gray-500 ">
+                        Time Left: {taskData.content_writer_time_left}
+                      </span>
+                      <textarea
+                        className="w-full border border-gray-300 p-3 rounded-md h-20 bg-[#BDB9E033]"
+                        placeholder={`Write caption for ${platform.platform_name}...`}
+                        value={platformCaptions[platform.platform_id] || ""}
                         onChange={(e) =>
-                          setPlatformTags((prev) => ({
+                          setPlatformCaptions((prev) => ({
                             ...prev,
-                            [selectedUploadPlatform]: e.target.value,
+                            [platform.platform_id]: e.target.value,
                           }))
                         }
                       />
 
-                      <button
-                        onClick={() => setShowTagModal(true)}
-                        className="text-gray-500"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="w-6 h-6"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                      <textarea
+                        className="w-full border border-gray-300 p-3 bg-[#BDB9E033] rounded-md h-20 mt-2"
+                        placeholder={`Write copywriting for ${platform.platform_name}...`}
+                        value={platformCopywriting[platform.platform_id] || ""}
+                        onChange={(e) =>
+                          setPlatformCopywriting((prev) => ({
+                            ...prev,
+                            [platform.platform_id]: e.target.value,
+                          }))
+                        }
+                      />
                     </div>
-
-                    <TagModal
-                      show={showTagModal}
-                      onClose={() => setShowTagModal(false)}
-                      month={taskData.month}
-                      year={taskData.year}
-                      brandId={taskData.brand_id}
-                      onSelectTags={handleSelectTags}
-                    />
-                  </div>
-                );
-              }
-              return null;
-            })
-          )}
-        </div>
-
-        <div className="mt-4">
-          <div className="flex justify-between">
-            <h4 className="text-lg font-medium mb-2">Files to Upload:</h4>
-            <span className="block text-gray-500 mt-4">
-              Time Left: {taskData.image_time_left}
-            </span>
+                  );
+                }
+                return null;
+              })
+            )}
           </div>
-          <div className="grid grid-cols-5 gap-4">
-            {taskData.images.map((image) => {
-              const currentFiles = files[image.platform_id] || [];
+        ) : null}
+        {task_module.includes("GD") || task_module.includes("SM") ? (
+          <div className="mt-4 px-4">
+            <div className="flex justify-between">
+              <h4 className="text-lg font-medium mb-2">Files to Upload:</h4>
+              <span className="block text-gray-500 mt-4">
+                Time Left: {taskData.image_time_left}
+              </span>
+            </div>
+            <div className="grid grid-cols-5 gap-4">
+              {taskData.images.map((image) => {
+                const currentFiles = files[image.platform_id] || [];
 
-              return (
-                <div key={image.platform_id} className="flex flex-col">
-                  <CustomDropzone
-                    platformId={image.platform_id}
-                    onDrop={onDrop}
-                    imageUrl={image.image_url}
-                    isfile={currentFiles.length}
-                  >
-                    {currentFiles.length > 0 ? (
-                      // First block: only show this if there are current files
-                      currentFiles.map((fileObj, index) => (
-                        <img
-                          key={index}
-                          src={fileObj.preview}
-                          alt={`Preview ${index + 1}`}
-                          className=" w-full h-full object-cover rounded"
-                        />
-                      ))
-                    ) : (
-                      // Second block: only show this if there are no current files
+                return (
+                  <div key={image.platform_id} className="flex flex-col">
+                    <CustomDropzone
+                      platformId={image.platform_id}
+                      onDrop={onDrop}
+                      imageUrl={image.image_url}
+                      isfile={currentFiles.length}
+                    >
+                      {currentFiles.length > 0 ? (
+                        // First block: only show this if there are current files
+                        currentFiles.map((fileObj, index) => (
+                          <img
+                            key={index}
+                            src={fileObj.preview}
+                            alt={`Preview ${index + 1}`}
+                            className=" w-full h-full object-cover rounded"
+                          />
+                        ))
+                      ) : (
+                        // Second block: only show this if there are no current files
+                        <>
+                          <div className="text-gray-400 text-center">
+                            {image.content_type.type}
+                          </div>
+                          <div className="text-gray-600 mt-2 text-center">
+                            {image.platform_name}
+                          </div>
+                          <div className="text-sm text-gray-500 text-center">
+                            Size: {image.content_type.size}
+                          </div>
+                        </>
+                      )}
+                    </CustomDropzone>
+
+                    {/* Ensure the preview and download buttons use the current image */}
+                    {image.image_url && (
                       <>
-                        <div className="text-gray-400 text-center">
-                          {image.content_type.type}
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href={image.image_url} // Use the current image's URL
+                            className="w-full flex justify-center px-2 py-1 bg-gray-600 text-white rounded-md"
+                          >
+                            Preview
+                          </a>
+                          <button
+                            onClick={() =>
+                              handleDownloadImage(
+                                image.image_url, // Use the current image's URL
+                                taskData.brand_name,
+                                image.platform_name,
+                                image.content_type.type,
+                                taskData.submit_date
+                              )
+                            }
+                            className="w-full px-2 py-1 bg-gray-600 text-white rounded-md"
+                          >
+                            Download
+                          </button>
                         </div>
                         <div className="text-gray-600 mt-2 text-center">
-                          {image.platform_name}
-                        </div>
-                        <div className="text-sm text-gray-500 text-center">
-                          Size: {image.content_type.size}
+                          {image.platform_name} - Size:{" "}
+                          {image.content_type.size}
                         </div>
                       </>
                     )}
-                  </CustomDropzone>
-
-                  {/* Ensure the preview and download buttons use the current image */}
-                  {image.image_url && (
-                    <>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href={image.image_url} // Use the current image's URL
-                          className="w-full flex justify-center px-2 py-1 bg-gray-600 text-white rounded-md"
-                        >
-                          Preview
-                        </a>
-                        <button
-                          onClick={() =>
-                            handleDownloadImage(
-                              image.image_url, // Use the current image's URL
-                              taskData.brand_name,
-                              image.platform_name,
-                              image.content_type.type,
-                              taskData.submit_date
-                            )
-                          }
-                          className="w-full px-2 py-1 bg-gray-600 text-white rounded-md"
-                        >
-                          Download
-                        </button>
-                      </div>
-                      <div className="text-gray-600 mt-2 text-center">
-                        {image.platform_name} - Size: {image.content_type.size}
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : null}
 
-        <div className="flex justify-end mt-4">
+        {task_module.includes("SM") ? (
+          <div className="px-4">
+            <span className="flex justify-end text-gray-500 ">
+              Time Left: {taskData.tags_time_left}
+            </span>
+            <div className="flex items-center gap-2 mt-2 ">
+              <input
+                type="text"
+                className="w-full border border-gray-300 p-3 rounded-md"
+                placeholder={`Write #tags for ${
+                  taskData.platforms.find(
+                    (p) => p.platform_id === selectedUploadPlatform
+                  )?.platform_name
+                }`}
+                value={platformTags[selectedUploadPlatform] || ""}
+                onChange={(e) =>
+                  setPlatformTags((prev) => ({
+                    ...prev,
+                    [selectedUploadPlatform]: e.target.value,
+                  }))
+                }
+              />
+
+              <button
+                onClick={() => setShowTagModal(true)}
+                className="text-gray-500"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm10.5 1.875a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Zm-3.75 5.56c0-1.336-1.616-2.005-2.56-1.06l-.22.22a.75.75 0 0 0 1.06 1.06l.22-.22v1.94h-.75a.75.75 0 0 0 0 1.5H9v3c0 .671.307 1.453 1.068 1.815a4.5 4.5 0 0 0 5.993-2.123c.233-.487.14-1-.136-1.37A1.459 1.459 0 0 0 14.757 15h-.507a.75.75 0 0 0 0 1.5h.349a2.999 2.999 0 0 1-3.887 1.21c-.091-.043-.212-.186-.212-.46v-3h5.25a.75.75 0 1 0 0-1.5H10.5v-1.94Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <TagModal
+              show={showTagModal}
+              onClose={() => setShowTagModal(false)}
+              month={taskData.month}
+              year={taskData.year}
+              brandId={taskData.brand_id}
+              onSelectTags={handleSelectTags}
+            />
+          </div>
+        ) : null}
+
+        <div className="flex justify-end mt-4 p-4">
           <button
             onClick={handleUpload}
             className="flex items-center px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-green-600"

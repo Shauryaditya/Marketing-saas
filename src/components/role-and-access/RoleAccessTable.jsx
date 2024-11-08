@@ -80,10 +80,7 @@ const RoleAccessTable = () => {
               <th scope="col" className="px-2 py-3  ">
                 Login Access
               </th>
-              <th
-                scope="col"
-                className="px-2 py-3  rounded-tr-xl"
-              >
+              <th scope="col" className="px-2 py-3  rounded-tr-xl">
                 Status
               </th>
             </tr>
@@ -134,14 +131,7 @@ const RoleAccessTable = () => {
                           />
                         </svg>
                       </button>
-                      {showModal && selectedPerson && (
-                        <RoleAccessModal
-                          isOpen={showModal}
-                          onClose={handleClose}
-                          people={selectedPerson}
-                          emp_id={selectedPerson.emp_id}
-                        />
-                      )}
+
                       <button>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -183,6 +173,14 @@ const RoleAccessTable = () => {
           </tbody>
         </table>
       </div>
+      {showModal && selectedPerson && (
+        <RoleAccessModal
+          isOpen={showModal}
+          onClose={handleClose}
+          people={selectedPerson}
+          emp_id={selectedPerson.emp_id}
+        />
+      )}
     </div>
   );
 };

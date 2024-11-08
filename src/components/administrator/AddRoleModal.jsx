@@ -19,6 +19,9 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
   const [roleName, setRoleName] = useState(initialRoleName);
   const [permissions, setPermissions] = useState([]);
   const [isOpen, setIsOpen] = useState(false); // Track dialog open state
+  const [sections, setSections] = useState([]);
+  const [selectedPermissions, setSelectedPermissions] = useState({});
+  const [hasFetchedPermissions, setHasFetchedPermissions] = useState(false);
 
   useEffect(() => {
     const fetchRoleDetails = async () => {
@@ -44,6 +47,33 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
     }
   }, [roleId, isOpen]);
 
+  const fetchPermissions = async () => {
+    try {
+      console.log("call this function:::",permissions,roleId)
+      const response = await axios.get('/v1/rbac/get-all-permission');
+      const allPermissions = response.data.data || [];
+      setSections(allPermissions);
+
+      // Initialize selectedPermissions based on the permissions prop
+      const initialPermissions = allPermissions.reduce((acc, section) => {
+        acc[section.section] = section.permissions
+          .filter(permission => permissions.includes(permission.permissionKey))
+          .map(permission => permission.permissionKey);
+        return acc;
+      }, {});
+
+      console.log("initialPermissions######",initialPermissions);
+
+      setSelectedPermissions(initialPermissions);
+    } catch (error) {
+      console.error('Error fetching permissions:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPermissions();
+  }, [isOpen,roleId,permissions]); 
+
   const handlePermissionsChange = (updatedPermissions) => {
     setPermissions(updatedPermissions);
   };
@@ -61,6 +91,7 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
       const response = await axios[method](url, payload);
       toast.success(response?.data?.message);
       setIsOpen(false); // Close dialog on successful save
+      window.location.reload()
     } catch (error) {
       console.error("Error saving role:", error);
       toast.error("Failed to save role.");
@@ -92,10 +123,10 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
             </button>
           ) : (
             <button
-              className="px-3 py-1 text-blue-400 text-xs bg-white rounded-md"
+              className="flex px-3 py-1 text-blue-800 text-xs bg-white rounded-md"
               onClick={() => setIsOpen(true)}
             >
-              <span className="text-xs p-1 rounded-full bg-gray-50">+</span>Add
+              <span className="text-xs w-4 h-4 flex items-center justify-center rounded-full bg-gray-50 mr-1">+</span>Add
               New Role
             </button>
           )}
@@ -125,6 +156,10 @@ const AddRoleModal = ({ roleId, initialRoleName = "" }) => {
                 onPermissionsChange={handlePermissionsChange}
                 permissions={permissions}
                 roleId={roleId}
+                setSelectedPermissions={setSelectedPermissions}
+                selectedPermissions={selectedPermissions}
+                setSections={setSections}
+                sections={sections}
               />
             </div>
           </div>
