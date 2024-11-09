@@ -190,7 +190,7 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         className="absolute inset-0 bg-gray-800 opacity-75"
         onClick={onClose}
       />
-      <div className="bg-white  rounded-lg no-scrollbar shadow-lg w-full max-w-6xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
+      <div className="bg-white  rounded-lg no-scrollbar shadow-lg w-full max-w-4xl mx-4 relative z-10 overflow-auto max-h-[90vh]">
         <div className="border-b pb-3 mb-4">
           <div className="flex justify-between items-center border-b p-4">
             <div>
@@ -375,12 +375,12 @@ const DetailedUploadModal = ({ show, onClose, event }) => {
         {task_module.includes("GD") || task_module.includes("SM") ? (
           <div className="mt-4 px-4">
             <div className="flex justify-between">
-              <h4 className="text-lg font-medium mb-2">Files to Upload:</h4>
+              <h4 className="text-base font-medium mb-2 uppercase">Upload Images:</h4>
               <span className="block text-gray-500 mt-4">
                 Time Left: {taskData.image_time_left}
               </span>
             </div>
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {taskData.images.map((image) => {
                 const currentFiles = files[image.platform_id] || [];
 
